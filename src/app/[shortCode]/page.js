@@ -15,4 +15,6 @@ export default async function RedirectPage({ params }) {
     return Response.redirect(originalUrl, 302);
   } catch (error) {
     console.error('Database error:', error); // 記錄詳細錯誤
-    return <div>Database error: {error.message}</div>; // 顯示
+    return <div>Database error: {error.message}</div>; // 顯示錯誤訊息
+  }
+}

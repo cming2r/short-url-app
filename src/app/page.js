@@ -1,22 +1,35 @@
-'use client'; // 表示這是客戶端元件，因為我們要用 useState
+'use client';
 
 import { useState } from 'react';
-import { nanoid } from 'nanoid';
 
 export default function Home() {
   const [longUrl, setLongUrl] = useState('');
   const [shortUrl, setShortUrl] = useState('');
+  const [error, setError] = useState('');
 
-  const handleShorten = () => {
-    const shortCode = nanoid(6); // 生成 6 位隨機短碼
-    const generatedShortUrl = `short-url-app-olive.vercel.app/${shortCode}`; // 暫時假設域名
-    setShortUrl(generatedShortUrl);
+  const handleShorten = async () => {
+    setError('');
+    try {
+      const response = await fetch('/api/shorten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: longUrl }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setShortUrl(data.shortUrl);
+      } else {
+        setError(data.error || 'Something went wrong');
+      }
+    } catch (err) {
+      setError('Failed to connect to server');
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-4">網址縮短器c</h1>
+        <h1 className="text-2xl font-bold text-center mb-4">網址縮短器</h1>
         <input
           type="text"
           value={longUrl}
@@ -38,6 +51,7 @@ export default function Home() {
             </a>
           </p>
         )}
+        {error && <p className="mt-4 text-center text-red-500">{error}</p>}
       </div>
     </div>
   );

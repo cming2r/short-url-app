@@ -1,20 +1,16 @@
-import sql from '@/lib/db';
+import { sql } from '@vercel/postgres';
+import { redirect } from 'next/navigation';
 
 export default async function RedirectPage({ params }) {
   const { shortCode } = params;
 
-  try {
-    const rows = await sql`
-      SELECT original_url FROM urls WHERE short_code = ${shortCode}
-    `;
-    if (rows.length === 0) {
-      return <div>404 - Short URL not found</div>;
-    }
+  const result = await sql`
+    SELECT original_url FROM urls WHERE short_code = ${shortCode}
+  `;
 
-    const originalUrl = rows[0].original_url;
-    return Response.redirect(originalUrl, 302);
-  } catch (error) {
-    console.error('Database error:', error); // 記錄詳細錯誤
-    return <div>Database error: {error.message}</div>; // 顯示錯誤訊息
+  if (result.rows.length > 0) {
+    redirect(result.rows[0].original_url); // 轉址到原始網址
+  } else {
+    return <div>短網址不存在</div>; // 若無記錄，顯示錯誤
   }
 }

@@ -5,24 +5,18 @@ import { useState } from 'react';
 export default function Home() {
   const [longUrl, setLongUrl] = useState('');
   const [shortUrl, setShortUrl] = useState('');
-  const [error, setError] = useState('');
 
   const handleShorten = async () => {
-    setError('');
-    try {
-      const response = await fetch('/api/shorten', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: longUrl }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setShortUrl(data.shortUrl);
-      } else {
-        setError(data.error || 'Something went wrong');
-      }
-    } catch (err) {
-      setError('Failed to connect to server');
+    const response = await fetch('/api/shorten', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: longUrl }),
+    });
+    const data = await response.json();
+    if (data.shortUrl) {
+      setShortUrl(data.shortUrl);
+    } else {
+      alert('縮短網址失敗');
     }
   };
 
@@ -51,7 +45,6 @@ export default function Home() {
             </a>
           </p>
         )}
-        {error && <p className="mt-4 text-center text-red-500">{error}</p>}
       </div>
     </div>
   );

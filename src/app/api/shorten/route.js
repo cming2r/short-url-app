@@ -1,23 +1,28 @@
-import { sql } from '@vercel/postgres';
+import { createPool } from '@vercel/postgres';
 import { nanoid } from 'nanoid';
+
+// 建立連接池，使用 POSTGRES_URL_NON_POOLING
+const pool = createPool({
+  connectionString: process.env.POSTGRES_URL_NON_POOLING,
+});
 
 export async function POST(request) {
   const { url } = await request.json();
   let shortCode = nanoid(6);
 
   try {
-    console.log('Received URL:', url); // 記錄接收到的網址
+    console.log('Received URL:', url);
     // 檢查短碼是否已存在
-    let existing = await sql`SELECT short_code FROM urls WHERE short_code = ${shortCode}`;
-    console.log('Existing check result:', existing.rows); // 記錄查詢結果
+    let existing = await pool.sql`SELECT short_code FROM urls WHERE short_code = ${shortCode}`;
+    console.log('Existing check result:', existing.rows);
     while (existing.rows.length > 0) {
       shortCode = nanoid(6);
-      existing = await sql`SELECT short_code FROM urls WHERE short_code = ${shortCode}`;
+      existing = await pool.sql`SELECT short_code FROM urls WHERE short_code = ${shortCode}`;
       console.log('Generated new shortCode:', shortCode);
     }
 
     console.log('Inserting into database:', { shortCode, url });
-    await sql`
+    await pool.sql`
       INSERT INTO urls (short_code, original_url)
       VALUES (${shortCode}, ${url})
     `;

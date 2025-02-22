@@ -1,4 +1,5 @@
-import '@/styles/globals.css'; // 使用自訂 alias 導入全局樣式
+// src/app/layout.js
+import '@/styles/globals.css';
 
 export default function RootLayout({ children }) {
   return (

@@ -2,30 +2,24 @@
 import { createClient } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
 
-let dbClient = null;
-
-async function getClient() {
-  if (!dbClient) {
-    dbClient = createClient({
-      connectionString: process.env.POSTGRES_URL_NON_POOLING,
-    });
-    await dbClient.connect();
-    console.log('Database client initialized for redirect');
-  }
-  return dbClient;
-}
-
 export default async function RedirectPage({ params }) {
   const startTime = Date.now();
   console.log('POSTGRES_URL_NON_POOLING for redirect:', process.env.POSTGRES_URL_NON_POOLING);
-  const client = await getClient();
-  console.log('Database connection time:', Date.now() - startTime, 'ms');
 
-  // 等待 params，並獲取 shortCode
-  const awaitedParams = await params;
-  const { shortCode } = awaitedParams;
+  const client = createClient({
+    connectionString: process.env.POSTGRES_URL_NON_POOLING,
+    queryTimeout: 5000, // 5 秒查詢超時
+    connectionTimeout: 5000, // 5 秒連線超時
+  });
 
   try {
+    await client.connect();
+    console.log('Database connection time:', Date.now() - startTime, 'ms');
+
+    // 等待 params，並獲取 shortCode
+    const awaitedParams = await params;
+    const { shortCode } = awaitedParams;
+
     const queryStart = Date.now();
     const result = await client.query('SELECT original_url FROM urls WHERE short_code = $1', [shortCode]);
 
@@ -38,7 +32,7 @@ export default async function RedirectPage({ params }) {
       console.log('Total request time:', Date.now() - startTime, 'ms');
 
       await client.end();
-      return NextResponse.redirect(originalUrl); // 直接返回 NextResponse
+      return NextResponse.redirect(originalUrl);
     } else {
       await client.end();
       return new NextResponse(

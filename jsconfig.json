@@ -1,7 +1,11 @@
+// jsconfig.json（根目錄）
 {
   "compilerOptions": {
+    "baseUrl": "src",
     "paths": {
-      "@/*": ["./src/*"]
-    }
-  }
+      "@/*": ["*"]
+    },
+    "checkJs": false // 禁用 JavaScript 檢查
+  },
+  "include": ["src/**/*"]
 }

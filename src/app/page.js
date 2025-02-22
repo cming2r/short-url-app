@@ -1,3 +1,4 @@
+// src/app/page.js
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -14,12 +15,11 @@ export default function Home() {
     const startTime = Date.now();
     try {
       const response = await fetch('/api/shorten', {
-        method: 'POST', // 確保為 POST
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: longUrl }),
       });
 
-      console.log('Request method in fetch:', 'POST'); // 記錄前端請求方法
       console.log('Response received in:', Date.now() - startTime, 'ms');
       console.log('Response status:', response.status);
       if (!response.ok) {
@@ -72,9 +72,7 @@ export default function Home() {
         ) : (
           <p className="mt-4 text-center">尚未生成短網址</p>
         )}
-        {error && (
-          <p className="mt-4 text-center text-red-500">{error}</p>
-        )}
+        {error && <p className="mt-4 text-center text-red-500">{error}</p>}
       </div>
     </div>
   );

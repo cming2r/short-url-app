@@ -1,14 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // 確保導入 useEffect
 
 export default function Home() {
   const [longUrl, setLongUrl] = useState('');
   const [shortUrl, setShortUrl] = useState('');
-  const [error, setError] = useState(''); // 新增錯誤狀態
+  const [error, setError] = useState('');
 
   const handleShorten = async () => {
-    setError(''); // 重置錯誤訊息
+    setError('');
+    setShortUrl('');
+    console.log('Sending URL to API:', longUrl);
+    const startTime = Date.now();
     try {
       const response = await fetch('/api/shorten', {
         method: 'POST',
@@ -16,12 +19,17 @@ export default function Home() {
         body: JSON.stringify({ url: longUrl }),
       });
 
+      console.log('Response received in:', Date.now() - startTime, 'ms');
+      console.log('Response status:', response.status);
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('API response:', data);
+      console.log('Processing time:', Date.now() - startTime, 'ms');
       if (data.shortUrl) {
+        console.log('Setting shortUrl:', data.shortUrl);
         setShortUrl(data.shortUrl);
       } else {
         setError('縮短網址失敗：未收到短網址');
@@ -31,6 +39,10 @@ export default function Home() {
       setError(`縮短網址失敗：${err.message}`);
     }
   };
+
+  useEffect(() => {
+    console.log('shortUrl updated:', shortUrl);
+  }, [shortUrl]); // 確認狀態更新
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -49,13 +61,15 @@ export default function Home() {
         >
           縮短
         </button>
-        {shortUrl && (
+        {shortUrl ? (
           <p className="mt-4 text-center">
             短網址:{' '}
             <a href={shortUrl} className="text-blue-500 underline">
               {shortUrl}
             </a>
           </p>
+        ) : (
+          <p className="mt-4 text-center">尚未生成短網址</p>
         )}
         {error && (
           <p className="mt-4 text-center text-red-500">{error}</p>

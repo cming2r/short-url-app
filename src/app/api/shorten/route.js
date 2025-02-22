@@ -7,6 +7,14 @@ export async function POST(request) {
   console.log('POSTGRES_URL:', process.env.POSTGRES_URL);
   console.log('BASE_URL:', process.env.BASE_URL);
 
+  if (!process.env.POSTGRES_URL) {
+    console.error('POSTGRES_URL is not defined');
+    return new Response(JSON.stringify({ error: 'Server configuration error: Missing POSTGRES_URL' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   const client = createClient({
     connectionString: process.env.POSTGRES_URL,
     queryTimeout: 5000,
@@ -15,13 +23,13 @@ export async function POST(request) {
 
   try {
     await client.connect();
-    console.log('Database connected');
+    console.log('Database connected successfully');
 
     const { url } = await request.json();
     console.log('Received URL:', url);
     if (!url || !/^https?:\/\//.test(url)) {
       await client.end();
-      return new Response(JSON.stringify({ error: '無效的 URL' }), {
+      return new Response(JSON.stringify({ error: 'Invalid URL' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -35,14 +43,14 @@ export async function POST(request) {
       console.log('Generated shortCode:', shortCode);
       try {
         await client.query('INSERT INTO urls (short_code, original_url) VALUES ($1, $2)', [shortCode, url]);
-        console.log('Inserted into database');
+        console.log('Inserted into database successfully');
         break;
       } catch (err) {
         if (err.code === '23505') {
           attempts++;
           console.log('Short code collision, attempt:', attempts);
           if (attempts >= maxAttempts) {
-            throw new Error('無法生成唯一短碼');
+            throw new Error('Unable to generate unique short code');
           }
         } else {
           throw err;
@@ -59,9 +67,13 @@ export async function POST(request) {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('API error:', error);
+    console.error('API error:', {
+      message: error.message,
+      stack: error.stack,
+      code: error.code,
+    });
     await client.end();
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: `Internal server error: ${error.message}` }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });

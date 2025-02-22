@@ -24,7 +24,7 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        const text = await response.text(); // 先獲取原始回應
+        const text = await response.text();
         console.error('API raw response:', text);
         throw new Error(`API request failed with status ${response.status}: ${text}`);
       }
@@ -47,32 +47,32 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-4">網址縮短器</h1>
+      <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center mb-4">網址縮短器</h1>
         <input
           type="text"
           value={longUrl}
           onChange={(e) => setLongUrl(e.target.value)}
           placeholder="輸入長網址"
-          className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
           onClick={handleShorten}
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+          class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
         >
           縮短
         </button>
         {shortUrl ? (
-          <p className="mt-4 text-center">
+          <p class="mt-4 text-center">
             短網址:{' '}
-            <a href={shortUrl} className="text-blue-500 underline">
+            <a href={shortUrl} class="text-blue-500 underline">
               {shortUrl}
             </a>
           </p>
         ) : (
-          <p className="mt-4 text-center">尚未生成短網址</p>
+          <p class="mt-4 text-center">尚未生成短網址</p>
         )}
-        {error && <p className="mt-4 text-center text-red-500">{error}</p>}
+        {error && <p class="mt-4 text-center text-red-500">{error}</p>}
       </div>
     </div>
   );

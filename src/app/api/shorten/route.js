@@ -1,6 +1,11 @@
 // src/app/api/shorten/route.js
-import { createClient } from '@vercel/postgres';
+import { createPool } from '@vercel/postgres';
 import { nanoid } from 'nanoid';
+
+// 在模組層級創建連線池（單例模式），避免每次請求重複建立
+const pool = createPool({
+  connectionString: process.env.POSTGRES_URL,
+});
 
 export async function POST(request) {
   console.log('POST /api/shorten called');
@@ -15,20 +20,10 @@ export async function POST(request) {
     });
   }
 
-  const client = createClient({
-    connectionString: process.env.POSTGRES_URL,
-    queryTimeout: 5000,
-    connectionTimeout: 5000,
-  });
-
   try {
-    await client.connect();
-    console.log('Database connected successfully');
-
     const { url } = await request.json();
     console.log('Received URL:', url);
     if (!url || !/^https?:\/\//.test(url)) {
-      await client.end();
       return new Response(JSON.stringify({ error: 'Invalid URL' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
@@ -42,11 +37,11 @@ export async function POST(request) {
       shortCode = nanoid(6);
       console.log('Generated shortCode:', shortCode);
       try {
-        await client.query('INSERT INTO urls (short_code, original_url) VALUES ($1, $2)', [shortCode, url]);
+        await pool.query('INSERT INTO urls (short_code, original_url) VALUES ($1, $2)', [shortCode, url]);
         console.log('Inserted into database successfully');
         break;
       } catch (err) {
-        if (err.code === '23505') {
+        if (err.code === '23505') { // 唯一性衝突
           attempts++;
           console.log('Short code collision, attempt:', attempts);
           if (attempts >= maxAttempts) {
@@ -60,7 +55,6 @@ export async function POST(request) {
 
     const shortUrl = `${process.env.BASE_URL}/${shortCode}`;
     console.log('Generated shortUrl:', shortUrl);
-    await client.end();
 
     return new Response(JSON.stringify({ shortUrl }), {
       status: 200,
@@ -72,12 +66,12 @@ export async function POST(request) {
       stack: error.stack,
       code: error.code,
     });
-    await client.end();
     return new Response(JSON.stringify({ error: `Internal server error: ${error.message}` }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
   }
+  // 注意：這裡不使用 pool.end()，因為連線池應保持活躍供後續請求使用
 }
 
 export async function GET() {

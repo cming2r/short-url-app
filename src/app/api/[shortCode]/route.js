@@ -1,23 +1,18 @@
 // src/app/api/[shortCode]/route.js
-import { createClient } from '@vercel/postgres';
+import { createPool } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
+
+// 在模組層級創建連線池（單例模式）
+const pool = createPool({
+  connectionString: process.env.POSTGRES_URL,
+});
 
 export async function GET(request, { params }) {
   console.log('GET /api/[shortCode] called with:', params.shortCode);
 
-  const client = createClient({
-    connectionString: process.env.POSTGRES_URL,
-    queryTimeout: 5000,
-    connectionTimeout: 5000,
-  });
-
   try {
-    await client.connect();
-    console.log('Database connected');
-
-    const result = await client.query('SELECT original_url FROM urls WHERE short_code = $1', [params.shortCode]);
+    const result = await pool.query('SELECT original_url FROM urls WHERE short_code = $1', [params.shortCode]);
     console.log('Query result:', result.rows);
-    await client.end();
 
     if (result.rows.length > 0) {
       console.log('Redirecting to:', result.rows[0].original_url);
@@ -29,11 +24,15 @@ export async function GET(request, { params }) {
       });
     }
   } catch (error) {
-    console.error('Redirect error:', error);
-    await client.end();
+    console.error('Redirect error:', {
+      message: error.message,
+      stack: error.stack,
+      code: error.code,
+    });
     return new Response(`轉址失敗：${error.message}`, {
       status: 500,
       headers: { 'Content-Type': 'text/plain' },
     });
   }
+  // 注意：不使用 pool.end()，保持連線池活躍
 }

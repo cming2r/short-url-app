@@ -4,15 +4,5 @@
       "source": "/:shortCode",
       "destination": "/api/:shortCode"
     }
-  ],
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs20.x",
-      "maxDuration": 30
-    },
-    "app/**/*.js": {
-      "runtime": "nodejs20.x",
-      "maxDuration": 30
-    }
-  }
+  ]
 }

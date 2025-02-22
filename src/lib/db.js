@@ -1,3 +1,6 @@
+import { createClient } from '@vercel/postgres';
+import { redirect } from 'next/navigation';
+
 let dbClient = null;
 
 async function getClient() {
@@ -6,44 +9,42 @@ async function getClient() {
       connectionString: process.env.POSTGRES_URL_NON_POOLING,
     });
     await dbClient.connect();
+    console.log('Database client initialized for redirect');
   }
   return dbClient;
 }
 
-export async function POST(request) {
+export default async function RedirectPage({ params }) {
+  console.log('POSTGRES_URL_NON_POOLING for redirect:', process.env.POSTGRES_URL_NON_POOLING);
   const client = await getClient();
-  console.log('Reusing database client');
+  console.log('Reusing database client for redirect');
 
-  const { url } = await request.json();
-  let shortCode = nanoid(6);
+  const { shortCode } = params;
 
   try {
-    let existing = await client.query('SELECT short_code FROM urls WHERE short_code = $1', [shortCode]);
-    console.log('Existing check result:', existing.rows);
-    while (existing.rows.length > 0) {
-      shortCode = nanoid(6);
-      existing = await client.query('SELECT short_code FROM urls WHERE short_code = $1', [shortCode]);
-      console.log('Generated new shortCode:', shortCode);
+    const result = await client.query('SELECT original_url FROM urls WHERE short_code = $1', [shortCode]);
+
+    console.log('Query result for shortCode', shortCode, ':', result.rows);
+
+    if (result.rows.length > 0) {
+      const originalUrl = result.rows[0].original_url;
+      console.log('Redirecting to:', originalUrl);
+      redirect(originalUrl);
+    } else {
+      await client.end();
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <p className="text-red-500">短網址不存在</p>
+        </div>
+      );
     }
-
-    console.log('Inserting into database:', { shortCode, url });
-    await client.query('INSERT INTO urls (short_code, original_url) VALUES ($1, $2)', [shortCode, url]);
-    const shortUrl = `https://${process.env.VERCEL_URL || 'localhost:3000'}/${shortCode}`;
-    console.log('Generated short URL:', shortUrl);
-
-    return new Response(JSON.stringify({ shortUrl }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
   } catch (error) {
-    console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      code: error.code,
-    });
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    console.error('Redirect error:', error);
+    await client.end();
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-red-500">轉址失敗：{error.message}</p>
+      </div>
+    );
   }
 }

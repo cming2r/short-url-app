@@ -24,6 +24,10 @@ export default async function RedirectPage({ params }) {
   try {
     const result = await client.query('SELECT original_url FROM urls WHERE short_code = $1', [shortCode]);
 
+    console.log('Query result for shortCode', shortCode, ':', result.rows);
+
+    await client.end();
+
     if (result.rows.length > 0) {
       redirect(result.rows[0].original_url);
     } else {
@@ -31,6 +35,7 @@ export default async function RedirectPage({ params }) {
     }
   } catch (error) {
     console.error('Redirect error:', error);
+    await client.end();
     return <div>轉址失敗：{error.message}</div>;
   }
 }

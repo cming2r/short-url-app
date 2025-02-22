@@ -5,18 +5,30 @@ import { useState } from 'react';
 export default function Home() {
   const [longUrl, setLongUrl] = useState('');
   const [shortUrl, setShortUrl] = useState('');
+  const [error, setError] = useState(''); // 新增錯誤狀態
 
   const handleShorten = async () => {
-    const response = await fetch('/api/shorten', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: longUrl }),
-    });
-    const data = await response.json();
-    if (data.shortUrl) {
-      setShortUrl(data.shortUrl);
-    } else {
-      alert('縮短網址失敗');
+    setError(''); // 重置錯誤訊息
+    try {
+      const response = await fetch('/api/shorten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: longUrl }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.shortUrl) {
+        setShortUrl(data.shortUrl);
+      } else {
+        setError('縮短網址失敗：未收到短網址');
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError(`縮短網址失敗：${err.message}`);
     }
   };
 
@@ -44,6 +56,9 @@ export default function Home() {
               {shortUrl}
             </a>
           </p>
+        )}
+        {error && (
+          <p className="mt-4 text-center text-red-500">{error}</p>
         )}
       </div>
     </div>

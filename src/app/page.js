@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react'; // 確保導入 useEffect
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [longUrl, setLongUrl] = useState('');
@@ -42,7 +42,7 @@ export default function Home() {
 
   useEffect(() => {
     console.log('shortUrl updated:', shortUrl);
-  }, [shortUrl]); // 確認狀態更新
+  }, [shortUrl]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">

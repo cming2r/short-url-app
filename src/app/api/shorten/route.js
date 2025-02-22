@@ -41,7 +41,8 @@ export async function POST(request) {
     await client.query('INSERT INTO urls (short_code, original_url) VALUES ($1, $2)', [shortCode, url]);
     console.log('Insert time:', Date.now() - insertStart, 'ms');
 
-    const shortUrl = `https://${process.env.VERCEL_URL || 'localhost:3000'}/${shortCode}`;
+    const shortUrl = `${process.env.BASE_URL || 'https://localhost:3000'}/${shortCode}`;
+
     console.log('Generated short URL:', shortUrl);
     console.log('Total request time:', Date.now() - startTime, 'ms');
 

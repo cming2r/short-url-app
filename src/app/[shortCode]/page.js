@@ -1,6 +1,6 @@
 // src/app/[shortCode]/page.js
 import { createClient } from '@vercel/postgres';
-import { redirect } from 'next/navigation';
+import { NextResponse } from 'next/server';
 
 let dbClient = null;
 
@@ -36,23 +36,36 @@ export default async function RedirectPage({ params }) {
       const originalUrl = result.rows[0].original_url;
       console.log('Redirecting to:', originalUrl);
       console.log('Total request time:', Date.now() - startTime, 'ms');
-      // 確保使用正確的 redirect 方法
-      redirect(originalUrl);
+
+      await client.end();
+      return NextResponse.redirect(originalUrl); // 直接返回 NextResponse
     } else {
       await client.end();
-      return (
-        <div className="min-h-screen flex items-center justify-center">
-          <p className="text-red-500">短網址不存在</p>
-        </div>
+      return new NextResponse(
+        `
+          <div class="min-h-screen flex items-center justify-center">
+            <p class="text-red-500">短網址不存在</p>
+          </div>
+        `,
+        {
+          status: 404,
+          headers: { 'Content-Type': 'text/html' },
+        }
       );
     }
   } catch (error) {
     console.error('Redirect error:', error);
     await client.end();
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-red-500">轉址失敗：{error.message}</p>
-      </div>
+    return new NextResponse(
+      `
+        <div class="min-h-screen flex items-center justify-center">
+          <p class="text-red-500">轉址失敗：${error.message}</p>
+        </div>
+      `,
+      {
+        status: 500,
+        headers: { 'Content-Type': 'text/html' },
+      }
     );
   }
 }

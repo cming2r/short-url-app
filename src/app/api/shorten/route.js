@@ -1,12 +1,12 @@
 import { createPool } from '@vercel/postgres';
 import { nanoid } from 'nanoid';
 
-// 建立連接池，使用 POSTGRES_URL_NON_POOLING
-const pool = createPool({
-  connectionString: process.env.POSTGRES_URL_NON_POOLING,
-});
-
 export async function POST(request) {
+  // 在請求處理時動態建立連接池
+  const pool = createPool({
+    connectionString: process.env.POSTGRES_URL_NON_POOLING,
+  });
+
   const { url } = await request.json();
   let shortCode = nanoid(6);
 
@@ -28,6 +28,10 @@ export async function POST(request) {
     `;
     const shortUrl = `https://${process.env.VERCEL_URL || 'localhost:3000'}/${shortCode}`;
     console.log('Generated short URL:', shortUrl);
+
+    // 關閉連接池（可選，避免資源洩漏）
+    await pool.end();
+
     return new Response(JSON.stringify({ shortUrl }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
@@ -38,6 +42,7 @@ export async function POST(request) {
       stack: error.stack,
       code: error.code,
     });
+    await pool.end(); // 確保錯誤時也關閉
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

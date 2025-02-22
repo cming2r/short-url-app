@@ -1,12 +1,12 @@
 {
-    "functions": {
-      "api/**/*.js": {
-        "runtime": "nodejs",
-        "maxDuration": 30
-      },
-      "app/**/*.js": {
-        "runtime": "nodejs",
-        "maxDuration": 30
-      }
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs",
+      "maxDuration": 30
+    },
+    "app/**/*.js": {
+      "runtime": "nodejs",
+      "maxDuration": 30
     }
   }
+}

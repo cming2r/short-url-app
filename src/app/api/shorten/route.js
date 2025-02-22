@@ -1,3 +1,4 @@
+// src/app/api/shorten/route.js
 import { createClient } from '@vercel/postgres';
 import { nanoid } from 'nanoid';
 
@@ -15,6 +16,7 @@ async function getClient() {
 }
 
 export async function POST(request) {
+  console.log('Request method:', request.method); // 記錄請求方法
   console.log('Environment POSTGRES_URL_NON_POOLING:', process.env.POSTGRES_URL_NON_POOLING);
   const startTime = Date.now();
   const client = await getClient();
@@ -41,8 +43,7 @@ export async function POST(request) {
     await client.query('INSERT INTO urls (short_code, original_url) VALUES ($1, $2)', [shortCode, url]);
     console.log('Insert time:', Date.now() - insertStart, 'ms');
 
-    const shortUrl = `${process.env.BASE_URL || 'https://localhost:3000'}/${shortCode}`;
-
+    const shortUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/${shortCode}`;
     console.log('Generated short URL:', shortUrl);
     console.log('Total request time:', Date.now() - startTime, 'ms');
 
@@ -63,10 +64,32 @@ export async function POST(request) {
   }
 }
 
-// 新增處理其他方法以避免 405
+// 確保只接受 POST，明確返回 405 給非 POST 方法
 export async function GET() {
   return new Response(JSON.stringify({ error: 'Method not allowed' }), {
     status: 405,
     headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+// 處理其他不支援的方法
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: { 'Allow': 'POST' },
+  });
+}
+
+export async function PUT() {
+  return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+    status: 405,
+    headers: { 'Content-Type': 'application/json', 'Allow': 'POST' },
+  });
+}
+
+export async function DELETE() {
+  return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+    status: 405,
+    headers: { 'Content-Type': 'application/json', 'Allow': 'POST' },
   });
 }

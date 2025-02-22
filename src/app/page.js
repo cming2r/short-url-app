@@ -14,11 +14,12 @@ export default function Home() {
     const startTime = Date.now();
     try {
       const response = await fetch('/api/shorten', {
-        method: 'POST',
+        method: 'POST', // 確保為 POST
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: longUrl }),
       });
 
+      console.log('Request method in fetch:', 'POST'); // 記錄前端請求方法
       console.log('Response received in:', Date.now() - startTime, 'ms');
       console.log('Response status:', response.status);
       if (!response.ok) {

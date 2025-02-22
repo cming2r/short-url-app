@@ -1,4 +1,10 @@
 {
+  "rewrites": [
+    {
+      "source": "/:shortCode",
+      "destination": "/api/:shortCode"
+    }
+  ],
   "functions": {
     "api/**/*.js": {
       "runtime": "nodejs",

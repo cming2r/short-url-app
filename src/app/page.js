@@ -11,32 +11,27 @@ export default function Home() {
   const handleShorten = async () => {
     setError('');
     setShortUrl('');
-    console.log('Sending URL to API:', longUrl);
-    const startTime = Date.now();
+    if (!longUrl || !/^https?:\/\//.test(longUrl)) {
+      setError('請輸入有效的 URL（需包含 http:// 或 https://）');
+      return;
+    }
+
     try {
       const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: longUrl }),
       });
-
-      console.log('Response received in:', Date.now() - startTime, 'ms');
-      console.log('Response status:', response.status);
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
       const data = await response.json();
-      console.log('API response:', data);
-      console.log('Processing time:', Date.now() - startTime, 'ms');
+      if (!response.ok) {
+        throw new Error(data.error || `API request failed with status ${response.status}`);
+      }
       if (data.shortUrl) {
-        console.log('Setting shortUrl:', data.shortUrl);
         setShortUrl(data.shortUrl);
       } else {
         setError('縮短網址失敗：未收到短網址');
       }
     } catch (err) {
-      console.error('Fetch error:', err);
       setError(`縮短網址失敗：${err.message}`);
     }
   };

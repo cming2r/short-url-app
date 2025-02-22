@@ -3,15 +3,22 @@ import { createClient } from '@vercel/postgres';
 import { nanoid } from 'nanoid';
 
 export async function POST(request) {
+  console.log('POST /api/shorten called');
+  console.log('POSTGRES_URL:', process.env.POSTGRES_URL);
+  console.log('BASE_URL:', process.env.BASE_URL);
+
   const client = createClient({
-    connectionString: process.env.POSTGRES_URL, // 使用池化連線
+    connectionString: process.env.POSTGRES_URL,
     queryTimeout: 5000,
     connectionTimeout: 5000,
   });
 
   try {
     await client.connect();
+    console.log('Database connected');
+
     const { url } = await request.json();
+    console.log('Received URL:', url);
     if (!url || !/^https?:\/\//.test(url)) {
       await client.end();
       return new Response(JSON.stringify({ error: '無效的 URL' }), {
@@ -22,17 +29,20 @@ export async function POST(request) {
 
     let shortCode;
     let attempts = 0;
-    const maxAttempts = 3; // 避免無限迴圈
+    const maxAttempts = 3;
     do {
       shortCode = nanoid(6);
+      console.log('Generated shortCode:', shortCode);
       try {
         await client.query('INSERT INTO urls (short_code, original_url) VALUES ($1, $2)', [shortCode, url]);
-        break; // 插入成功，跳出迴圈
+        console.log('Inserted into database');
+        break;
       } catch (err) {
-        if (err.code === '23505') { // PostgreSQL 唯一性衝突
+        if (err.code === '23505') {
           attempts++;
+          console.log('Short code collision, attempt:', attempts);
           if (attempts >= maxAttempts) {
-            throw new Error('無法生成唯一短碼，請稍後再試');
+            throw new Error('無法生成唯一短碼');
           }
         } else {
           throw err;
@@ -41,6 +51,7 @@ export async function POST(request) {
     } while (true);
 
     const shortUrl = `${process.env.BASE_URL}/${shortCode}`;
+    console.log('Generated shortUrl:', shortUrl);
     await client.end();
 
     return new Response(JSON.stringify({ shortUrl }), {
@@ -48,7 +59,7 @@ export async function POST(request) {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error:', error);
+    console.error('API error:', error);
     await client.end();
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
@@ -57,7 +68,6 @@ export async function POST(request) {
   }
 }
 
-// 處理非 POST 請求
 export async function GET() {
   return new Response(JSON.stringify({ error: 'Method not allowed' }), {
     status: 405,

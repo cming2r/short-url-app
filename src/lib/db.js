@@ -6,7 +6,7 @@ let dbClient = null;
 async function getClient() {
   if (!dbClient) {
     dbClient = createClient({
-      connectionString: process.env.POSTGRES_URL_NON_POOLING,
+      connectionString: process.env.POSTGRES_URL,
     });
     await dbClient.connect();
     console.log('Database client initialized for redirect');
@@ -15,7 +15,7 @@ async function getClient() {
 }
 
 export default async function RedirectPage({ params }) {
-  console.log('POSTGRES_URL_NON_POOLING for redirect:', process.env.POSTGRES_URL_NON_POOLING);
+  console.log('POSTGRES_URL for redirect:', process.env.POSTGRES_URL);
   const client = await getClient();
   console.log('Reusing database client for redirect');
 

@@ -22,16 +22,21 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: longUrl }),
       });
-      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(data.error || `API request failed with status ${response.status}`);
+        const text = await response.text(); // 先獲取原始回應
+        console.error('API raw response:', text);
+        throw new Error(`API request failed with status ${response.status}: ${text}`);
       }
+
+      const data = await response.json();
       if (data.shortUrl) {
         setShortUrl(data.shortUrl);
       } else {
         setError('縮短網址失敗：未收到短網址');
       }
     } catch (err) {
+      console.error('Fetch error:', err);
       setError(`縮短網址失敗：${err.message}`);
     }
   };

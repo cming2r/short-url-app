@@ -1,5 +1,5 @@
 // src/app/layout.js
-import '@/styles/globals.css';
+import '@/globals.css';
 
 export const metadata = {
   title: '網址縮短器',

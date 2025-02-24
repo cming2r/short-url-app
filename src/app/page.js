@@ -41,38 +41,54 @@ export default function Home() {
     }
   };
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(shortUrl);
+    alert('短網址已複製到剪貼簿！');
+  };
+
   useEffect(() => {
     console.log('shortUrl updated:', shortUrl);
   }, [shortUrl]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-        <h1 class="text-2xl font-bold text-center mb-4">網址縮短器</h1>
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+        <h1 className="text-2xl font-bold text-center mb-4">網址縮短器</h1>
         <input
           type="text"
           value={longUrl}
           onChange={(e) => setLongUrl(e.target.value)}
           placeholder="輸入長網址"
-          class="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
           onClick={handleShorten}
-          class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
         >
           縮短
         </button>
-        {shortUrl ? (
-          <p class="mt-4 text-center">
-            短網址:{' '}
-            <a href={shortUrl} class="text-blue-500 underline">
-              {shortUrl}
-            </a>
-          </p>
-        ) : (
-          <p class="mt-4 text-center">尚未生成短網址</p>
+        {shortUrl && (
+          <div className="mt-4 flex items-center justify-center space-x-2">
+            <p className="text-center">
+              您的短網址:{' '}
+              <a
+                href={shortUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 underline"
+              >
+                {shortUrl}
+              </a>
+            </p>
+            <button
+              onClick={handleCopy}
+              className="bg-gray-200 text-black px-2 py-1 rounded hover:bg-gray-300"
+            >
+              複製
+            </button>
+          </div>
         )}
-        {error && <p class="mt-4 text-center text-red-500">{error}</p>}
+        {error && <p className="mt-4 text-center text-red-500">{error}</p>}
       </div>
     </div>
   );

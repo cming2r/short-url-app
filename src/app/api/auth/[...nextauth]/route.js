@@ -23,6 +23,7 @@ export const authOptions = {
   ],
   adapter: {
     async createUser(user) {
+      console.log('Creating user:', user);
       const { rows } = await pool.query(
         'INSERT INTO auth.users (id, email, name) VALUES ($1, $2, $3) RETURNING id',
         [user.id, user.email, user.name]
@@ -30,41 +31,46 @@ export const authOptions = {
       return { id: rows[0].id, email: user.email, name: user.name };
     },
     async getUser(id) {
+      console.log('Getting user:', id);
       const { rows } = await pool.query('SELECT * FROM auth.users WHERE id = $1', [id]);
       return rows[0] || null;
+    },
+    async updateUser(user) {
+      console.log('Updating user:', user);
+      await pool.query(
+        'UPDATE auth.users SET email = $2, name = $3 WHERE id = $1',
+        [user.id, user.email, user.name]
+      );
+      return user;
     },
   },
   session: {
     strategy: 'jwt',
   },
   callbacks: {
-    async signIn({ account, profile }) {
-      if (!account || !profile) return false;
-      return true; // 確保 Google 登入成功
+    async signIn({ user, account, profile }) {
+      console.log('SignIn callback:', { user, account, profile });
+      return true; // 允許登入
     },
     async jwt({ token, account, profile }) {
+      console.log('JWT callback:', { token, account, profile });
       if (account) {
         token.accessToken = account.access_token;
-        token.id = profile.sub; // 將 Google 的 user ID 加入 token
-        token.email = profile.email;
-        token.name = profile.name;
+        token.id = profile.sub; // 使用 Google 的 user ID
       }
       return token;
     },
     async session({ session, token }) {
-      session.user = {
-        id: token.id,
-        email: token.email,
-        name: token.name,
-      };
+      console.log('Session callback:', { session, token });
+      session.user.id = token.id || token.sub;
       session.accessToken = token.accessToken;
       return session;
     },
   },
   pages: {
-    signIn: '/', // 自訂登入頁面
-    error: '/error', // 可選，自訂錯誤頁面
+    signIn: '/', // 確保從首頁開始登入
   },
+  debug: true, // 啟用調試模式，幫助診斷
 };
 
 const handler = NextAuth(authOptions);

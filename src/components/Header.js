@@ -27,7 +27,10 @@ export default function Header() {
               {status === 'loading' ? (
                 <span>載入中...</span>
               ) : status === 'authenticated' ? (
-                <button onClick={() => signOut()} className="hover:underline">登出</button>
+                <div className="flex items-center space-x-2">
+                  <span>{session.user.name || session.user.email}</span>
+                  <button onClick={() => signOut()} className="hover:underline">登出</button>
+                </div>
               ) : (
                 <button onClick={() => signIn('google')} className="hover:underline">Google 登入</button>
               )}

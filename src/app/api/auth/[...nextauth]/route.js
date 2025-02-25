@@ -12,6 +12,13 @@ export const authOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code',
+        },
+      },
     }),
   ],
   adapter: {
@@ -26,16 +33,37 @@ export const authOptions = {
       const { rows } = await pool.query('SELECT * FROM auth.users WHERE id = $1', [id]);
       return rows[0] || null;
     },
-    // 其他必要的 adapter 方法可根據需求實現
   },
   session: {
     strategy: 'jwt',
   },
   callbacks: {
+    async signIn({ account, profile }) {
+      if (!account || !profile) return false;
+      return true; // 確保 Google 登入成功
+    },
+    async jwt({ token, account, profile }) {
+      if (account) {
+        token.accessToken = account.access_token;
+        token.id = profile.sub; // 將 Google 的 user ID 加入 token
+        token.email = profile.email;
+        token.name = profile.name;
+      }
+      return token;
+    },
     async session({ session, token }) {
-      session.user.id = token.sub; // 將用戶 ID 加入 session
+      session.user = {
+        id: token.id,
+        email: token.email,
+        name: token.name,
+      };
+      session.accessToken = token.accessToken;
       return session;
     },
+  },
+  pages: {
+    signIn: '/', // 自訂登入頁面
+    error: '/error', // 可選，自訂錯誤頁面
   },
 };
 

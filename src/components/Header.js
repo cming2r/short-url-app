@@ -1,9 +1,11 @@
 // src/components/Header.js
+'use client';
+
 import { useSession, signIn, signOut } from 'next-auth/react';
 import Link from 'next/link';
 
 export default function Header() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   return (
     <header className="bg-gray-800 text-white p-4">
@@ -16,13 +18,15 @@ export default function Header() {
             <li>
               <Link href="/" className="hover:underline">首頁</Link>
             </li>
-            {session && (
+            {status === 'authenticated' && (
               <li>
                 <Link href="/history" className="hover:underline">歷史記錄</Link>
               </li>
             )}
             <li>
-              {session ? (
+              {status === 'loading' ? (
+                <span>載入中...</span>
+              ) : status === 'authenticated' ? (
                 <button onClick={() => signOut()} className="hover:underline">登出</button>
               ) : (
                 <button onClick={() => signIn('google')} className="hover:underline">Google 登入</button>

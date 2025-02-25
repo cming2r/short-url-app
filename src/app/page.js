@@ -2,9 +2,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 export default function Home() {
+  const { data: session } = useSession();
   const [longUrl, setLongUrl] = useState('');
+  const [customCode, setCustomCode] = useState('');
   const [shortUrl, setShortUrl] = useState('');
   const [error, setError] = useState('');
 
@@ -20,7 +23,7 @@ export default function Home() {
       const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: longUrl }),
+        body: JSON.stringify({ url: longUrl, customCode: customCode || undefined }),
       });
 
       if (!response.ok) {
@@ -61,6 +64,16 @@ export default function Home() {
           placeholder="輸入長網址"
           className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        {session && (
+          <input
+            type="text"
+            value={customCode}
+            onChange={(e) => setCustomCode(e.target.value)}
+            placeholder="自訂短碼（6位元，可選）"
+            maxLength={6}
+            className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        )}
         <button
           onClick={handleShorten}
           className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"

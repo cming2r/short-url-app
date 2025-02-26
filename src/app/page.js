@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase';
 
 export default function Home() {
   const [longUrl, setLongUrl] = useState('');
-  const [customCode, setCustomCode] = useState('');
   const [shortUrl, setShortUrl] = useState('');
   const [error, setError] = useState('');
   const [session, setSession] = useState(null);
@@ -31,26 +30,25 @@ export default function Home() {
       setError('請輸入有效的 URL（需包含 http:// 或 https://）');
       return;
     }
-  
+
     try {
-      const userId = session?.user?.id ?? null;
+      const userId = session?.user?.id || null;
       const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: longUrl, customCode: customCode || undefined, userId }),
+        body: JSON.stringify({ url: longUrl, userId }),
       });
-  
+
       if (!response.ok) {
         const text = await response.text();
         console.error('API raw response:', text);
         throw new Error(`API request failed with status ${response.status}: ${text}`);
       }
-  
+
       const data = await response.json();
       if (data.shortUrl) {
         setShortUrl(data.shortUrl);
         setLongUrl(''); // 清空輸入
-        setCustomCode(''); // 清空自訂短碼
       } else {
         setError('縮短網址失敗：未收到短網址');
       }
@@ -76,16 +74,6 @@ export default function Home() {
           placeholder="輸入長網址"
           className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        {session && (
-          <input
-            type="text"
-            value={customCode}
-            onChange={(e) => setCustomCode(e.target.value)}
-            placeholder="自訂短碼（6位元，可選）"
-            maxLength={6}
-            className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        )}
         <button
           onClick={handleShorten}
           className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"

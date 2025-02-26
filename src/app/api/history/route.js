@@ -27,13 +27,13 @@ export async function GET() {
   try {
     const { data, error } = await supabaseServer
       .from('urls')
-      .select('short_code, original_url')
+      .select('short_code, original_url, custom_code')
       .eq('user_id', session.user.id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
 
-    return new Response(JSON.stringify({ urls: data }), {
+    return new Response(JSON.stringify({ urls: data || [] }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

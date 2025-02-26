@@ -18,10 +18,26 @@ export async function POST(request) {
   console.log('POST /api/shorten called');
   console.log('BASE_URL:', process.env.NEXT_PUBLIC_BASE_URL);
 
-  const { url, customCode } = await request.json();
+  const { url, customCode, userId } = await request.json();
 
-  if (!url || !/^https?:\/\//.test(url)) {
-    return new Response(JSON.stringify({ error: 'Invalid URL, must start with http:// or https://' }), {
+  if (!url) {
+    return new Response(JSON.stringify({ error: 'Invalid URL, URL is required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  // 驗證並格式化 URL
+  let formattedUrl = url.trim();
+  if (!/^https?:\/\//.test(formattedUrl)) {
+    // 如果缺少協議，假設為 https
+    formattedUrl = `https://${formattedUrl}`;
+  }
+
+  try {
+    new URL(formattedUrl); // 驗證 URL 格式
+  } catch (urlError) {
+    return new Response(JSON.stringify({ error: 'Invalid URL format, must start with http:// or https://' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });
@@ -56,12 +72,13 @@ export async function POST(request) {
     const {
       data: { session },
     } = await supabaseServer.auth.getSession();
-    const userId = session?.user?.id || null; // 從當前會話獲取 userId
+    const currentUserId = session?.user?.id || userId || null; // 從會話或請求獲取 userId
 
     const { error } = await supabaseServer.from('urls').insert({
       short_code: shortCode,
-      original_url: url,
-      user_id: userId,
+      original_url: formattedUrl,
+      user_id: currentUserId,
+      custom_code: !!customCode, // 如果有 customCode，標記為 true
       created_at: new Date().toISOString(),
     });
 

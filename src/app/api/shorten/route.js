@@ -21,12 +21,19 @@ async function fetchTitle(url) {
     if (!titleMatch) return url;
 
     let title = titleMatch[1].trim();
-    // 簡化標題，移除多餘的後綴（如 ' - Yahoo奇摩' 保留 'Yahoo奇摩'）
+    // 特殊處理 Yahoo 網站，保留簡潔標題
+    if (url.includes('tw.yahoo.com')) {
+      title = title.replace(/ - Yahoo奇摩$/, '').trim() || 'Yahoo奇摩';
+    }
+    // 處理 Turadise 網站或其他長標題，移除多餘後綴
     title = title.replace(/ - .*$/, '').replace(/\|.*$/, '').trim() || url;
     // 限制標題長度，確保簡潔
     return title.length > 50 ? title.substring(0, 50) + '...' : title;
   } catch (error) {
     console.error('Failed to fetch title:', error);
+    // 為特定網站提供預設簡潔標題
+    if (url.includes('tw.yahoo.com')) return 'Yahoo奇摩';
+    if (url.includes('turadise.com')) return 'Turadise';
     return url; // 回傳原始 URL 作為標題
   }
 }
@@ -91,13 +98,20 @@ export async function POST(request) {
     } = await supabaseServer.auth.getSession();
     const currentUserId = session?.user?.id || userId || null; // 從會話或請求獲取 userId
 
+    if (!currentUserId) {
+      return new Response(JSON.stringify({ error: 'User not authenticated' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     // 獲取 original_url 的標題
     const title = await fetchTitle(formattedUrl);
 
     const { error } = await supabaseServer.from('urls').insert({
       short_code: shortCode,
       original_url: formattedUrl,
-      user_id: currentUserId,
+      user_id: currentUserId, // 確保 user_id 設置正確
       custom_code: !!customCode, // 如果有 customCode，標記為 true
       title, // 儲存簡潔標題
       created_at: new Date().toISOString(), // 確保 created_at 設置

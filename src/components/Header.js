@@ -22,10 +22,11 @@ export default function Header() {
   }, []);
 
   const handleSignIn = async () => {
+    const redirectTo = process.env.NEXT_PUBLIC_BASE_URL || 'https://short-url-app-olive.vercel.app/';
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: process.env.NEXT_PUBLIC_BASE_URL || 'https://short-url-app-olive.vercel.app/', // 動態設置重定向 URL
+        redirectTo, // 使用動態設置的重定向 URL
       },
     });
     if (error) console.error('Error signing in:', error);

@@ -70,6 +70,10 @@ export default function History() {
       setError('請輸入有效的 URL（需包含 http:// 或 https://）');
       return;
     }
+    if (customCode && (customCode.length !== 6 || !/^[a-zA-Z0-9]+$/.test(customCode))) {
+      setError('自訂短碼必須為6位元字母或數字');
+      return;
+    }
 
     try {
       const response = await fetch('/api/shorten', {
@@ -88,7 +92,7 @@ export default function History() {
       if (data.shortUrl) {
         setLongUrl(''); // 清空輸入
         setCustomCode(''); // 清空自訂短碼
-        fetchHistory(); // 刷新歷史記錄
+        await fetchHistory(); // 確保刷新數據
       } else {
         setError('縮短網址失敗：未收到短網址');
       }
@@ -121,7 +125,7 @@ export default function History() {
       if (data.shortUrl) {
         setLongUrl(''); // 清空輸入
         setCustomCode(''); // 清空自訂短碼
-        fetchHistory(); // 刷新歷史記錄
+        await fetchHistory(); // 確保刷新數據
       } else {
         setError('更新自訂短網址失敗：未收到短網址');
       }
@@ -136,7 +140,7 @@ export default function History() {
 
   return (
     <div className="flex items-center justify-center bg-gray-100 py-8">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl"> {/* 放寬寬度 */}
         <h1 className="text-2xl font-bold text-center mb-4">短網址歷史記錄</h1>
 
         {/* 自定義短網址區塊 */}
@@ -180,7 +184,13 @@ export default function History() {
                 </a>
                 <p className="text-gray-600">{customUrls[0].title || customUrls[0].original_url}</p>
                 <p className="text-sm text-gray-500">
-                  產生時間：{new Date(customUrls[0].created_at).toLocaleString()}
+                  產生時間：{new Date(customUrls[0].created_at).toLocaleString('zh-TW', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }).replace(/\//g, '/')}
                   ，點擊次數：{customUrls[0].click_count || 0}
                 </p>
               </div>
@@ -198,33 +208,51 @@ export default function History() {
           {error && <p className="mt-2 text-center text-red-500">{error}</p>}
         </div>
 
-        {/* 普通縮網址歷史紀錄 */}
+        {/* 普通縮網址歷史紀錄 - 表格形式 */}
         <div>
           <h2 className="text-xl font-bold mb-2">縮網址歷史記錄</h2>
           {regularUrls.length === 0 ? (
             <p className="text-center">尚無縮網址記錄</p>
           ) : (
-            <ul className="space-y-2">
-              {regularUrls.map((url) => (
-                <li key={url.short_code} className="flex justify-between items-center">
-                  <div>
-                    <a
-                      href={`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 underline"
-                    >
-                      {`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}
-                    </a>
-                    <p className="text-gray-600">{url.title || url.original_url}</p>
-                    <p className="text-sm text-gray-500">
-                      產生時間：{new Date(url.created_at).toLocaleString()}
-                      ，點擊次數：{url.click_count || 0}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <div className="overflow-x-auto">
+              <table className="min-w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-200">
+                    <th className="border border-gray-300 p-2">短網址</th>
+                    <th className="border border-gray-300 p-2">標題</th>
+                    <th className="border border-gray-300 p-2">產生時間</th>
+                    <th className="border border-gray-300 p-2">點擊次數</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {regularUrls.map((url) => (
+                    <tr key={url.short_code} className="hover:bg-gray-100">
+                      <td className="border border-gray-300 p-2">
+                        <a
+                          href={`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 underline"
+                        >
+                          {`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}
+                        </a>
+                      </td>
+                      <td className="border border-gray-300 p-2">{url.title || url.original_url}</td>
+                      <td className="border border-gray-300 p-2">
+                        {new Date(url.created_at).toLocaleString('zh-TW', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        }).replace(/\//g, '/')}
+                      </td>
+                      <td className="border border-gray-300 p-2">{url.click_count || 0}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>

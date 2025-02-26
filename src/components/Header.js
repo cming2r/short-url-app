@@ -25,7 +25,7 @@ export default function Header() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'http://localhost:3000', // 本地測試
+        redirectTo: process.env.NEXT_PUBLIC_BASE_URL || 'https://short-url-app-olive.vercel.app/', // 動態設置重定向 URL
       },
     });
     if (error) console.error('Error signing in:', error);
@@ -53,15 +53,15 @@ export default function Header() {
               </li>
             )}
             <li>
-            {session ? (
-  <button onClick={handleSignOut} className="hover:underline">
-    登出（{session.user?.email || '用戶'}）
-  </button>
-) : (
-  <button onClick={handleSignIn} className="hover:underline">
-    Google 登入
-  </button>
-)}
+              {session ? (
+                <button onClick={handleSignOut} className="hover:underline">
+                  登出（{session.user?.email || '用戶'}）
+                </button>
+              ) : (
+                <button onClick={handleSignIn} className="hover:underline">
+                  Google 登入
+                </button>
+              )}
             </li>
           </ul>
         </nav>

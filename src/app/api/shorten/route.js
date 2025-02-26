@@ -1,11 +1,11 @@
+// src/app/api/shorten/route.js
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { nanoid } from 'nanoid';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY; // 服務角色金鑰，需在 Vercel 設置
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 
-// 確保 supabaseServiceKey 存在
 if (!supabaseServiceKey) {
   throw new Error('SUPABASE_SERVICE_KEY is required in environment variables');
 }
@@ -21,7 +21,7 @@ export async function POST(request) {
   const { url, customCode } = await request.json();
 
   if (!url || !/^https?:\/\//.test(url)) {
-    return new Response(JSON.stringify({ error: 'Invalid URL' }), {
+    return new Response(JSON.stringify({ error: 'Invalid URL, must start with http:// or https://' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });

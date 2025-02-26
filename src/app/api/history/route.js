@@ -4,6 +4,10 @@ import { cookies } from 'next/headers';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 
+if (!supabaseServiceKey) {
+  throw new Error('SUPABASE_SERVICE_KEY is required in environment variables');
+}
+
 export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
   cookies,
 });

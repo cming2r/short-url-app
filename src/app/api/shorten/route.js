@@ -15,10 +15,16 @@ export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
 
 async function fetchTitle(url) {
   try {
-    const response = await fetch(url, { method: 'HEAD' });
+    const response = await fetch(url, { method: 'HEAD', redirect: 'follow' });
     const html = await response.text();
     const titleMatch = html.match(/<title>(.*?)<\/title>/i);
-    return titleMatch ? titleMatch[1] : url;
+    if (!titleMatch) return url;
+
+    let title = titleMatch[1].trim();
+    // 簡化標題，移除多餘的後綴（如 ' - Yahoo奇摩' 保留 'Yahoo奇摩'）
+    title = title.replace(/ - .*$/, '').replace(/\|.*$/, '').trim() || url;
+    // 限制標題長度，確保簡潔
+    return title.length > 50 ? title.substring(0, 50) + '...' : title;
   } catch (error) {
     console.error('Failed to fetch title:', error);
     return url; // 回傳原始 URL 作為標題
@@ -93,7 +99,7 @@ export async function POST(request) {
       original_url: formattedUrl,
       user_id: currentUserId,
       custom_code: !!customCode, // 如果有 customCode，標記為 true
-      title, // 儲存標題
+      title, // 儲存簡潔標題
       created_at: new Date().toISOString(), // 確保 created_at 設置
       click_count: 0, // 初始點擊次數為 0
     });

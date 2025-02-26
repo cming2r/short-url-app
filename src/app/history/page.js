@@ -193,7 +193,7 @@ export default function History() {
                     rel="noopener noreferrer"
                     className="text-blue-500 underline"
                   >
-                    {customUrls[0].title || customUrls[0].original_url}
+                    {customUrls[0].title || '無標題'}
                   </a>
                 </p>
                 <p className="text-sm text-gray-500">
@@ -257,7 +257,7 @@ export default function History() {
                           rel="noopener noreferrer"
                           className="text-blue-500 underline"
                         >
-                          {url.title || url.original_url}
+                          {url.title || '無標題'}
                         </a>
                       </td>
                       <td className="border border-gray-300 p-2">

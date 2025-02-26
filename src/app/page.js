@@ -1,15 +1,28 @@
-// src/app/page.js
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { supabase } from '@/lib/supabase';
 
 export default function Home() {
-  const { data: session } = useSession();
   const [longUrl, setLongUrl] = useState('');
   const [customCode, setCustomCode] = useState('');
   const [shortUrl, setShortUrl] = useState('');
   const [error, setError] = useState('');
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   const handleShorten = async () => {
     setError('');
@@ -18,23 +31,26 @@ export default function Home() {
       setError('請輸入有效的 URL（需包含 http:// 或 https://）');
       return;
     }
-
+  
     try {
+      const userId = session?.user?.id ?? null;
       const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: longUrl, customCode: customCode || undefined }),
+        body: JSON.stringify({ url: longUrl, customCode: customCode || undefined, userId }),
       });
-
+  
       if (!response.ok) {
         const text = await response.text();
         console.error('API raw response:', text);
         throw new Error(`API request failed with status ${response.status}: ${text}`);
       }
-
+  
       const data = await response.json();
       if (data.shortUrl) {
         setShortUrl(data.shortUrl);
+        setLongUrl(''); // 清空輸入
+        setCustomCode(''); // 清空自訂短碼
       } else {
         setError('縮短網址失敗：未收到短網址');
       }
@@ -48,10 +64,6 @@ export default function Home() {
     navigator.clipboard.writeText(shortUrl);
     alert('短網址已複製到剪貼簿！');
   };
-
-  useEffect(() => {
-    console.log('shortUrl updated:', shortUrl);
-  }, [shortUrl]);
 
   return (
     <div className="flex items-center justify-center bg-gray-100 py-8">

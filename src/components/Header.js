@@ -1,11 +1,40 @@
-// src/components/Header.js
 'use client';
 
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 
 export default function Header() {
-  const { data: session, status } = useSession();
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleSignIn = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: 'http://localhost:3000', // 本地測試
+      },
+    });
+    if (error) console.error('Error signing in:', error);
+  };
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) console.error('Error signing out:', error);
+  };
 
   return (
     <header className="bg-gray-800 text-white p-4">
@@ -18,22 +47,21 @@ export default function Header() {
             <li>
               <Link href="/" className="hover:underline">首頁</Link>
             </li>
-            {status === 'authenticated' && (
+            {session && (
               <li>
                 <Link href="/history" className="hover:underline">歷史記錄</Link>
               </li>
             )}
             <li>
-              {status === 'loading' ? (
-                <span>載入中...</span>
-              ) : status === 'authenticated' ? (
-                <div className="flex items-center space-x-2">
-                  <span>{session.user.name || session.user.email}</span>
-                  <button onClick={() => signOut()} className="hover:underline">登出</button>
-                </div>
-              ) : (
-                <button onClick={() => signIn('google')} className="hover:underline">Google 登入</button>
-              )}
+            {session ? (
+  <button onClick={handleSignOut} className="hover:underline">
+    登出（{session.user?.email || '用戶'}）
+  </button>
+) : (
+  <button onClick={handleSignIn} className="hover:underline">
+    Google 登入
+  </button>
+)}
             </li>
           </ul>
         </nav>

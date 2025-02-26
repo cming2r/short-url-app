@@ -1,14 +1,18 @@
-// src/app/api/history/route.js
-import { createPool } from '@vercel/postgres';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { createClient } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
 
-const pool = createPool({
-  connectionString: process.env.POSTGRES_URL,
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+
+export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
+  cookies,
 });
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
+  const {
+    data: { session },
+  } = await supabaseServer.auth.getSession();
+
   if (!session) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
@@ -17,11 +21,15 @@ export async function GET() {
   }
 
   try {
-    const { rows } = await pool.query(
-      'SELECT short_code, original_url FROM urls WHERE user_id = $1 ORDER BY created_at DESC',
-      [session.user.id]
-    );
-    return new Response(JSON.stringify({ urls: rows }), {
+    const { data, error } = await supabaseServer
+      .from('urls')
+      .select('short_code, original_url')
+      .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return new Response(JSON.stringify({ urls: data }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

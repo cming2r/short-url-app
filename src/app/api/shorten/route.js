@@ -1,27 +1,23 @@
-// src/app/api/shorten/route.js
-import { createPool } from '@vercel/postgres';
+import { createClient } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
 import { nanoid } from 'nanoid';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]/route';
 
-const pool = createPool({
-  connectionString: process.env.POSTGRES_URL,
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY; // 服務角色金鑰，需在 Vercel 設置
+
+// 確保 supabaseServiceKey 存在
+if (!supabaseServiceKey) {
+  throw new Error('SUPABASE_SERVICE_KEY is required in environment variables');
+}
+
+export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
+  cookies,
 });
 
 export async function POST(request) {
   console.log('POST /api/shorten called');
-  console.log('POSTGRES_URL:', process.env.POSTGRES_URL);
-  console.log('BASE_URL:', process.env.BASE_URL);
+  console.log('BASE_URL:', process.env.NEXT_PUBLIC_BASE_URL);
 
-  if (!process.env.POSTGRES_URL) {
-    console.error('POSTGRES_URL is not defined');
-    return new Response(JSON.stringify({ error: 'Server configuration error: Missing POSTGRES_URL' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  const session = await getServerSession(authOptions);
   const { url, customCode } = await request.json();
 
   if (!url || !/^https?:\/\//.test(url)) {
@@ -41,8 +37,15 @@ export async function POST(request) {
 
   try {
     if (customCode) {
-      const { rows } = await pool.query('SELECT short_code FROM urls WHERE short_code = $1', [customCode]);
-      if (rows.length > 0) {
+      const { data, error } = await supabaseServer
+        .from('urls')
+        .select('short_code')
+        .eq('short_code', customCode)
+        .single();
+      if (error && error.code !== 'PGRST116') { // PGRST116 表示無記錄
+        throw error;
+      }
+      if (data) {
         return new Response(JSON.stringify({ error: '自訂短碼已被使用' }), {
           status: 400,
           headers: { 'Content-Type': 'application/json' },
@@ -50,14 +53,22 @@ export async function POST(request) {
       }
     }
 
-    const userId = session?.user?.id || null; // 未登入用戶設為 null
-    await pool.query(
-      'INSERT INTO urls (short_code, original_url, user_id) VALUES ($1, $2, $3)',
-      [shortCode, url, userId]
-    );
-    console.log('Inserted into database successfully');
+    const {
+      data: { session },
+    } = await supabaseServer.auth.getSession();
+    const userId = session?.user?.id || null; // 從當前會話獲取 userId
 
-    const shortUrl = `${process.env.BASE_URL}/${shortCode}`;
+    const { error } = await supabaseServer.from('urls').insert({
+      short_code: shortCode,
+      original_url: url,
+      user_id: userId,
+      created_at: new Date().toISOString(),
+    });
+
+    if (error) throw error;
+
+    console.log('Inserted into database successfully');
+    const shortUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/${shortCode}`;
     console.log('Generated shortUrl:', shortUrl);
 
     return new Response(JSON.stringify({ shortUrl }), {
@@ -65,7 +76,7 @@ export async function POST(request) {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('API error:', { message: error.message, stack: error.stack, code: error.code });
+    console.error('API error:', { message: error.message, code: error.code });
     return new Response(JSON.stringify({ error: `Internal server error: ${error.message}` }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

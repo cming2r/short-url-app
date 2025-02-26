@@ -1,4 +1,3 @@
-// src/app/[shortCode]/page.js
 import { redirect } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
@@ -34,6 +33,12 @@ export default async function ShortUrl({ params }) {
       });
     }
 
+    // 增加點擊次數
+    await supabaseServer
+      .from('urls')
+      .update({ click_count: data.click_count + 1 })
+      .eq('short_code', shortCode);
+
     // 驗證並格式化 original_url
     let originalUrl = data.original_url.trim();
     if (!/^https?:\/\//.test(originalUrl)) {
@@ -52,7 +57,7 @@ export default async function ShortUrl({ params }) {
       });
     }
 
-    // 重定向到原始網址，使用 307 臨時重定向
+    // 重定向到原始網址
     redirect(originalUrl);
   } catch (err) {
     console.error('Short URL redirection error:', err);

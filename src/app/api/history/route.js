@@ -27,7 +27,7 @@ export async function GET() {
   try {
     const { data, error } = await supabaseServer
       .from('urls')
-      .select('short_code, original_url, custom_code')
+      .select('short_code, original_url, title, created_at, click_count, custom_code')
       .eq('user_id', session.user.id)
       .order('created_at', { ascending: false });
 

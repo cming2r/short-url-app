@@ -1,4 +1,3 @@
-// src/app/api/shorten/route.js
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { nanoid } from 'nanoid';
@@ -13,6 +12,18 @@ if (!supabaseServiceKey) {
 export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
   cookies,
 });
+
+async function fetchTitle(url) {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    const html = await response.text();
+    const titleMatch = html.match(/<title>(.*?)<\/title>/i);
+    return titleMatch ? titleMatch[1] : url;
+  } catch (error) {
+    console.error('Failed to fetch title:', error);
+    return url; // 回傳原始 URL 作為標題
+  }
+}
 
 export async function POST(request) {
   console.log('POST /api/shorten called');
@@ -74,12 +85,17 @@ export async function POST(request) {
     } = await supabaseServer.auth.getSession();
     const currentUserId = session?.user?.id || userId || null; // 從會話或請求獲取 userId
 
+    // 獲取 original_url 的標題
+    const title = await fetchTitle(formattedUrl);
+
     const { error } = await supabaseServer.from('urls').insert({
       short_code: shortCode,
       original_url: formattedUrl,
       user_id: currentUserId,
       custom_code: !!customCode, // 如果有 customCode，標記為 true
-      created_at: new Date().toISOString(),
+      title, // 儲存標題
+      created_at: new Date().toISOString(), // 確保 created_at 設置
+      click_count: 0, // 初始點擊次數為 0
     });
 
     if (error) throw error;

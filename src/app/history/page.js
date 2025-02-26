@@ -29,24 +29,24 @@ export default function History() {
   const fetchHistory = async () => {
     if (session) {
       try {
-        // 查詢自定義短網址（假設 self_defined 為 true 或 customCode 不為 null）
+        // 查詢自定義短網址（custom_code = true）
         const { data: customData, error: customError } = await supabase
           .from('urls')
-          .select('short_code, original_url')
+          .select('short_code, original_url, title, created_at, click_count')
           .eq('user_id', session.user.id)
-          .is('custom_code', true) // 假設有 self_defined 欄位表示自定義
+          .eq('custom_code', true)
           .order('created_at', { ascending: false })
-          .limit(1); // 只取最新的自定義記錄
+          .limit(1);
 
         if (customError) throw customError;
         setCustomUrls(customData || []);
 
-        // 查詢普通縮網址歷史記錄
+        // 查詢普通縮網址歷史記錄（custom_code = false）
         const { data: regularData, error: regularError } = await supabase
           .from('urls')
-          .select('short_code, original_url')
+          .select('short_code, original_url, title, created_at, click_count')
           .eq('user_id', session.user.id)
-          .is('custom_code', false) // 假設普通縮網址為非自定義
+          .eq('custom_code', false)
           .order('created_at', { ascending: false });
 
         if (regularError) throw regularError;
@@ -178,7 +178,11 @@ export default function History() {
                 >
                   {`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrls[0].short_code}`}
                 </a>
-                <span className="text-gray-600 ml-2">{customUrls[0].original_url}</span>
+                <p className="text-gray-600">{customUrls[0].title || customUrls[0].original_url}</p>
+                <p className="text-sm text-gray-500">
+                  產生時間：{new Date(customUrls[0].created_at).toLocaleString()}
+                  ，點擊次數：{customUrls[0].click_count || 0}
+                </p>
               </div>
               <button
                 onClick={() => {
@@ -203,15 +207,21 @@ export default function History() {
             <ul className="space-y-2">
               {regularUrls.map((url) => (
                 <li key={url.short_code} className="flex justify-between items-center">
-                  <a
-                    href={`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 underline"
-                  >
-                    {`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}
-                  </a>
-                  <span className="text-gray-600 truncate max-w-xs">{url.original_url}</span>
+                  <div>
+                    <a
+                      href={`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 underline"
+                    >
+                      {`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}
+                    </a>
+                    <p className="text-gray-600">{url.title || url.original_url}</p>
+                    <p className="text-sm text-gray-500">
+                      產生時間：{new Date(url.created_at).toLocaleString()}
+                      ，點擊次數：{url.click_count || 0}
+                    </p>
+                  </div>
                 </li>
               ))}
             </ul>

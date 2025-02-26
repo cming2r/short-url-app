@@ -85,7 +85,9 @@ export default function History() {
       if (!response.ok) {
         const text = await response.text();
         console.error('API raw response:', text);
-        throw new Error(`API request failed with status ${response.status}: ${text}`);
+        const errorData = JSON.parse(text);
+        setError(`縮短網址失敗：${errorData.error || '未知錯誤'}`);
+        return;
       }
 
       const data = await response.json();
@@ -118,7 +120,9 @@ export default function History() {
       if (!response.ok) {
         const text = await response.text();
         console.error('API raw response:', text);
-        throw new Error(`API request failed with status ${response.status}: ${text}`);
+        const errorData = JSON.parse(text);
+        setError(`更新自訂短網址失敗：${errorData.error || '未知錯誤'}`);
+        return;
       }
 
       const data = await response.json();
@@ -182,7 +186,16 @@ export default function History() {
                 >
                   {`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrls[0].short_code}`}
                 </a>
-                <p className="text-gray-600">{customUrls[0].title || customUrls[0].original_url}</p>
+                <p className="text-gray-600">
+                  <a
+                    href={customUrls[0].original_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline"
+                  >
+                    {customUrls[0].title || customUrls[0].original_url}
+                  </a>
+                </p>
                 <p className="text-sm text-gray-500">
                   產生時間：{new Date(customUrls[0].created_at).toLocaleString('zh-TW', {
                     year: 'numeric',
@@ -237,7 +250,16 @@ export default function History() {
                           {`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}
                         </a>
                       </td>
-                      <td className="border border-gray-300 p-2">{url.title || url.original_url}</td>
+                      <td className="border border-gray-300 p-2">
+                        <a
+                          href={url.original_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 underline"
+                        >
+                          {url.title || url.original_url}
+                        </a>
+                      </td>
                       <td className="border border-gray-300 p-2">
                         {new Date(url.created_at).toLocaleString('zh-TW', {
                           year: 'numeric',

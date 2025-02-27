@@ -87,8 +87,38 @@ export async function POST(request) {
 
   try {
     if (customCode) {
+      const {
+        data: { session },
+      } = await supabaseServer.auth.getSession();
+      const currentUserId = session?.user?.id || userId || null;
+
+      if (!currentUserId) {
+        return new Response(JSON.stringify({ error: 'User not authenticated for custom URL' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      // 檢查是否已有自定義短網址
+      const { data: existingCustom, error: customError } = await supabaseServer
+        .from('custom_urls')
+        .select('short_code')
+        .eq('user_id', currentUserId)
+        .single();
+
+      if (customError && customError.code !== 'PGRST116') { // PGRST116 表示無記錄
+        throw customError;
+      }
+      if (existingCustom) {
+        return new Response(JSON.stringify({ error: '已存在自訂短網址，無法再創建新的自訂短網址' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      // 檢查自定義短碼是否已被使用
       const { data, error } = await supabaseServer
-        .from('urls')
+        .from('custom_urls')
         .select('short_code')
         .eq('short_code', customCode)
         .single();
@@ -106,22 +136,37 @@ export async function POST(request) {
     const {
       data: { session },
     } = await supabaseServer.auth.getSession();
-    const currentUserId = session?.user?.id || userId || null; // 保持 user_id 為 null 允許未登入用戶
+    const currentUserId = session?.user?.id || userId || null;
 
     // 獲取 original_url 的標題
     const title = await fetchTitle(formattedUrl);
 
-    const { error } = await supabaseServer.from('urls').insert({
-      short_code: shortCode,
-      original_url: formattedUrl,
-      user_id: currentUserId, // 允許 user_id 為 null（未登入）
-      custom_code: !!customCode, // 如果有 customCode，標記為 true
-      title, // 儲存任何網址的標題
-      created_at: new Date().toISOString(), // 確保 created_at 設置
-      click_count: 0, // 初始點擊次數為 0
-    });
+    if (customCode) {
+      // 插入自定義短網址到 custom_urls 表
+      const { error } = await supabaseServer.from('custom_urls').insert({
+        user_id: currentUserId,
+        short_code: shortCode,
+        original_url: formattedUrl,
+        title,
+        created_at: new Date().toISOString(),
+        click_count: 0,
+      });
 
-    if (error) throw error;
+      if (error) throw error;
+    } else {
+      // 插入普通縮網址到 urls 表
+      const { error } = await supabaseServer.from('urls').insert({
+        short_code: shortCode,
+        original_url: formattedUrl,
+        user_id: currentUserId,
+        custom_code: false,
+        title,
+        created_at: new Date().toISOString(),
+        click_count: 0,
+      });
+
+      if (error) throw error;
+    }
 
     console.log('Inserted into database successfully');
     const shortUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/${shortCode}`;

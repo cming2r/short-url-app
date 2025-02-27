@@ -49,9 +49,14 @@ export default function Header() {
               <Link href="/" className="hover:underline">首頁</Link>
             </li>
             {session && (
-              <li>
-                <Link href="/history" className="hover:underline">歷史記錄</Link>
-              </li>
+              <>
+                <li>
+                  <Link href="/custom" className="hover:underline">自訂短網址</Link>
+                </li>
+                <li>
+                  <Link href="/history" className="hover:underline">歷史記錄</Link>
+                </li>
+              </>
             )}
             <li>
               {session ? (

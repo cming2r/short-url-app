@@ -30,21 +30,21 @@ export default function Home() {
       setError('請輸入有效的 URL（需包含 http:// 或 https://）');
       return;
     }
-
+  
     try {
-      const userId = session?.user?.id || null;
+      const userId = session?.user?.id || null; // 確保已登入時傳遞 user_id
       const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: longUrl, userId }),
       });
-
+  
       if (!response.ok) {
         const text = await response.text();
         console.error('API raw response:', text);
         throw new Error(`API request failed with status ${response.status}: ${text}`);
       }
-
+  
       const data = await response.json();
       if (data.shortUrl) {
         setShortUrl(data.shortUrl);

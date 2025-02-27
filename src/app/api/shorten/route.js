@@ -124,7 +124,7 @@ export async function POST(request) {
         .select('short_code')
         .eq('short_code', customCode)
         .single();
-      if (error && error.code !== 'PGRST116') { // PGRST116 表示無記錄
+      if (error && customError.code !== 'PGRST116') { // PGRST116 表示無記錄
         throw error;
       }
       if (data) {
@@ -138,7 +138,9 @@ export async function POST(request) {
     const {
       data: { session },
     } = await supabaseServer.auth.getSession();
-    const currentUserId = session?.user?.id || null; // 允許 null 給未登入用戶（普通縮網址）
+    const currentUserId = session?.user?.id; // 確保已登入用戶的 currentUserId 不為 null
+
+    console.log('Session for regular URL:', session); // 添加日誌調試
 
     // 獲取 original_url 的標題
     const title = await fetchTitle(formattedUrl);
@@ -156,11 +158,11 @@ export async function POST(request) {
 
       if (error) throw error;
     } else {
-      // 插入普通縮網址到 urls 表
+      // 插入普通縮網址到 urls 表，確保記錄 user_id
       const { error } = await supabaseServer.from('urls').insert({
         short_code: shortCode,
         original_url: formattedUrl,
-        user_id: currentUserId,
+        user_id: currentUserId, // 確保已登入用戶的 user_id 記錄
         custom_code: false,
         title,
         created_at: new Date().toISOString(),

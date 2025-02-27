@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { nanoid } from 'nanoid';
+import axios from 'axios'; 
+import cheerio from 'cheerio'; 
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
@@ -15,24 +17,25 @@ export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
 
 async function fetchTitle(url) {
   try {
-    const response = await fetch(url, { method: 'HEAD', redirect: 'follow' });
-    const html = await response.text();
-    const titleMatch = html.match(/<title>(.*?)<\/title>/i);
-    if (!titleMatch) return url;
+    // 使用 axios 獲取完整的 HTML
+    const response = await axios.get(url, { timeout: 5000 }); // 設置超時，避免延遲過長
+    const html = response.data;
 
-    let title = titleMatch[1].trim();
-    // 特殊處理 Yahoo 網站，保留簡潔標題（如 "Yahoo奇摩")
-    if (url.includes('tw.yahoo.com')) {
-      title = title.replace(/ - Yahoo奇摩$/, '').trim() || 'Yahoo奇摩';
+    // 使用 cheerio 解析 HTML
+    const $ = cheerio.load(html);
+    let title = $('title').text().trim();
+
+    // 處理空標題或無效標題
+    if (!title || title === '') {
+      return url; // 回傳原始 URL 作為預設標題
     }
-    // 處理其他網站，移除多餘後綴並限制長度
+
+    // 移除多餘後綴並限制長度
     title = title.replace(/ - .*$/, '').replace(/\|.*$/, '').trim() || url;
     return title.length > 50 ? title.substring(0, 50) + '...' : title;
   } catch (error) {
-    console.error('Failed to fetch title:', error);
-    // 為特定網站提供預設簡潔標題
-    if (url.includes('tw.yahoo.com')) return 'Yahoo奇摩';
-    return url; // 回傳原始 URL 作為標題
+    console.error('Failed to fetch title:', error.message);
+    return url; // 回傳原始 URL 作為預設標題
   }
 }
 
@@ -111,7 +114,7 @@ export async function POST(request) {
       original_url: formattedUrl,
       user_id: currentUserId, // 確保 user_id 設置正確
       custom_code: !!customCode, // 如果有 customCode，標記為 true
-      title, // 儲存簡潔標題（如 "Yahoo奇摩"）
+      title, // 儲存任何網址的標題
       created_at: new Date().toISOString(), // 確保 created_at 設置
       click_count: 0, // 初始點擊次數為 0
     });

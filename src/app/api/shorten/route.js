@@ -136,7 +136,7 @@ export async function POST(request) {
     const {
       data: { session },
     } = await supabaseServer.auth.getSession();
-    const currentUserId = session?.user?.id || null; // 允許 null 給未登入用戶
+    const currentUserId = session?.user?.id || null; // 允許 null 給未登入用戶（普通縮網址）
 
     // 獲取 original_url 的標題
     const title = await fetchTitle(formattedUrl);

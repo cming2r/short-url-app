@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { nanoid } from 'nanoid';
-import axios from 'axios'; // 確保已安裝 axios
-import { load } from 'cheerio'; // 修正導入方式，使用命名匯出 load
+import axios from 'axios';
+import { load } from 'cheerio';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
@@ -106,14 +106,7 @@ export async function POST(request) {
     const {
       data: { session },
     } = await supabaseServer.auth.getSession();
-    const currentUserId = session?.user?.id || userId || null; // 從會話或請求獲取 userId
-
-    if (!currentUserId) {
-      return new Response(JSON.stringify({ error: 'User not authenticated' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    const currentUserId = session?.user?.id || userId || null; // 保持 user_id 為 null 允許未登入用戶
 
     // 獲取 original_url 的標題
     const title = await fetchTitle(formattedUrl);
@@ -121,7 +114,7 @@ export async function POST(request) {
     const { error } = await supabaseServer.from('urls').insert({
       short_code: shortCode,
       original_url: formattedUrl,
-      user_id: currentUserId, // 確保 user_id 設置正確
+      user_id: currentUserId, // 允許 user_id 為 null（未登入）
       custom_code: !!customCode, // 如果有 customCode，標記為 true
       title, // 儲存任何網址的標題
       created_at: new Date().toISOString(), // 確保 created_at 設置

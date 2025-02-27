@@ -21,19 +21,17 @@ async function fetchTitle(url) {
     if (!titleMatch) return url;
 
     let title = titleMatch[1].trim();
-    // 特殊處理 Yahoo 網站，保留簡潔標題
+    // 特殊處理 Yahoo 網站，保留簡潔標題（如 "Yahoo奇摩")
     if (url.includes('tw.yahoo.com')) {
       title = title.replace(/ - Yahoo奇摩$/, '').trim() || 'Yahoo奇摩';
     }
-    // 處理 Turadise 網站或其他長標題，移除多餘後綴
+    // 處理其他網站，移除多餘後綴並限制長度
     title = title.replace(/ - .*$/, '').replace(/\|.*$/, '').trim() || url;
-    // 限制標題長度，確保簡潔
     return title.length > 50 ? title.substring(0, 50) + '...' : title;
   } catch (error) {
     console.error('Failed to fetch title:', error);
     // 為特定網站提供預設簡潔標題
     if (url.includes('tw.yahoo.com')) return 'Yahoo奇摩';
-    if (url.includes('turadise.com')) return 'Turadise';
     return url; // 回傳原始 URL 作為標題
   }
 }
@@ -113,7 +111,7 @@ export async function POST(request) {
       original_url: formattedUrl,
       user_id: currentUserId, // 確保 user_id 設置正確
       custom_code: !!customCode, // 如果有 customCode，標記為 true
-      title, // 儲存簡潔標題
+      title, // 儲存簡潔標題（如 "Yahoo奇摩"）
       created_at: new Date().toISOString(), // 確保 created_at 設置
       click_count: 0, // 初始點擊次數為 0
     });

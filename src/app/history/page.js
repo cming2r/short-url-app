@@ -29,7 +29,7 @@ export default function History() {
   const fetchHistory = async () => {
     if (session) {
       try {
-        // 查詢自定義短網址（custom_code = true 且 user_id 匹配）
+        // 查詢自定義短網址（custom_code = true）
         const { data: customData, error: customError } = await supabase
           .from('urls')
           .select('short_code, original_url, title, created_at, click_count')
@@ -41,7 +41,7 @@ export default function History() {
         if (customError) throw customError;
         setCustomUrls(customData || []);
 
-        // 查詢普通縮網址歷史記錄（custom_code = false 且 user_id 匹配）
+        // 查詢普通縮網址歷史記錄（custom_code = false）
         const { data: regularData, error: regularError } = await supabase
           .from('urls')
           .select('short_code, original_url, title, created_at, click_count')

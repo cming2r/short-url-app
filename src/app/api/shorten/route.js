@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { nanoid } from 'nanoid';
-import axios from 'axios'; 
-import cheerio from 'cheerio'; 
+import axios from 'axios'; // 確保已安裝 axios
+import { load } from 'cheerio'; // 修正導入方式，使用命名匯出 load
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
@@ -22,7 +22,7 @@ async function fetchTitle(url) {
     const html = response.data;
 
     // 使用 cheerio 解析 HTML
-    const $ = cheerio.load(html);
+    const $ = load(html);
     let title = $('title').text().trim();
 
     // 處理空標題或無效標題
@@ -30,11 +30,20 @@ async function fetchTitle(url) {
       return url; // 回傳原始 URL 作為預設標題
     }
 
-    // 移除多餘後綴並限制長度
+    // 特殊處理 Yahoo 網站，確保返回 "Yahoo奇摩"
+    if (url.includes('tw.yahoo.com')) {
+      title = title.replace(/ - Yahoo奇摩$/, '').trim() || 'Yahoo奇摩';
+      // 確保標題不包含多餘字符
+      title = title.replace(/^\s*|\s*$/g, '').replace(/\s+/g, ' ');
+      if (!title || title === '') title = 'Yahoo奇摩';
+    }
+    // 處理其他網站，移除多餘後綴並限制長度
     title = title.replace(/ - .*$/, '').replace(/\|.*$/, '').trim() || url;
     return title.length > 50 ? title.substring(0, 50) + '...' : title;
   } catch (error) {
     console.error('Failed to fetch title:', error.message);
+    // 為特定網站提供預設簡潔標題
+    if (url.includes('tw.yahoo.com')) return 'Yahoo奇摩';
     return url; // 回傳原始 URL 作為預設標題
   }
 }

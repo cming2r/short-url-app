@@ -92,6 +92,8 @@ export async function POST(request) {
       } = await supabaseServer.auth.getSession();
       const currentUserId = session?.user?.id;
 
+      console.log('Session for custom URL:', session); // 添加日誌調試
+
       if (!currentUserId) {
         return new Response(JSON.stringify({ error: 'User not authenticated for custom URL' }), {
           status: 401,

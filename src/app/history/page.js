@@ -49,9 +49,12 @@ export default function History() {
 
         if (regularError) throw regularError;
         setUrls(regularData || []);
+
+        console.log('Custom URL data:', customData);
+        console.log('Regular URLs data:', regularData); // 添加日誌調試
       } catch (err) {
         console.error('Fetch history error:', err);
-        setError('載入歷史記錄失敗');
+        setError('載入歷史記錄失敗: ' + err.message);
       } finally {
         setLoading(false);
       }

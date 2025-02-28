@@ -39,7 +39,7 @@ export default function History() {
         }
         setCustomUrl(customData || null);
 
-        // 查詢普通縮網址歷史記錄（從 urls 表，移除 custom_code 條件）
+        // 查詢普通縮網址歷史記錄（從 urls 表）
         const { data: regularData, error: regularError } = await supabase
           .from('urls')
           .select('short_code, original_url, title, created_at, click_count')
@@ -50,7 +50,7 @@ export default function History() {
         setUrls(regularData || []);
 
         console.log('Custom URL data:', customData);
-        console.log('Regular URLs data:', regularData); // 添加日誌調試
+        console.log('Regular URLs data:', regularData);
       } catch (err) {
         console.error('Fetch history error:', err);
         setError('載入歷史記錄失敗: ' + err.message);
@@ -69,45 +69,58 @@ export default function History() {
 
   return (
     <div className="flex items-center justify-center bg-gray-100 py-8">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl"> {/* 放寬寬度 */}
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl">
         <h1 className="text-2xl font-bold text-center mb-4">歷史記錄</h1>
 
-        {/* 自定義短網址區塊 */}
+        {/* 自定義短網址區塊（改為表格形式） */}
         <div className="mb-6">
           <h2 className="text-xl font-bold mb-2">自定義短網址</h2>
           {customUrl ? (
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-bold">自訂短網址：</p>
-                <a
-                  href={`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 underline"
-                >
-                  {`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`}
-                </a>
-                <p className="text-gray-600">
-                  <a
-                    href={customUrl.original_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 underline"
-                  >
-                    {customUrl.title || '無標題'}
-                  </a>
-                </p>
-                <p className="text-sm text-gray-500">
-                  產生時間：{new Date(customUrl.created_at).toLocaleString('zh-TW', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  }).replace(/\//g, '/')}
-                  ，點擊次數：{customUrl.click_count || 0}
-                </p>
-              </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-200">
+                    <th className="border border-gray-300 p-2">短網址</th>
+                    <th className="border border-gray-300 p-2">標題</th>
+                    <th className="border border-gray-300 p-2">產生時間</th>
+                    <th className="border border-gray-300 p-2">點擊次數</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="hover:bg-gray-100">
+                    <td className="border border-gray-300 p-2">
+                      <a
+                        href={`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 underline"
+                      >
+                        {`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`}
+                      </a>
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      <a
+                        href={customUrl.original_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 underline"
+                      >
+                        {customUrl.title || '無標題'}
+                      </a>
+                    </td>
+                    <td className="border border-gray-300 p-2">
+                      {new Date(customUrl.created_at).toLocaleString('zh-TW', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      }).replace(/\//g, '/')}
+                    </td>
+                    <td className="border border-gray-300 p-2">{customUrl.click_count || 0}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           ) : (
             <p className="text-center">尚未定義自訂短網址</p>

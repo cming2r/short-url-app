@@ -111,35 +111,53 @@ export default function CustomUrl() {
     }
 
     try {
-      const userId = session?.user?.id || null;
-      const accessToken = session?.access_token || null;
-      console.log('User ID sent from custom/page.js (edit):', userId);
-      console.log('Access token sent from custom/page.js (edit):', accessToken);
+      async function fetchTitle(url) {
+        try {
+          const response = await fetch(url, { timeout: 5000, redirect: 'follow' });
+          const html = await response.text();
+          const titleMatch = html.match(/<title>(.*?)<\/title>/i);
+          if (!titleMatch) return url;
 
-      const response = await fetch('/api/shorten', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: longUrl, customCode, userId, accessToken }),
-      });
-
-      if (!response.ok) {
-        const text = await response.text();
-        console.error('API raw response:', text);
-        const errorData = JSON.parse(text);
-        setError(`更新自訂短網址失敗：${errorData.error || '未知錯誤'}`);
-        return;
+          let title = titleMatch[1].trim();
+          // 特殊處理 Yahoo 網站，確保返回 "Yahoo奇摩"
+          if (url.includes('tw.yahoo.com')) {
+            title = title.replace(/ - Yahoo奇摩$/, '').trim() || 'Yahoo奇摩';
+            // 確保標題不包含多餘字符
+            title = title.replace(/^\s*|\s*$/g, '').replace(/\s+/g, ' ');
+            if (!title || title === '') title = 'Yahoo奇摩';
+          }
+          // 處理其他網站，移除多餘後綴並限制長度
+          title = title.replace(/ - .*$/, '').replace(/\|.*$/, '').trim() || url;
+          return title.length > 50 ? title.substring(0, 50) + '...' : title;
+        } catch (error) {
+          console.error('Failed to fetch title:', error);
+          if (url.includes('tw.yahoo.com')) return 'Yahoo奇摩';
+          return url;
+        }
       }
 
-      const data = await response.json();
-      if (data.shortUrl) {
-        setLongUrl(''); // 清空輸入
-        setCustomCode(''); // 清空自訂短碼
-        await fetchCustomUrl(); // 刷新自定義短網址
-      } else {
-        setError('更新自訂短網址失敗：未收到短網址');
-      }
+      // 獲取標題
+      const title = await fetchTitle(longUrl);
+
+      // 更新現有自定義短網址記錄
+      const { error } = await supabase
+        .from('custom_urls')
+        .update({
+          short_code: customCode,
+          original_url: longUrl,
+          title: title,
+          created_at: new Date().toISOString(), // 更新時間
+        })
+        .eq('user_id', session.user.id)
+        .eq('short_code', customUrl.short_code);
+
+      if (error) throw error;
+
+      setLongUrl(''); // 清空輸入
+      setCustomCode(''); // 清空自訂短碼
+      await fetchCustomUrl(); // 刷新自定義短網址
     } catch (err) {
-      console.error('Fetch error:', err);
+      console.error('Update error:', err);
       setError(`更新自訂短網址失敗：${err.message}`);
     }
   };

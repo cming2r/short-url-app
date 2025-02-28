@@ -19,46 +19,81 @@ export default async function ShortUrl({ params }) {
   const shortCode = resolvedParams.shortCode;
 
   try {
-    const { data, error } = await supabaseServer
-      .from('urls')
-      .select('original_url')
+    // 首先檢查 custom_urls 表
+    const { data: customData, error: customError } = await supabaseServer
+      .from('custom_urls')
+      .select('original_url, click_count')
       .eq('short_code', shortCode)
       .single();
 
-    if (error || !data || !data.original_url) {
-      // 如果短網址無效，返回自定義錯誤
-      return new Response('短網址無效或處理中，請稍後再試', {
-        status: 404,
-        headers: { 'Content-Type': 'text/plain' },
-      });
+    if (customData) {
+      // 更新 custom_urls 表的點擊次數
+      const newClickCount = (customData.click_count || 0) + 1;
+      await supabaseServer
+        .from('custom_urls')
+        .update({ click_count: newClickCount })
+        .eq('short_code', shortCode);
+
+      // 驗證並格式化 original_url
+      let originalUrl = customData.original_url.trim();
+      if (!/^https?:\/\//.test(originalUrl)) {
+        originalUrl = `https://${originalUrl}`;
+      }
+
+      try {
+        new URL(originalUrl); // 驗證 URL 格式
+      } catch (urlError) {
+        console.error('Invalid original URL in custom_urls:', originalUrl, urlError);
+        return new Response('原始網址格式無效', {
+          status: 400,
+          headers: { 'Content-Type': 'text/plain' },
+        });
+      }
+
+      // 重定向到原始網址
+      redirect(originalUrl);
     }
 
-    // 增加點擊次數
-    await supabaseServer
+    // 如果 custom_urls 表中找不到，檢查 urls 表
+    const { data: urlData, error: urlError } = await supabaseServer
       .from('urls')
-      .update({ click_count: data.click_count + 1 })
-      .eq('short_code', shortCode);
+      .select('original_url, click_count')
+      .eq('short_code', shortCode)
+      .single();
 
-    // 驗證並格式化 original_url
-    let originalUrl = data.original_url.trim();
-    if (!/^https?:\/\//.test(originalUrl)) {
-      // 如果缺少協議，假設為 https
-      originalUrl = `https://${originalUrl}`;
+    if (urlData) {
+      // 更新 urls 表的點擊次數
+      const newClickCount = (urlData.click_count || 0) + 1;
+      await supabaseServer
+        .from('urls')
+        .update({ click_count: newClickCount })
+        .eq('short_code', shortCode);
+
+      // 驗證並格式化 original_url
+      let originalUrl = urlData.original_url.trim();
+      if (!/^https?:\/\//.test(originalUrl)) {
+        originalUrl = `https://${originalUrl}`;
+      }
+
+      try {
+        new URL(originalUrl); // 驗證 URL 格式
+      } catch (urlError) {
+        console.error('Invalid original URL in urls:', originalUrl, urlError);
+        return new Response('原始網址格式無效', {
+          status: 400,
+          headers: { 'Content-Type': 'text/plain' },
+        });
+      }
+
+      // 重定向到原始網址
+      redirect(originalUrl);
     }
 
-    // 確保 originalUrl 是一個有效的 URL
-    try {
-      new URL(originalUrl); // 驗證 URL 格式
-    } catch (urlError) {
-      console.error('Invalid original URL:', originalUrl, urlError);
-      return new Response('原始網址格式無效', {
-        status: 400,
-        headers: { 'Content-Type': 'text/plain' },
-      });
-    }
-
-    // 重定向到原始網址
-    redirect(originalUrl);
+    // 如果短網址無效，返回自定義錯誤
+    return new Response('短網址無效或處理中，請稍後再試', {
+      status: 404,
+      headers: { 'Content-Type': 'text/plain' },
+    });
   } catch (err) {
     console.error('Short URL redirection error:', err);
     return new Response('短網址處理失敗，請稍後再試', {

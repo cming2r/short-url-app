@@ -52,7 +52,7 @@ export async function POST(request) {
   console.log('POST /api/shorten called');
   console.log('BASE_URL:', process.env.NEXT_PUBLIC_BASE_URL);
 
-  const { url, customCode } = await request.json();
+  const { url, customCode, userId, accessToken } = await request.json();
 
   if (!url) {
     return new Response(JSON.stringify({ error: 'Invalid URL, URL is required' }), {
@@ -86,26 +86,24 @@ export async function POST(request) {
   }
 
   try {
-    let currentUserId = null;
-
-    // 獲取當前用戶的 session
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabaseServer.auth.getSession();
-
-    console.log('Session retrieval result:', { session, sessionError }); // 詳細日誌調試
-
-    if (sessionError) {
-      console.error('Session retrieval error:', sessionError);
-    }
+    let currentUserId = userId || null;
 
     if (customCode) {
-      // 自定義短網址要求已登入用戶
-      currentUserId = session?.user?.id || null;
-
-      if (!currentUserId) {
+      // 自定義短網址要求已登入用戶，驗證 access_token
+      if (!userId || !accessToken) {
         return new Response(JSON.stringify({ error: 'User not authenticated for custom URL' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      // 使用 access_token 驗證會話
+      const { data: { user }, error: tokenError } = await supabaseServer.auth.getUser(accessToken);
+
+      console.log('User verification result:', { user, tokenError }); // 調試 user 和 tokenError
+
+      if (tokenError || !user || user.id !== userId) {
+        return new Response(JSON.stringify({ error: 'Invalid access token for custom URL' }), {
           status: 401,
           headers: { 'Content-Type': 'application/json' },
         });
@@ -115,7 +113,7 @@ export async function POST(request) {
       const { data: existingCustom, error: customError } = await supabaseServer
         .from('custom_urls')
         .select('short_code')
-        .eq('user_id', currentUserId)
+        .eq('user_id', userId)
         .single();
 
       if (customError && customError.code !== 'PGRST116') { // PGRST116 表示無記錄
@@ -143,11 +141,9 @@ export async function POST(request) {
           headers: { 'Content-Type': 'application/json' },
         });
       }
-    } else {
-      // 普通縮網址，無論是否登入都允許，但記錄 user_id
-      currentUserId = session?.user?.id || null; // 已登入用戶記錄 user_id，未登入為 null
-      console.log('Current user ID for regular URL:', currentUserId); // 調試 user_id
     }
+
+    console.log('Current user ID for URL:', currentUserId); // 調試 currentUserId
 
     // 獲取 original_url 的標題
     const title = await fetchTitle(formattedUrl);
@@ -169,7 +165,7 @@ export async function POST(request) {
       const { error } = await supabaseServer.from('urls').insert({
         short_code: shortCode,
         original_url: formattedUrl,
-        user_id: currentUserId, // 確保已登入用戶的 user_id 記錄
+        user_id: currentUserId, // 使用客戶端傳遞的 userId
         title,
         created_at: new Date().toISOString(),
         click_count: 0,

@@ -35,11 +35,14 @@ export default function Home() {
 
     try {
       const userId = session?.user?.id || null;
+      const accessToken = session?.access_token || null; // 獲取 access_token
       console.log('User ID sent from page.js:', userId); // 調試 userId
+      console.log('Access token sent from page.js:', accessToken); // 調試 access_token
+
       const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: longUrl, userId }),
+        body: JSON.stringify({ url: longUrl, userId, accessToken }),
       });
 
       if (!response.ok) {

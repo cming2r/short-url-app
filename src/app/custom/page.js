@@ -14,10 +14,12 @@ export default function CustomUrl() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      console.log('Client session in custom/page.js:', session); // 調試客戶端 session
     });
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
+      console.log('Auth state changed in custom/page.js:', { event, session }); // 調試 auth 事件
     });
 
     return () => {
@@ -63,10 +65,15 @@ export default function CustomUrl() {
     }
 
     try {
+      const userId = session?.user?.id || null;
+      const accessToken = session?.access_token || null; // 獲取 access_token
+      console.log('User ID sent from custom/page.js:', userId); // 調試 userId
+      console.log('Access token sent from custom/page.js:', accessToken); // 調試 access_token
+
       const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: longUrl, customCode }),
+        body: JSON.stringify({ url: longUrl, customCode, userId, accessToken }),
       });
 
       if (!response.ok) {
@@ -92,16 +99,22 @@ export default function CustomUrl() {
   };
 
   const handleEditCustom = async () => {
+    setError('');
     if (!longUrl || !customCode || customCode.length !== 6 || !/^[a-zA-Z0-9]+$/.test(customCode)) {
       setError('請輸入有效的 URL 和 6 位元字母或數字的自訂短碼');
       return;
     }
 
     try {
+      const userId = session?.user?.id || null;
+      const accessToken = session?.access_token || null; // 獲取 access_token
+      console.log('User ID sent from custom/page.js (edit):', userId); // 調試 userId
+      console.log('Access token sent from custom/page.js (edit):', accessToken); // 調試 access_token
+
       const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: longUrl, customCode }),
+        body: JSON.stringify({ url: longUrl, customCode, userId, accessToken }),
       });
 
       if (!response.ok) {

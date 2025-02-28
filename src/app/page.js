@@ -72,7 +72,7 @@ export default function Home() {
   return (
     <div className="flex items-center justify-center bg-gray-100 py-8">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-4">網址縮短器</h1>
+        <h1 className="text-2xl font-bold text-center mb-4">網址縮短器A</h1>
         <input
           type="text"
           value={longUrl}

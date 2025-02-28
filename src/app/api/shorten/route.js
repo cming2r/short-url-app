@@ -16,36 +16,14 @@ export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
 });
 
 async function fetchTitle(url) {
-  // 確保 URL 格式正確
-  let formattedUrl = url.trim();
-  if (!/^https?:\/\//.test(formattedUrl)) {
-    formattedUrl = `https://${formattedUrl}`;
-  }
-
   try {
-    // 驗證 URL 格式
-    new URL(formattedUrl);
+    // 使用 GET 方法獲取完整的 HTML
+    const response = await axios.get(url, { timeout: 5000, redirect: 'follow' });
+    const html = await response.text();
+    const titleMatch = html.match(/<title>(.*?)<\/title>/i);
+    if (!titleMatch) return url;
 
-    // 使用 axios 獲取完整的 HTML，增加超時時間和重試邏輯
-    const response = await axios.get(formattedUrl, { 
-      timeout: 10000, // 增加超時時間
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; ShortURLBot/1.0; +https://short-url-app-olive.vercel.app/)',
-      },
-    });
-
-    const html = response.data;
-
-    // 使用 cheerio 解析 HTML
-    const $ = load(html);
-    let title = $('title').text().trim();
-
-    // 處理空標題或無效標題
-    if (!title || title === '') {
-      if (url.includes('tw.yahoo.com')) return 'Yahoo奇摩';
-      return url; // 回傳原始 URL 作為預設標題
-    }
-
+    let title = titleMatch[1].trim();
     // 特殊處理 Yahoo 網站，確保返回 "Yahoo奇摩"
     if (url.includes('tw.yahoo.com')) {
       title = title.replace(/ - Yahoo奇摩$/, '').trim() || 'Yahoo奇摩';
@@ -53,22 +31,14 @@ async function fetchTitle(url) {
       title = title.replace(/^\s*|\s*$/g, '').replace(/\s+/g, ' ');
       if (!title || title === '') title = 'Yahoo奇摩';
     }
-
     // 處理其他網站，移除多餘後綴並限制長度
     title = title.replace(/ - .*$/, '').replace(/\|.*$/, '').trim() || url;
     return title.length > 50 ? title.substring(0, 50) + '...' : title;
   } catch (error) {
-    // 減少日誌噪音，避免過多 404 錯誤
-    if (error.response && error.response.status === 404) {
-      console.warn(`Unable to fetch title for URL ${url}: 404 Not Found`);
-    } else {
-      console.error('Failed to fetch title:', error.message);
-    }
-
+    console.error('Failed to fetch title:', error);
     // 為特定網站提供預設簡潔標題
     if (url.includes('tw.yahoo.com')) return 'Yahoo奇摩';
-    if (url.includes('turadise.com')) return 'Turadise';
-    return url; // 回傳原始 URL 作為預設標題
+    return url; // 回傳原始 URL 作為標題
   }
 }
 
@@ -124,7 +94,7 @@ export async function POST(request) {
       // 使用 access_token 驗證會話
       const { data: { user }, error: tokenError } = await supabaseServer.auth.getUser(accessToken);
 
-      console.log('User verification result:', { user, tokenError }); // 調試 user 和 tokenError
+      console.log('User verification result:', { user, tokenError });
 
       if (tokenError || !user || user.id !== userId) {
         return new Response(JSON.stringify({ error: 'Invalid access token for custom URL' }), {
@@ -167,7 +137,7 @@ export async function POST(request) {
       }
     }
 
-    console.log('Current user ID for URL:', currentUserId); // 調試 currentUserId
+    console.log('Current user ID for URL:', currentUserId);
 
     // 獲取 original_url 的標題
     const title = await fetchTitle(formattedUrl);
@@ -189,7 +159,7 @@ export async function POST(request) {
       const { error } = await supabaseServer.from('urls').insert({
         short_code: shortCode,
         original_url: formattedUrl,
-        user_id: currentUserId, // 使用客戶端傳遞的 userId
+        user_id: currentUserId,
         title,
         created_at: new Date().toISOString(),
         click_count: 0,

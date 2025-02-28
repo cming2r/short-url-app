@@ -55,20 +55,10 @@ export default function CustomUrl() {
 
   const handleShorten = async () => {
     setError('');
-
-    // 更嚴格的 URL 驗證
-    let formattedUrl = longUrl.trim();
-    if (!/^https?:\/\//.test(formattedUrl)) {
-      formattedUrl = `https://${formattedUrl}`;
-    }
-
-    try {
-      new URL(formattedUrl); // 驗證 URL 格式
-    } catch (urlError) {
-      setError('請輸入有效的 URL（例如 https://tw.yahoo.com/）');
+    if (!longUrl || !/^https?:\/\//.test(longUrl)) {
+      setError('請輸入有效的 URL（需包含 http:// 或 https://）');
       return;
     }
-
     if (customCode && (customCode.length !== 6 || !/^[a-zA-Z0-9]+$/.test(customCode))) {
       setError('自訂短碼必須為6位元字母或數字');
       return;
@@ -83,7 +73,7 @@ export default function CustomUrl() {
       const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: formattedUrl, customCode, userId, accessToken }),
+        body: JSON.stringify({ url: longUrl, customCode, userId, accessToken }),
       });
 
       if (!response.ok) {
@@ -110,21 +100,12 @@ export default function CustomUrl() {
 
   const handleEditCustom = async () => {
     setError('');
-
-    // 更嚴格的 URL 驗證
-    let formattedUrl = longUrl.trim();
-    if (!/^https?:\/\//.test(formattedUrl)) {
-      formattedUrl = `https://${formattedUrl}`;
-    }
-
-    try {
-      new URL(formattedUrl); // 驗證 URL 格式
-    } catch (urlError) {
-      setError('請輸入有效的 URL（例如 https://tw.yahoo.com/）');
+    if (!longUrl || !/^https?:\/\//.test(longUrl)) {
+      setError('請輸入有效的 URL（需包含 http:// 或 https://）');
       return;
     }
 
-    if (customCode && (customCode.length !== 6 || !/^[a-zA-Z0-9]+$/.test(customCode))) {
+    if (!customCode || customCode.length !== 6 || !/^[a-zA-Z0-9]+$/.test(customCode)) {
       setError('請輸入有效的 URL 和 6 位元字母或數字的自訂短碼');
       return;
     }
@@ -138,7 +119,7 @@ export default function CustomUrl() {
       const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: formattedUrl, customCode, userId, accessToken }),
+        body: JSON.stringify({ url: longUrl, customCode, userId, accessToken }),
       });
 
       if (!response.ok) {
@@ -220,7 +201,7 @@ export default function CustomUrl() {
               type="text"
               value={longUrl}
               onChange={(e) => setLongUrl(e.target.value)}
-              placeholder="輸入長網址（如 https://tw.yahoo.com/）"
+              placeholder="輸入長網址"
               className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <input

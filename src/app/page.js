@@ -28,17 +28,8 @@ export default function Home() {
   const handleShorten = async () => {
     setError('');
     setShortUrl('');
-
-    // 更嚴格的 URL 驗證
-    let formattedUrl = longUrl.trim();
-    if (!/^https?:\/\//.test(formattedUrl)) {
-      formattedUrl = `https://${formattedUrl}`;
-    }
-
-    try {
-      new URL(formattedUrl); // 驗證 URL 格式
-    } catch (urlError) {
-      setError('請輸入有效的 URL（例如 https://tw.yahoo.com/）');
+    if (!longUrl || !/^https?:\/\//.test(longUrl)) {
+      setError('請輸入有效的 URL（需包含 http:// 或 https://）');
       return;
     }
 
@@ -51,7 +42,7 @@ export default function Home() {
       const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: formattedUrl, userId, accessToken }),
+        body: JSON.stringify({ url: longUrl, userId, accessToken }),
       });
 
       if (!response.ok) {
@@ -86,7 +77,7 @@ export default function Home() {
           type="text"
           value={longUrl}
           onChange={(e) => setLongUrl(e.target.value)}
-          placeholder="輸入長網址（如 https://tw.yahoo.com/）"
+          placeholder="輸入長網址"
           className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button

@@ -14,12 +14,12 @@ export default function CustomUrl() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      console.log('Client session in custom/page.js:', session); // 調試客戶端 session
+      console.log('Client session in custom/page.js:', session);
     });
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
-      console.log('Auth state changed in custom/page.js:', { event, session }); // 調試 auth 事件
+      console.log('Auth state changed in custom/page.js:', { event, session });
     });
 
     return () => {
@@ -55,10 +55,20 @@ export default function CustomUrl() {
 
   const handleShorten = async () => {
     setError('');
-    if (!longUrl || !/^https?:\/\//.test(longUrl)) {
-      setError('請輸入有效的 URL（需包含 http:// 或 https://）');
+
+    // 更嚴格的 URL 驗證
+    let formattedUrl = longUrl.trim();
+    if (!/^https?:\/\//.test(formattedUrl)) {
+      formattedUrl = `https://${formattedUrl}`;
+    }
+
+    try {
+      new URL(formattedUrl); // 驗證 URL 格式
+    } catch (urlError) {
+      setError('請輸入有效的 URL（例如 https://tw.yahoo.com/）');
       return;
     }
+
     if (customCode && (customCode.length !== 6 || !/^[a-zA-Z0-9]+$/.test(customCode))) {
       setError('自訂短碼必須為6位元字母或數字');
       return;
@@ -66,14 +76,14 @@ export default function CustomUrl() {
 
     try {
       const userId = session?.user?.id || null;
-      const accessToken = session?.access_token || null; // 獲取 access_token
-      console.log('User ID sent from custom/page.js:', userId); // 調試 userId
-      console.log('Access token sent from custom/page.js:', accessToken); // 調試 access_token
+      const accessToken = session?.access_token || null;
+      console.log('User ID sent from custom/page.js:', userId);
+      console.log('Access token sent from custom/page.js:', accessToken);
 
       const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: longUrl, customCode, userId, accessToken }),
+        body: JSON.stringify({ url: formattedUrl, customCode, userId, accessToken }),
       });
 
       if (!response.ok) {
@@ -100,21 +110,35 @@ export default function CustomUrl() {
 
   const handleEditCustom = async () => {
     setError('');
-    if (!longUrl || !customCode || customCode.length !== 6 || !/^[a-zA-Z0-9]+$/.test(customCode)) {
+
+    // 更嚴格的 URL 驗證
+    let formattedUrl = longUrl.trim();
+    if (!/^https?:\/\//.test(formattedUrl)) {
+      formattedUrl = `https://${formattedUrl}`;
+    }
+
+    try {
+      new URL(formattedUrl); // 驗證 URL 格式
+    } catch (urlError) {
+      setError('請輸入有效的 URL（例如 https://tw.yahoo.com/）');
+      return;
+    }
+
+    if (customCode && (customCode.length !== 6 || !/^[a-zA-Z0-9]+$/.test(customCode))) {
       setError('請輸入有效的 URL 和 6 位元字母或數字的自訂短碼');
       return;
     }
 
     try {
       const userId = session?.user?.id || null;
-      const accessToken = session?.access_token || null; // 獲取 access_token
-      console.log('User ID sent from custom/page.js (edit):', userId); // 調試 userId
-      console.log('Access token sent from custom/page.js (edit):', accessToken); // 調試 access_token
+      const accessToken = session?.access_token || null;
+      console.log('User ID sent from custom/page.js (edit):', userId);
+      console.log('Access token sent from custom/page.js (edit):', accessToken);
 
       const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: longUrl, customCode, userId, accessToken }),
+        body: JSON.stringify({ url: formattedUrl, customCode, userId, accessToken }),
       });
 
       if (!response.ok) {
@@ -196,7 +220,7 @@ export default function CustomUrl() {
               type="text"
               value={longUrl}
               onChange={(e) => setLongUrl(e.target.value)}
-              placeholder="輸入長網址"
+              placeholder="輸入長網址（如 https://tw.yahoo.com/）"
               className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <input

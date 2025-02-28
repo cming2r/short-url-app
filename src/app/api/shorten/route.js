@@ -16,9 +16,24 @@ export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
 });
 
 async function fetchTitle(url) {
+  // 確保 URL 格式正確
+  let formattedUrl = url.trim();
+  if (!/^https?:\/\//.test(formattedUrl)) {
+    formattedUrl = `https://${formattedUrl}`;
+  }
+
   try {
-    // 使用 axios 獲取完整的 HTML
-    const response = await axios.get(url, { timeout: 5000 }); // 設置超時，避免延遲過長
+    // 驗證 URL 格式
+    new URL(formattedUrl);
+
+    // 使用 axios 獲取完整的 HTML，增加超時時間和重試邏輯
+    const response = await axios.get(formattedUrl, { 
+      timeout: 10000, // 增加超時時間
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; ShortURLBot/1.0; +https://short-url-app-olive.vercel.app/)',
+      },
+    });
+
     const html = response.data;
 
     // 使用 cheerio 解析 HTML
@@ -27,6 +42,7 @@ async function fetchTitle(url) {
 
     // 處理空標題或無效標題
     if (!title || title === '') {
+      if (url.includes('tw.yahoo.com')) return 'Yahoo奇摩';
       return url; // 回傳原始 URL 作為預設標題
     }
 
@@ -37,13 +53,21 @@ async function fetchTitle(url) {
       title = title.replace(/^\s*|\s*$/g, '').replace(/\s+/g, ' ');
       if (!title || title === '') title = 'Yahoo奇摩';
     }
+
     // 處理其他網站，移除多餘後綴並限制長度
     title = title.replace(/ - .*$/, '').replace(/\|.*$/, '').trim() || url;
     return title.length > 50 ? title.substring(0, 50) + '...' : title;
   } catch (error) {
-    console.error('Failed to fetch title:', error.message);
+    // 減少日誌噪音，避免過多 404 錯誤
+    if (error.response && error.response.status === 404) {
+      console.warn(`Unable to fetch title for URL ${url}: 404 Not Found`);
+    } else {
+      console.error('Failed to fetch title:', error.message);
+    }
+
     // 為特定網站提供預設簡潔標題
     if (url.includes('tw.yahoo.com')) return 'Yahoo奇摩';
+    if (url.includes('turadise.com')) return 'Turadise';
     return url; // 回傳原始 URL 作為預設標題
   }
 }

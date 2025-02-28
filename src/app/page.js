@@ -12,10 +12,12 @@ export default function Home() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      console.log('Client session in page.js:', session); // 調試客戶端 session
     });
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
+      console.log('Auth state changed in page.js:', { event, session }); // 調試 auth 事件
     });
 
     return () => {
@@ -30,21 +32,22 @@ export default function Home() {
       setError('請輸入有效的 URL（需包含 http:// 或 https://）');
       return;
     }
-  
+
     try {
-      const userId = session?.user?.id || null; // 確保已登入時傳遞 user_id
+      const userId = session?.user?.id || null;
+      console.log('User ID sent from page.js:', userId); // 調試 userId
       const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: longUrl, userId }),
       });
-  
+
       if (!response.ok) {
         const text = await response.text();
         console.error('API raw response:', text);
         throw new Error(`API request failed with status ${response.status}: ${text}`);
       }
-  
+
       const data = await response.json();
       if (data.shortUrl) {
         setShortUrl(data.shortUrl);

@@ -91,9 +91,14 @@ export async function POST(request) {
     // 獲取當前用戶的 session
     const {
       data: { session },
+      error: sessionError,
     } = await supabaseServer.auth.getSession();
 
-    console.log('Session:', session); // 添加日誌調試 session
+    console.log('Session retrieval result:', { session, sessionError }); // 詳細日誌調試
+
+    if (sessionError) {
+      console.error('Session retrieval error:', sessionError);
+    }
 
     if (customCode) {
       // 自定義短網址要求已登入用戶
@@ -141,6 +146,7 @@ export async function POST(request) {
     } else {
       // 普通縮網址，無論是否登入都允許，但記錄 user_id
       currentUserId = session?.user?.id || null; // 已登入用戶記錄 user_id，未登入為 null
+      console.log('Current user ID for regular URL:', currentUserId); // 調試 user_id
     }
 
     // 獲取 original_url 的標題

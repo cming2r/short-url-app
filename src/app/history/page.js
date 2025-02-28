@@ -39,12 +39,11 @@ export default function History() {
         }
         setCustomUrl(customData || null);
 
-        // 查詢普通縮網址歷史記錄（從 urls 表）
+        // 查詢普通縮網址歷史記錄（從 urls 表，移除 custom_code 條件）
         const { data: regularData, error: regularError } = await supabase
           .from('urls')
           .select('short_code, original_url, title, created_at, click_count')
           .eq('user_id', session.user.id)
-          .eq('custom_code', false) // 僅顯示普通縮網址
           .order('created_at', { ascending: false });
 
         if (regularError) throw regularError;

@@ -52,7 +52,7 @@ export async function POST(request) {
   console.log('POST /api/shorten called');
   console.log('BASE_URL:', process.env.NEXT_PUBLIC_BASE_URL);
 
-  const { url, customCode, userId } = await request.json();
+  const { url, customCode } = await request.json();
 
   if (!url) {
     return new Response(JSON.stringify({ error: 'Invalid URL, URL is required' }), {
@@ -86,13 +86,18 @@ export async function POST(request) {
   }
 
   try {
-    if (customCode) {
-      const {
-        data: { session },
-      } = await supabaseServer.auth.getSession();
-      const currentUserId = session?.user?.id;
+    let currentUserId = null;
 
-      console.log('Session for custom URL:', session); // 添加日誌調試
+    // 獲取當前用戶的 session
+    const {
+      data: { session },
+    } = await supabaseServer.auth.getSession();
+
+    console.log('Session:', session); // 添加日誌調試 session
+
+    if (customCode) {
+      // 自定義短網址要求已登入用戶
+      currentUserId = session?.user?.id || null;
 
       if (!currentUserId) {
         return new Response(JSON.stringify({ error: 'User not authenticated for custom URL' }), {
@@ -124,7 +129,7 @@ export async function POST(request) {
         .select('short_code')
         .eq('short_code', customCode)
         .single();
-      if (error && customError.code !== 'PGRST116') { // PGRST116 表示無記錄
+      if (error && error.code !== 'PGRST116') { // PGRST116 表示無記錄
         throw error;
       }
       if (data) {
@@ -133,14 +138,10 @@ export async function POST(request) {
           headers: { 'Content-Type': 'application/json' },
         });
       }
+    } else {
+      // 普通縮網址，無論是否登入都允許，但記錄 user_id
+      currentUserId = session?.user?.id || null; // 已登入用戶記錄 user_id，未登入為 null
     }
-
-    const {
-      data: { session },
-    } = await supabaseServer.auth.getSession();
-    const currentUserId = session?.user?.id; // 確保已登入用戶的 currentUserId 不為 null
-
-    console.log('Session for regular URL:', session); // 添加日誌調試
 
     // 獲取 original_url 的標題
     const title = await fetchTitle(formattedUrl);
@@ -163,7 +164,6 @@ export async function POST(request) {
         short_code: shortCode,
         original_url: formattedUrl,
         user_id: currentUserId, // 確保已登入用戶的 user_id 記錄
-        custom_code: false,
         title,
         created_at: new Date().toISOString(),
         click_count: 0,

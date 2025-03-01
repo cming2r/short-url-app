@@ -77,18 +77,18 @@ export default function History() {
           <h2 className="text-xl font-bold mb-2">自定義短網址</h2>
           {customUrl ? (
             <div className="overflow-hidden">
-              <table className="min-w-full border-collapse border border-gray-300 table-fixed">
+              <table className="w-full border-collapse border border-gray-300 table-fixed">
                 <thead>
                   <tr className="bg-gray-200">
-                    <th className="border border-gray-300 p-2 w-[35%]">短網址</th>
-                    <th className="border border-gray-300 p-2 w-[35%]">標題</th>
-                    <th className="border border-gray-300 p-2 w-[20%]">產生時間</th>
-                    <th className="border border-gray-300 p-2 w-[10%]">點擊次數</th>
+                    <th className="border border-gray-300 p-2 w-[300px] text-center">短網址</th>
+                    <th className="border border-gray-300 p-2 w-[300px] text-center">標題</th>
+                    <th className="border border-gray-300 p-2 w-[150px] text-center">產生時間</th>
+                    <th className="border border-gray-300 p-2 w-[100px] text-center">點擊次數</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="hover:bg-gray-100">
-                    <td className="border border-gray-300 p-2 truncate" title={`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`}>
+                    <td className="border border-gray-300 p-2 truncate text-center" title={`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`}>
                       <a
                         href={`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`}
                         target="_blank"
@@ -98,7 +98,7 @@ export default function History() {
                         {`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`}
                       </a>
                     </td>
-                    <td className="border border-gray-300 p-2 truncate" title={customUrl.title || '無標題'}>
+                    <td className="border border-gray-300 p-2 truncate text-center" title={customUrl.title || '無標題'}>
                       <a
                         href={customUrl.original_url}
                         target="_blank"
@@ -108,7 +108,7 @@ export default function History() {
                         {customUrl.title || '無標題'}
                       </a>
                     </td>
-                    <td className="border border-gray-300 p-2">
+                    <td className="border border-gray-300 p-2 text-center">
                       {new Date(customUrl.created_at).toLocaleString('zh-TW', {
                         year: 'numeric',
                         month: '2-digit',
@@ -117,7 +117,7 @@ export default function History() {
                         minute: '2-digit',
                       }).replace(/\//g, '/')}
                     </td>
-                    <td className="border border-gray-300 p-2">{customUrl.click_count || 0}</td>
+                    <td className="border border-gray-300 p-2 text-center">{customUrl.click_count || 0}</td>
                   </tr>
                 </tbody>
               </table>
@@ -134,19 +134,19 @@ export default function History() {
             <p className="text-center">尚無縮網址記錄</p>
           ) : (
             <div className="overflow-hidden">
-              <table className="min-w-full border-collapse border border-gray-300 table-fixed">
+              <table className="w-full border-collapse border border-gray-300 table-fixed">
                 <thead>
                   <tr className="bg-gray-200">
-                    <th className="border border-gray-300 p-2 w-[35%]">短網址</th>
-                    <th className="border border-gray-300 p-2 w-[35%]">標題</th>
-                    <th className="border border-gray-300 p-2 w-[20%]">產生時間</th>
-                    <th className="border border-gray-300 p-2 w-[10%]">點擊次數</th>
+                    <th className="border border-gray-300 p-2 w-[300px] text-center">短網址</th>
+                    <th className="border border-gray-300 p-2 w-[300px] text-center">標題</th>
+                    <th className="border border-gray-300 p-2 w-[150px] text-center">產生時間</th>
+                    <th className="border border-gray-300 p-2 w-[100px] text-center">點擊次數</th>
                   </tr>
                 </thead>
                 <tbody>
                   {urls.map((url) => (
                     <tr key={url.short_code} className="hover:bg-gray-100">
-                      <td className="border border-gray-300 p-2 truncate" title={`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}>
+                      <td className="border border-gray-300 p-2 truncate text-center" title={`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}>
                         <a
                           href={`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}
                           target="_blank"
@@ -156,7 +156,7 @@ export default function History() {
                           {`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}
                         </a>
                       </td>
-                      <td className="border border-gray-300 p-2 truncate" title={url.title || '無標題'}>
+                      <td className="border border-gray-300 p-2 truncate text-center" title={url.title || '無標題'}>
                         <a
                           href={url.original_url}
                           target="_blank"
@@ -166,7 +166,7 @@ export default function History() {
                           {url.title || '無標題'}
                         </a>
                       </td>
-                      <td className="border border-gray-300 p-2">
+                      <td className="border border-gray-300 p-2 text-center">
                         {new Date(url.created_at).toLocaleString('zh-TW', {
                           year: 'numeric',
                           month: '2-digit',
@@ -175,7 +175,7 @@ export default function History() {
                           minute: '2-digit',
                         }).replace(/\//g, '/')}
                       </td>
-                      <td className="border border-gray-300 p-2">{url.click_count || 0}</td>
+                      <td className="border border-gray-300 p-2 text-center">{url.click_count || 0}</td>
                     </tr>
                   ))}
                 </tbody>

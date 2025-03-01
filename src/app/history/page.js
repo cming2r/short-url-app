@@ -72,23 +72,23 @@ export default function History() {
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl">
         <h1 className="text-2xl font-bold text-center mb-4">歷史記錄</h1>
 
-        {/* 自定義短網址區塊（改為表格形式） */}
+        {/* 自定義短網址區塊 */}
         <div className="mb-6">
           <h2 className="text-xl font-bold mb-2">自定義短網址</h2>
           {customUrl ? (
             <div className="overflow-x-auto">
-              <table className="min-w-full border-collapse border border-gray-300">
+              <table className="min-w-full border-collapse border border-gray-300 table-fixed">
                 <thead>
                   <tr className="bg-gray-200">
-                    <th className="border border-gray-300 p-2">短網址</th>
-                    <th className="border border-gray-300 p-2">標題</th>
-                    <th className="border border-gray-300 p-2">產生時間</th>
-                    <th className="border border-gray-300 p-2">點擊次數</th>
+                    <th className="border border-gray-300 p-2 w-2/5">短網址</th>
+                    <th className="border border-gray-300 p-2 w-2/5">標題</th>
+                    <th className="border border-gray-300 p-2 w-auto">產生時間</th>
+                    <th className="border border-gray-300 p-2 w-auto">點擊次數</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="hover:bg-gray-100">
-                    <td className="border border-gray-300 p-2">
+                    <td className="border border-gray-300 p-2 truncate">
                       <a
                         href={`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`}
                         target="_blank"
@@ -98,7 +98,7 @@ export default function History() {
                         {`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`}
                       </a>
                     </td>
-                    <td className="border border-gray-300 p-2">
+                    <td className="border border-gray-300 p-2 truncate">
                       <a
                         href={customUrl.original_url}
                         target="_blank"
@@ -134,19 +134,19 @@ export default function History() {
             <p className="text-center">尚無縮網址記錄</p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full border-collapse border border-gray-300">
+              <table className="min-w-full border-collapse border border-gray-300 table-fixed">
                 <thead>
                   <tr className="bg-gray-200">
-                    <th className="border border-gray-300 p-2">短網址</th>
-                    <th className="border border-gray-300 p-2">標題</th>
-                    <th className="border border-gray-300 p-2">產生時間</th>
-                    <th className="border border-gray-300 p-2">點擊次數</th>
+                    <th className="border border-gray-300 p-2 w-2/5">短網址</th>
+                    <th className="border border-gray-300 p-2 w-2/5">標題</th>
+                    <th className="border border-gray-300 p-2 w-auto">產生時間</th>
+                    <th className="border border-gray-300 p-2 w-auto">點擊次數</th>
                   </tr>
                 </thead>
                 <tbody>
                   {urls.map((url) => (
                     <tr key={url.short_code} className="hover:bg-gray-100">
-                      <td className="border border-gray-300 p-2">
+                      <td className="border border-gray-300 p-2 truncate">
                         <a
                           href={`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}
                           target="_blank"
@@ -156,7 +156,7 @@ export default function History() {
                           {`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}
                         </a>
                       </td>
-                      <td className="border border-gray-300 p-2">
+                      <td className="border border-gray-300 p-2 truncate">
                         <a
                           href={url.original_url}
                           target="_blank"

@@ -5,10 +5,10 @@ import axios from 'axios';
 import { load } from 'cheerio';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // 改為 SUPABASE_SERVICE_ROLE_KEY
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseServiceKey) {
-  throw new Error('SUPABASE_SERVICE_ROLE_KEY is required in environment variables'); // 更新錯誤訊息
+  throw new Error('SUPABASE_SERVICE_ROLE_KEY is required in environment variables');
 }
 
 export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
@@ -30,20 +30,13 @@ async function fetchTitle(url) {
       return url; // 回傳原始 URL 作為預設標題
     }
 
-    // 特殊處理 Yahoo 網站，確保返回 "Yahoo奇摩"
-    if (url.includes('tw.yahoo.com')) {
-      title = title.replace(/ - Yahoo奇摩$/, '').trim() || 'Yahoo奇摩';
-      // 確保標題不包含多餘字符
-      title = title.replace(/^\s*|\s*$/g, '').replace(/\s+/g, ' ');
-      if (!title || title === '') title = 'Yahoo奇摩';
-    }
-    // 處理其他網站，移除多餘後綴並限制長度
-    title = title.replace(/ - .*$/, '').replace(/\|.*$/, '').trim() || url;
+    // 移除多餘的空白字符
+    title = title.replace(/^\s*|\s*$/g, '').replace(/\s+/g, ' ');
+
+    // 限制標題長度，避免過長
     return title.length > 50 ? title.substring(0, 50) + '...' : title;
   } catch (error) {
     console.error('Failed to fetch title:', error.message);
-    // 為特定網站提供預設簡潔標題
-    if (url.includes('tw.yahoo.com')) return 'Yahoo奇摩';
     return url; // 回傳原始 URL 作為預設標題
   }
 }

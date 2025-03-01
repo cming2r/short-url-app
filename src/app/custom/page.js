@@ -128,7 +128,7 @@ export default function CustomUrl() {
         }
       }
 
-      // 自定義 fetchTitle 函數
+      // 自定義 fetchTitle 函數，統一適用於所有網站
       async function fetchTitle(url) {
         try {
           const response = await fetch(url, { timeout: 5000, redirect: 'follow' });
@@ -137,17 +137,13 @@ export default function CustomUrl() {
           if (!titleMatch) return url;
 
           let title = titleMatch[1].trim();
-          if (url.includes('tw.yahoo.com')) {
-            title = title.replace(/ - Yahoo奇摩$/, '').trim() || 'Yahoo奇摩';
-            title = title.replace(/^\s*|\s*$/g, '').replace(/\s+/g, ' ');
-            if (!title || title === '') title = 'Yahoo奇摩';
-          }
-          title = title.replace(/ - .*$/, '').replace(/\|.*$/, '').trim() || url;
+          // 移除多餘的空白字符
+          title = title.replace(/^\s*|\s*$/g, '').replace(/\s+/g, ' ');
+          // 限制標題長度，避免過長
           return title.length > 50 ? title.substring(0, 50) + '...' : title;
         } catch (error) {
           console.error('Failed to fetch title:', error);
-          if (url.includes('tw.yahoo.com')) return 'Yahoo奇摩';
-          return url;
+          return url; // 回傳原始 URL 作為預設標題
         }
       }
 

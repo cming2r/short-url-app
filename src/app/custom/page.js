@@ -152,6 +152,7 @@ export default function CustomUrl() {
       }
 
       const title = await fetchTitle(longUrl);
+      console.log('Fetched title for editing:', title);
 
       // 更新現有自定義短網址記錄
       const { error } = await supabase
@@ -165,8 +166,12 @@ export default function CustomUrl() {
         .eq('user_id', session.user.id)
         .eq('short_code', customUrl.short_code);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating custom URL:', error);
+        throw error;
+      }
 
+      console.log('Custom URL updated successfully:', { shortCode: customCode, original_url: longUrl, title });
       setLongUrl('');
       setCustomCode('');
       await fetchCustomUrl();

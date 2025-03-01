@@ -5,10 +5,10 @@ import axios from 'axios';
 import { load } from 'cheerio';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // 改為 SUPABASE_SERVICE_ROLE_KEY
 
 if (!supabaseServiceKey) {
-  throw new Error('SUPABASE_SERVICE_KEY is required in environment variables');
+  throw new Error('SUPABASE_SERVICE_ROLE_KEY is required in environment variables'); // 更新錯誤訊息
 }
 
 export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
@@ -17,13 +17,19 @@ export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
 
 async function fetchTitle(url) {
   try {
-    // 使用 GET 方法獲取完整的 HTML
-    const response = await axios.get(url, { timeout: 5000, redirect: 'follow' });
-    const html = await response.text();
-    const titleMatch = html.match(/<title>(.*?)<\/title>/i);
-    if (!titleMatch) return url;
+    // 使用 axios 獲取完整的 HTML
+    const response = await axios.get(url, { timeout: 5000 }); // 設置超時，避免延遲過長
+    const html = response.data;
 
-    let title = titleMatch[1].trim();
+    // 使用 cheerio 解析 HTML
+    const $ = load(html);
+    let title = $('title').text().trim();
+
+    // 處理空標題或無效標題
+    if (!title || title === '') {
+      return url; // 回傳原始 URL 作為預設標題
+    }
+
     // 特殊處理 Yahoo 網站，確保返回 "Yahoo奇摩"
     if (url.includes('tw.yahoo.com')) {
       title = title.replace(/ - Yahoo奇摩$/, '').trim() || 'Yahoo奇摩';
@@ -35,10 +41,10 @@ async function fetchTitle(url) {
     title = title.replace(/ - .*$/, '').replace(/\|.*$/, '').trim() || url;
     return title.length > 50 ? title.substring(0, 50) + '...' : title;
   } catch (error) {
-    console.error('Failed to fetch title:', error);
+    console.error('Failed to fetch title:', error.message);
     // 為特定網站提供預設簡潔標題
     if (url.includes('tw.yahoo.com')) return 'Yahoo奇摩';
-    return url; // 回傳原始 URL 作為標題
+    return url; // 回傳原始 URL 作為預設標題
   }
 }
 

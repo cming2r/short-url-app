@@ -3,10 +3,10 @@ import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // 改為 SUPABASE_SERVICE_ROLE_KEY
 
 if (!supabaseServiceKey) {
-  throw new Error('SUPABASE_SERVICE_KEY is required in environment variables');
+  throw new Error('SUPABASE_SERVICE_ROLE_KEY is required in environment variables'); // 更新錯誤訊息
 }
 
 const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
@@ -15,15 +15,19 @@ const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
 
 export default async function ShortUrl({ params }) {
   console.log('ShortUrl route called with params:', params);
+  console.log('Environment variables:', {
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY, // 改為 SUPABASE_SERVICE_ROLE_KEY
+  });
 
   // 確保 params 為 Promise，等待解析
   const resolvedParams = await params;
   const shortCode = resolvedParams.shortCode;
   console.log('Processing shortCode:', shortCode);
 
-  // 如果 shortCode 是 'not-found'，直接導向內建 404 頁面，避免重定向循環
-  if (shortCode === 'not-found') {
-    console.log('Short code is "not-found", redirecting to /_not-found');
+  // 如果 shortCode 是 'not-found' 或 '_not-found'，直接導向內建 404 頁面，避免重定向循環
+  if (shortCode === 'not-found' || shortCode === '_not-found') {
+    console.log(`Short code is "${shortCode}", redirecting to /_not-found`);
     redirect('/_not-found');
   }
 
@@ -31,12 +35,16 @@ export default async function ShortUrl({ params }) {
     // 首先檢查 custom_urls 表（忽略大小寫比較）
     const { data: customData, error: customError } = await supabaseServer
       .from('custom_urls')
-      .select('original_url, click_count')
+      .select('original_url, click_count, short_code')
       .ilike('short_code', shortCode) // 使用 ilike 忽略大小寫
       .single();
 
-    if (customError && customError.code !== 'PGRST116') { // PGRST116 表示無記錄
-      console.error('Error querying custom_urls:', customError);
+    if (customError) {
+      if (customError.code === 'PGRST116') {
+        console.log('No matching record found in custom_urls for shortCode:', shortCode);
+      } else {
+        console.error('Error querying custom_urls:', customError);
+      }
     }
 
     if (customData) {
@@ -75,12 +83,16 @@ export default async function ShortUrl({ params }) {
     // 如果 custom_urls 表中找不到，檢查 urls 表（忽略大小寫比較）
     const { data: urlData, error: urlError } = await supabaseServer
       .from('urls')
-      .select('original_url, click_count')
+      .select('original_url, click_count, short_code')
       .ilike('short_code', shortCode) // 使用 ilike 忽略大小寫
       .single();
 
-    if (urlError && urlError.code !== 'PGRST116') { // PGRST116 表示無記錄
-      console.error('Error querying urls:', urlError);
+    if (urlError) {
+      if (urlError.code === 'PGRST116') {
+        console.log('No matching record found in urls for shortCode:', shortCode);
+      } else {
+        console.error('Error querying urls:', urlError);
+      }
     }
 
     if (urlData) {

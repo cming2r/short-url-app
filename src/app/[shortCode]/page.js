@@ -21,12 +21,18 @@ export default async function ShortUrl({ params }) {
   const shortCode = resolvedParams.shortCode;
   console.log('Processing shortCode:', shortCode);
 
+  // 如果 shortCode 是 'not-found'，直接導向內建 404 頁面，避免重定向循環
+  if (shortCode === 'not-found') {
+    console.log('Short code is "not-found", redirecting to /_not-found');
+    redirect('/_not-found');
+  }
+
   try {
-    // 首先檢查 custom_urls 表
+    // 首先檢查 custom_urls 表（忽略大小寫比較）
     const { data: customData, error: customError } = await supabaseServer
       .from('custom_urls')
       .select('original_url, click_count')
-      .eq('short_code', shortCode)
+      .ilike('short_code', shortCode) // 使用 ilike 忽略大小寫
       .single();
 
     if (customError && customError.code !== 'PGRST116') { // PGRST116 表示無記錄
@@ -40,7 +46,7 @@ export default async function ShortUrl({ params }) {
       const { error: updateError } = await supabaseServer
         .from('custom_urls')
         .update({ click_count: newClickCount })
-        .eq('short_code', shortCode);
+        .eq('short_code', customData.short_code); // 使用儲存的 short_code 值
 
       if (updateError) {
         console.error('Failed to update click_count in custom_urls:', updateError);
@@ -66,11 +72,11 @@ export default async function ShortUrl({ params }) {
       redirect(originalUrl);
     }
 
-    // 如果 custom_urls 表中找不到，檢查 urls 表
+    // 如果 custom_urls 表中找不到，檢查 urls 表（忽略大小寫比較）
     const { data: urlData, error: urlError } = await supabaseServer
       .from('urls')
       .select('original_url, click_count')
-      .eq('short_code', shortCode)
+      .ilike('short_code', shortCode) // 使用 ilike 忽略大小寫
       .single();
 
     if (urlError && urlError.code !== 'PGRST116') { // PGRST116 表示無記錄
@@ -84,7 +90,7 @@ export default async function ShortUrl({ params }) {
       const { error: updateError } = await supabaseServer
         .from('urls')
         .update({ click_count: newClickCount })
-        .eq('short_code', shortCode);
+        .eq('short_code', urlData.short_code); // 使用儲存的 short_code 值
 
       if (updateError) {
         console.error('Failed to update click_count in urls:', updateError);

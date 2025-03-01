@@ -2,10 +2,10 @@ import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // 改為 SUPABASE_SERVICE_ROLE_KEY
 
 if (!supabaseServiceKey) {
-  throw new Error('SUPABASE_SERVICE_KEY is required in environment variables');
+  throw new Error('SUPABASE_SERVICE_ROLE_KEY is required in environment variables'); // 更新錯誤訊息
 }
 
 export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {

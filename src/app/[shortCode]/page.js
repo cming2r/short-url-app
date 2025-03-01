@@ -62,6 +62,7 @@ export default async function ShortUrl({ params }) {
       }
 
       // 重定向到原始網址
+      console.log(`Redirecting to original URL: ${originalUrl}`);
       redirect(originalUrl);
     }
 
@@ -105,6 +106,7 @@ export default async function ShortUrl({ params }) {
       }
 
       // 重定向到原始網址
+      console.log(`Redirecting to original URL: ${originalUrl}`);
       redirect(originalUrl);
     }
 

@@ -29,6 +29,10 @@ export default async function ShortUrl({ params }) {
       .eq('short_code', shortCode)
       .single();
 
+    if (customError && customError.code !== 'PGRST116') { // PGRST116 表示無記錄
+      console.error('Error querying custom_urls:', customError);
+    }
+
     if (customData) {
       console.log(`Found in custom_urls:`, customData);
       // 更新 custom_urls 表的點擊次數
@@ -67,6 +71,10 @@ export default async function ShortUrl({ params }) {
       .select('original_url, click_count')
       .eq('short_code', shortCode)
       .single();
+
+    if (urlError && urlError.code !== 'PGRST116') { // PGRST116 表示無記錄
+      console.error('Error querying urls:', urlError);
+    }
 
     if (urlData) {
       console.log(`Found in urls:`, urlData);

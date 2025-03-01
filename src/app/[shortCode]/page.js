@@ -50,10 +50,7 @@ export default async function ShortUrl({ params }) {
         new URL(originalUrl); // 驗證 URL 格式
       } catch (urlError) {
         console.error('Invalid original URL in custom_urls:', originalUrl, urlError);
-        return new Response('原始網址格式無效', {
-          status: 400,
-          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-        });
+        redirect('/not-found'); // 導向自定義 404 頁面
       }
 
       // 重定向到原始網址
@@ -91,27 +88,18 @@ export default async function ShortUrl({ params }) {
         new URL(originalUrl); // 驗證 URL 格式
       } catch (urlError) {
         console.error('Invalid original URL in urls:', originalUrl, urlError);
-        return new Response('原始網址格式無效', {
-          status: 400,
-          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-        });
+        redirect('/not-found'); // 導向自定義 404 頁面
       }
 
       // 重定向到原始網址
       redirect(originalUrl);
     }
 
-    // 如果短網址無效，返回自定義錯誤
-    return new Response('縮網址不存在', {
-      status: 404,
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-    });
+    // 如果短網址無效，導向自定義 404 頁面
+    redirect('/not-found');
   } catch (err) {
     console.error('Short URL redirection error:', err);
-    return new Response('短網址處理失敗，請稍後再試', {
-      status: 500,
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-    });
+    redirect('/not-found'); // 導向自定義 404 頁面
   }
 }
 

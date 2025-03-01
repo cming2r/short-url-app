@@ -14,9 +14,12 @@ const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
 });
 
 export default async function ShortUrl({ params }) {
+  console.log('ShortUrl route called with params:', params);
+
   // 確保 params 為 Promise，等待解析
   const resolvedParams = await params;
   const shortCode = resolvedParams.shortCode;
+  console.log('Processing shortCode:', shortCode);
 
   try {
     // 首先檢查 custom_urls 表
@@ -27,6 +30,7 @@ export default async function ShortUrl({ params }) {
       .single();
 
     if (customData) {
+      console.log(`Found in custom_urls:`, customData);
       // 更新 custom_urls 表的點擊次數
       const newClickCount = (customData.click_count || 0) + 1;
       const { error: updateError } = await supabaseServer
@@ -65,6 +69,7 @@ export default async function ShortUrl({ params }) {
       .single();
 
     if (urlData) {
+      console.log(`Found in urls:`, urlData);
       // 更新 urls 表的點擊次數
       const newClickCount = (urlData.click_count || 0) + 1;
       const { error: updateError } = await supabaseServer
@@ -96,6 +101,7 @@ export default async function ShortUrl({ params }) {
     }
 
     // 如果短網址無效，導向自定義 404 頁面
+    console.log(`Short code ${shortCode} not found, redirecting to /not-found`);
     redirect('/not-found');
   } catch (err) {
     console.error('Short URL redirection error:', err);

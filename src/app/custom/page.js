@@ -111,6 +111,24 @@ export default function CustomUrl() {
     }
 
     try {
+      // 檢查新短碼是否已被使用（排除當前記錄的短碼）
+      if (customCode !== customUrl.short_code) {
+        const { data: existingCode, error: codeError } = await supabase
+          .from('custom_urls')
+          .select('short_code')
+          .eq('short_code', customCode)
+          .single();
+
+        if (codeError && codeError.code !== 'PGRST116') {
+          throw codeError;
+        }
+        if (existingCode) {
+          setError('自訂短碼已被使用');
+          return;
+        }
+      }
+
+      // 自定義 fetchTitle 函數
       async function fetchTitle(url) {
         try {
           const response = await fetch(url, { timeout: 5000, redirect: 'follow' });
@@ -119,14 +137,11 @@ export default function CustomUrl() {
           if (!titleMatch) return url;
 
           let title = titleMatch[1].trim();
-          // 特殊處理 Yahoo 網站，確保返回 "Yahoo奇摩"
           if (url.includes('tw.yahoo.com')) {
             title = title.replace(/ - Yahoo奇摩$/, '').trim() || 'Yahoo奇摩';
-            // 確保標題不包含多餘字符
             title = title.replace(/^\s*|\s*$/g, '').replace(/\s+/g, ' ');
             if (!title || title === '') title = 'Yahoo奇摩';
           }
-          // 處理其他網站，移除多餘後綴並限制長度
           title = title.replace(/ - .*$/, '').replace(/\|.*$/, '').trim() || url;
           return title.length > 50 ? title.substring(0, 50) + '...' : title;
         } catch (error) {
@@ -136,7 +151,6 @@ export default function CustomUrl() {
         }
       }
 
-      // 獲取標題
       const title = await fetchTitle(longUrl);
 
       // 更新現有自定義短網址記錄
@@ -146,16 +160,16 @@ export default function CustomUrl() {
           short_code: customCode,
           original_url: longUrl,
           title: title,
-          created_at: new Date().toISOString(), // 更新時間
+          created_at: new Date().toISOString(),
         })
         .eq('user_id', session.user.id)
         .eq('short_code', customUrl.short_code);
 
       if (error) throw error;
 
-      setLongUrl(''); // 清空輸入
-      setCustomCode(''); // 清空自訂短碼
-      await fetchCustomUrl(); // 刷新自定義短網址
+      setLongUrl('');
+      setCustomCode('');
+      await fetchCustomUrl();
     } catch (err) {
       console.error('Update error:', err);
       setError(`更新自訂短網址失敗：${err.message}`);

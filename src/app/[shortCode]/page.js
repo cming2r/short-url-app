@@ -29,10 +29,16 @@ export default async function ShortUrl({ params }) {
     if (customData) {
       // 更新 custom_urls 表的點擊次數
       const newClickCount = (customData.click_count || 0) + 1;
-      await supabaseServer
+      const { error: updateError } = await supabaseServer
         .from('custom_urls')
         .update({ click_count: newClickCount })
         .eq('short_code', shortCode);
+
+      if (updateError) {
+        console.error('Failed to update click_count in custom_urls:', updateError);
+      } else {
+        console.log(`Updated click_count in custom_urls for ${shortCode}: ${newClickCount}`);
+      }
 
       // 驗證並格式化 original_url
       let originalUrl = customData.original_url.trim();
@@ -46,7 +52,7 @@ export default async function ShortUrl({ params }) {
         console.error('Invalid original URL in custom_urls:', originalUrl, urlError);
         return new Response('原始網址格式無效', {
           status: 400,
-          headers: { 'Content-Type': 'text/plain' },
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
         });
       }
 
@@ -64,10 +70,16 @@ export default async function ShortUrl({ params }) {
     if (urlData) {
       // 更新 urls 表的點擊次數
       const newClickCount = (urlData.click_count || 0) + 1;
-      await supabaseServer
+      const { error: updateError } = await supabaseServer
         .from('urls')
         .update({ click_count: newClickCount })
         .eq('short_code', shortCode);
+
+      if (updateError) {
+        console.error('Failed to update click_count in urls:', updateError);
+      } else {
+        console.log(`Updated click_count in urls for ${shortCode}: ${newClickCount}`);
+      }
 
       // 驗證並格式化 original_url
       let originalUrl = urlData.original_url.trim();
@@ -81,7 +93,7 @@ export default async function ShortUrl({ params }) {
         console.error('Invalid original URL in urls:', originalUrl, urlError);
         return new Response('原始網址格式無效', {
           status: 400,
-          headers: { 'Content-Type': 'text/plain' },
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
         });
       }
 
@@ -90,15 +102,15 @@ export default async function ShortUrl({ params }) {
     }
 
     // 如果短網址無效，返回自定義錯誤
-    return new Response('短網址無效或處理中，請稍後再試', {
+    return new Response('縮網址不存在', {
       status: 404,
-      headers: { 'Content-Type': 'text/plain' },
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
     });
   } catch (err) {
     console.error('Short URL redirection error:', err);
     return new Response('短網址處理失敗，請稍後再試', {
       status: 500,
-      headers: { 'Content-Type': 'text/plain' },
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
     });
   }
 }

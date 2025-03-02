@@ -21,10 +21,10 @@ export async function GET(request, { params }) {
     hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
   });
 
-  // 如果 shortCode 是 'not-found' 或 '_not-found'，返回 404 錯誤
+  // 如果 shortCode 是 'not-found' 或 '_not-found'，直接重定向到 /not-found
   if (shortCode === 'not-found' || shortCode === '_not-found') {
-    console.log(`Short code is "${shortCode}", returning 404`);
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    console.log(`Short code is "${shortCode}", redirecting to /not-found`);
+    return NextResponse.redirect(new URL('/not-found', request.url));
   }
 
   // 首先檢查 custom_urls 表（忽略大小寫比較）
@@ -67,7 +67,7 @@ export async function GET(request, { params }) {
       new URL(originalUrl); // 驗證 URL 格式
     } catch (urlError) {
       console.error('Invalid original URL in custom_urls:', originalUrl, urlError);
-      return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
+      return NextResponse.redirect(new URL('/not-found', request.url));
     }
 
     // 重定向到原始網址
@@ -115,7 +115,7 @@ export async function GET(request, { params }) {
       new URL(originalUrl); // 驗證 URL 格式
     } catch (urlError) {
       console.error('Invalid original URL in urls:', originalUrl, urlError);
-      return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
+      return NextResponse.redirect(new URL('/not-found', request.url));
     }
 
     // 重定向到原始網址
@@ -123,7 +123,7 @@ export async function GET(request, { params }) {
     return NextResponse.redirect(originalUrl, 302);
   }
 
-  // 如果短網址無效，返回 404
-  console.log(`Short code ${shortCode} not found, returning 404`);
-  return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  // 如果短網址無效，重定向到 /not-found
+  console.log(`Short code ${shortCode} not found, redirecting to /not-found`);
+  return NextResponse.redirect(new URL('/not-found', request.url));
 }

@@ -2,6 +2,7 @@ import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { SupabaseProvider } from '@/components/SupabaseProvider';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata = {
   title: '網址縮短器',

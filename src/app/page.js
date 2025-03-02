@@ -1,47 +1,78 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export default function Home() {
   const [longUrl, setLongUrl] = useState('');
   const [shortUrl, setShortUrl] = useState('');
   const [error, setError] = useState('');
-  const [isGenerated, setIsGenerated] = useState(false); // 新增狀態追蹤是否生成
-  const router = useRouter();
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      console.log('Client session in page.js:', session);
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      console.log('Auth state changed in page.js:', { event, session });
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   const handleShorten = async () => {
     setError('');
+    setShortUrl('');
     if (!longUrl || !/^https?:\/\//.test(longUrl)) {
       setError('請輸入有效的 URL（需包含 http:// 或 https://）');
       return;
     }
 
     try {
+      const userId = session?.user?.id || null;
+      const accessToken = session?.access_token || null;
+      console.log('User ID sent from page.js:', userId);
+      console.log('Access token sent from page.js:', accessToken);
+
       const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: longUrl }),
+        body: JSON.stringify({ url: longUrl, userId, accessToken }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        setError(`縮短網址失敗：${errorData.error || '未知錯誤'}`);
-        return;
+        const text = await response.text();
+        console.error('API raw response:', text);
+        throw new Error(`API request failed with status ${response.status}: ${text}`);
       }
 
       const data = await response.json();
-      setShortUrl(data.shortUrl);
-      setIsGenerated(true); // 標記已生成
+      if (data.shortUrl) {
+        setShortUrl(data.shortUrl);
+        setLongUrl(''); // 清空輸入
+      } else {
+        setError('縮短網址失敗：未收到短網址');
+      }
     } catch (err) {
+      console.error('Fetch error:', err);
       setError(`縮短網址失敗：${err.message}`);
     }
   };
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(shortUrl);
+    alert('短網址已複製到剪貼簿！');
+  };
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
-        <h1 className="text-2xl font-bold text-center mb-4">縮短網址服務</h1>
+    <div className="flex items-center justify-center bg-gray-100 py-8">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+        <h1 className="text-2xl font-bold text-center mb-4">網址縮短器A</h1>
         <input
           type="text"
           value={longUrl}
@@ -51,45 +82,32 @@ export default function Home() {
         />
         <button
           onClick={handleShorten}
-          className={`w-full p-2 rounded text-white ${
-            isGenerated ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-800 hover:bg-gray-900'
-          }`}
+          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
         >
           縮短
         </button>
         {shortUrl && (
-          <div className="mt-4 text-center">
-            <p className="font-bold">縮短後的網址：</p>
-            <a href={shortUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
-              {shortUrl}
-            </a>
+          <div className="mt-4 flex items-center justify-center space-x-2">
+            <p className="text-center">
+              您的短網址:{' '}
+              <a
+                href={shortUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 underline"
+              >
+                {shortUrl}
+              </a>
+            </p>
             <button
-              onClick={() => {
-                navigator.clipboard.writeText(shortUrl);
-                alert('已複製到剪貼簿！');
-              }}
-              className="ml-2 text-sm text-gray-500 underline"
+              onClick={handleCopy}
+              className="bg-gray-200 text-black px-2 py-1 rounded hover:bg-gray-300"
             >
-              複製網址
+              複製
             </button>
           </div>
         )}
-        {error && <p className="mt-2 text-center text-red-500">{error}</p>}
-        <div className="mt-4 text-center">
-          <button
-            onClick={() => router.push('/history')}
-            className="text-blue-500 underline"
-          >
-            查看歷史記錄
-          </button>
-          <span className="mx-2">|</span>
-          <button
-            onClick={() => router.push('/custom')}
-            className="text-blue-500 underline"
-          >
-            自訂短網址服務
-          </button>
-        </div>
+        {error && <p className="mt-4 text-center text-red-500">{error}</p>}
       </div>
     </div>
   );

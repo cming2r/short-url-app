@@ -10,7 +10,8 @@ export default function CustomUrl() {
   const [customCode, setCustomCode] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [isEditing, setIsEditing] = useState(false); // 新增編輯模式狀態
+  const [isEditing, setIsEditing] = useState(false);
+  const [isGenerated, setIsGenerated] = useState(false); // 新增狀態追蹤是否生成
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -41,6 +42,7 @@ export default function CustomUrl() {
           throw error;
         }
         setCustomUrl(data || null);
+        setIsGenerated(!!data); // 如果有自定義短網址，表示已生成
       } catch (err) {
         console.error('Fetch custom URL error:', err);
         setError('載入自訂短網址失敗');
@@ -89,6 +91,7 @@ export default function CustomUrl() {
       if (data.shortUrl) {
         setLongUrl(''); // 清空輸入
         setCustomCode(''); // 清空自訂短碼
+        setIsGenerated(true); // 標記已生成
         await fetchCustomUrl(); // 刷新自定義短網址
       } else {
         setError('縮短網址失敗：未收到短網址');
@@ -172,6 +175,7 @@ export default function CustomUrl() {
       setLongUrl('');
       setCustomCode('');
       setIsEditing(false); // 提交後退出編輯模式
+      setIsGenerated(true); // 標記已生成
       await fetchCustomUrl();
     } catch (err) {
       console.error('Update error:', err);
@@ -250,7 +254,9 @@ export default function CustomUrl() {
             />
             <button
               onClick={customUrl ? handleEditCustom : handleShorten}
-              className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+              className={`w-full p-2 rounded text-white ${
+                isGenerated ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-800 hover:bg-gray-900'
+              }`}
             >
               {customUrl ? '提交編輯' : '定義自訂短網址'}
             </button>

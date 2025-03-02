@@ -10,6 +10,7 @@ export default function CustomUrl() {
   const [customCode, setCustomCode] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isEditing, setIsEditing] = useState(false); // 新增編輯模式狀態
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -170,6 +171,7 @@ export default function CustomUrl() {
       console.log('Custom URL updated successfully:', { shortCode: customCode, original_url: longUrl, title });
       setLongUrl('');
       setCustomCode('');
+      setIsEditing(false); // 提交後退出編輯模式
       await fetchCustomUrl();
     } catch (err) {
       console.error('Update error:', err);
@@ -185,7 +187,7 @@ export default function CustomUrl() {
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
         <h1 className="text-2xl font-bold text-center mb-4">自訂短網址</h1>
 
-        {customUrl ? (
+        {customUrl && !isEditing ? (
           <div className="flex justify-between items-center mb-4">
             <div>
               <p className="font-bold">自訂短網址：</p>
@@ -222,6 +224,7 @@ export default function CustomUrl() {
               onClick={() => {
                 setLongUrl(customUrl.original_url);
                 setCustomCode(customUrl.short_code);
+                setIsEditing(true); // 進入編輯模式
               }}
               className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
             >
@@ -246,11 +249,23 @@ export default function CustomUrl() {
               className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
-              onClick={handleShorten}
+              onClick={customUrl ? handleEditCustom : handleShorten}
               className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
             >
-              定義自訂短網址
+              {customUrl ? '提交編輯' : '定義自訂短網址'}
             </button>
+            {customUrl && (
+              <button
+                onClick={() => {
+                  setLongUrl('');
+                  setCustomCode('');
+                  setIsEditing(false); // 取消編輯
+                }}
+                className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mt-2"
+              >
+                取消
+              </button>
+            )}
           </>
         )}
         {error && <p className="mt-2 text-center text-red-500">{error}</p>}

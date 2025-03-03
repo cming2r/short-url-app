@@ -66,19 +66,52 @@ export default function Header() {
       } else {
         // 回退到直接使用 Supabase
         console.log('直接使用 Supabase 登出');
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-          console.error('登出錯誤:', error);
-          alert('登出失敗: ' + error.message);
-        } else {
-          console.log('成功登出');
-          // 強制刷新頁面以確保狀態更新
-          window.location.href = window.location.origin;
+        try {
+          const { error } = await supabase.auth.signOut();
+          if (error) {
+            console.error('Supabase 登出錯誤:', error);
+            // 如果是會話不存在的錯誤，使用替代方法
+            if (error.message.includes('session missing') || error.message.includes('missing')) {
+              console.log('嘗試 Header 中的替代登出方法...');
+              // 手動清除存儲
+              if (typeof window !== 'undefined') {
+                // 清除 localStorage 中所有的 Supabase 相關項目
+                for (let i = 0; i < localStorage.length; i++) {
+                  const key = localStorage.key(i);
+                  if (key && key.startsWith('supabase.auth')) {
+                    console.log('從 Header 清除存儲項:', key);
+                    localStorage.removeItem(key);
+                  }
+                }
+              }
+            }
+          }
+        } catch (innerError) {
+          console.error('Supabase API 調用出錯:', innerError);
         }
+        
+        // 無論登出是否成功，都強制重新載入
+        console.log('強制頁面重新載入');
+        // 將會話狀態設置為 null
+        setSession(null);
+        
+        // 延遲重載以確保狀態更新
+        setTimeout(() => {
+          if (typeof window !== 'undefined') {
+            // 使用完整 URL 重新載入，避免任何緩存問題
+            window.location.href = window.location.origin + '?t=' + new Date().getTime();
+          }
+        }, 100);
       }
     } catch (err) {
       console.error('登出過程中發生未預期的錯誤:', err);
-      alert('登出時發生錯誤: ' + err.message);
+      console.log('即使出錯也嘗試重新載入');
+      
+      // 強制重設頁面狀態
+      setSession(null);
+      if (typeof window !== 'undefined') {
+        window.location.href = window.location.origin;
+      }
     }
   };
 
@@ -108,6 +141,26 @@ export default function Header() {
                 <button 
                   onClick={handleSignOut} 
                   className="hover:underline"
+                  // 添加額外的直接登出方法作為後備
+                  onDoubleClick={() => {
+                    console.log('使用直接登出方法');
+                    // 直接清除所有相關存儲並重新載入
+                    if (typeof window !== 'undefined') {
+                      // 清除 localStorage
+                      try {
+                        for (let i = 0; i < localStorage.length; i++) {
+                          const key = localStorage.key(i);
+                          if (key && key.startsWith('supabase.auth')) {
+                            localStorage.removeItem(key);
+                          }
+                        }
+                      } catch (e) {
+                        console.error('清除 localStorage 出錯:', e);
+                      }
+                      // 強制重新載入
+                      window.location.href = window.location.origin;
+                    }
+                  }}
                 >
                   登出（{session.user?.email || '用戶'}）
                 </button>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, getCurrentSiteUrl } from '@/lib/supabase';
 import Link from 'next/link';
 
 export default function Header() {
@@ -22,13 +22,21 @@ export default function Header() {
   }, []);
 
   const handleSignIn = async () => {
-    const redirectTo = process.env.NEXT_PUBLIC_BASE_URL || 'https://short-url-app-olive.vercel.app/';
-    const { error } = await supabase.auth.signInWithOAuth({
+    // 獲取當前頁面的 URL 作為重定向目的地
+    const redirectUrl = getCurrentSiteUrl();
+    console.log('登入重定向URL:', redirectUrl);
+    
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo, // 使用動態設置的重定向 URL
-      },
+        redirectTo: redirectUrl,
+        queryParams: {
+          // 添加明確的重定向參數
+          redirect_to: redirectUrl
+        }
+      }
     });
+    
     if (error) console.error('Error signing in:', error);
   };
 

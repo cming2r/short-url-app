@@ -1,25 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { supabase } from '@/lib/supabase';
 
 export function SupabaseProvider({ children }) {
-  const [supabaseClient] = useState(() => supabase);
-
   useEffect(() => {
-    const { data: authListener } = supabaseClient.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event, session);
+    // 監聽認證狀態變化
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed in provider:', event);
+      
+      // 如果有錯誤的重定向 URL，可以在這裡檢測並處理
+      if (event === 'SIGNED_IN' && window.location.href.includes('short-url-app-olive.vercel.app')) {
+        console.log('檢測到生產環境 URL，將重定向到本地開發環境');
+        // 獲取當前的查詢參數並保留
+        const params = new URLSearchParams(window.location.search);
+        // 重定向到本地環境
+        window.location.href = `http://localhost:3000/?${params.toString()}`;
+      }
     });
 
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [supabaseClient]);
+  }, []);
 
   return children;
 }

@@ -10,31 +10,14 @@ export default function Header() {
   const supabaseContext = useContext(SupabaseContext);
   const [session, setSession] = useState(null);
   
-  // 從上下文中獲取會話，同時保持本地狀態作為備份
+  // 從上下文中獲取會話
   useEffect(() => {
-    // 如果上下文中有會話，則使用它
-    if (supabaseContext && supabaseContext.session) {
-      console.log('從上下文中獲取會話');
+    if (supabaseContext) {
       setSession(supabaseContext.session);
-    } else {
-      // 否則回退到直接從 Supabase 獲取
-      console.log('直接從 Supabase 獲取會話');
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        setSession(session);
-      });
-  
-      const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-        console.log('Header 中的認證狀態變更:', event);
-        setSession(session);
-      });
-  
-      return () => {
-        console.log('Header 清理會話監聽器');
-        authListener.subscription.unsubscribe();
-      };
     }
   }, [supabaseContext]);
 
+  // 處理登入
   const handleSignIn = async () => {
     // 檢測當前環境
     const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
@@ -53,111 +36,18 @@ export default function Header() {
       }
     });
     
-    if (error) console.error('Error signing in:', error);
+    if (error) console.error('登入錯誤:', error);
   };
 
+  // 處理登出 - 直接使用上下文提供的方法
   const handleSignOut = async () => {
-    console.log('Header 組件嘗試登出...');
-    
-    // 無論如何，清除會話數據
-    const forceSignOut = () => {
-      console.log('執行強制登出清理...');
-      
-      try {
-        // 1. 重設 React 狀態
-        setSession(null);
-        
-        // 2. 清除所有相關 localStorage 項目
-        if (typeof window !== 'undefined' && window.localStorage) {
-          const keysToRemove = [];
-          
-          // 先收集所有要刪除的鍵
-          for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && 
-               (key.startsWith('supabase.') || 
-                key.includes('auth') || 
-                key.includes('token') || 
-                key.includes('session'))) {
-              keysToRemove.push(key);
-            }
-          }
-          
-          // 然後再刪除，避免在迭代過程中修改集合
-          keysToRemove.forEach(key => {
-            console.log('清除 localStorage 項:', key);
-            try {
-              localStorage.removeItem(key);
-            } catch (e) {
-              console.warn('無法清除 localStorage 項:', key, e);
-            }
-          });
-        }
-        
-        // 3. 清除所有 cookies
-        if (typeof document !== 'undefined' && document.cookie) {
-          document.cookie.split(";").forEach(function(c) {
-            try {
-              const cookieName = c.trim().split("=")[0];
-              if (cookieName) {
-                document.cookie = cookieName + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
-              }
-            } catch (e) {
-              console.warn('無法清除 cookie:', c, e);
-            }
-          });
-        }
-      } catch (e) {
-        console.error('強制登出清理出錯:', e);
-      }
-      
-      // 最後，強制重新載入頁面
-      try {
-        // 延遲確保所有清理操作完成
-        setTimeout(() => {
-          if (typeof window !== 'undefined') {
-            const cacheBuster = new Date().getTime();
-            window.location.replace(`${window.location.origin}?forceRefresh=${cacheBuster}`);
-          }
-        }, 300);
-      } catch (e) {
-        console.error('頁面重定向失敗:', e);
-        // 備用重定向方法
-        if (typeof window !== 'undefined') {
-          window.location.href = window.location.origin;
-        }
-      }
-    };
-    
+    console.log('嘗試登出...');
     try {
-      // 嘗試使用 Context 提供的登出方法
       if (supabaseContext && typeof supabaseContext.signOut === 'function') {
-        console.log('使用 Context 提供的登出方法');
-        try {
-          await supabaseContext.signOut();
-          // 即使 Context 登出成功，也執行強制清理作為額外保障
-          forceSignOut();
-          return;
-        } catch (e) {
-          console.warn('Context 登出方法失敗，使用替代方法:', e);
-        }
+        await supabaseContext.signOut();
       }
-      
-      // 如果沒有 Context 或 Context 登出失敗，嘗試直接使用 Supabase
-      console.log('直接使用 Supabase 登出');
-      try {
-        await supabase.auth.signOut();
-      } catch (e) {
-        console.warn('直接 Supabase 登出失敗，繼續強制清理:', e);
-      }
-      
-      // 無論上面的方法是否成功，都執行徹底的強制清理
-      forceSignOut();
-      
-    } catch (err) {
-      console.error('登出過程中發生未預期的錯誤:', err);
-      // 即使出錯也執行強制清理
-      forceSignOut();
+    } catch (error) {
+      console.error('登出過程中發生錯誤:', error);
     }
   };
 

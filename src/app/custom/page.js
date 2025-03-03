@@ -183,7 +183,7 @@ export default function CustomUrl() {
   if (loading) return <p className="text-center">載入中...</p>;
 
   return (
-    <div className="flex items-center justify-center bg-gray-100 py-8">
+    <div className="flex items-center justify-center py-8">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
         <h1 className="text-2xl font-bold text-center mb-4">自訂短網址</h1>
 

@@ -22,18 +22,20 @@ export default function Header() {
   }, []);
 
   const handleSignIn = async () => {
-    // 獲取當前頁面的 URL 作為重定向目的地
-    const redirectUrl = getCurrentSiteUrl();
+    // 檢測當前環境
+    const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+    
+    // 根據環境選擇適當的重定向 URL
+    const redirectUrl = isLocalhost 
+      ? 'http://localhost:3000' 
+      : 'https://short-url-app-olive.vercel.app';
+    
     console.log('登入重定向URL:', redirectUrl);
     
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: redirectUrl,
-        queryParams: {
-          // 添加明確的重定向參數
-          redirect_to: redirectUrl
-        }
       }
     });
     

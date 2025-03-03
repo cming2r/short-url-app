@@ -57,61 +57,107 @@ export default function Header() {
   };
 
   const handleSignOut = async () => {
-    console.log('嘗試登出...');
-    try {
-      // 優先使用上下文中的登出方法
-      if (supabaseContext && supabaseContext.signOut) {
-        console.log('使用 SupabaseContext 的 signOut 方法');
-        await supabaseContext.signOut();
-      } else {
-        // 回退到直接使用 Supabase
-        console.log('直接使用 Supabase 登出');
-        try {
-          const { error } = await supabase.auth.signOut();
-          if (error) {
-            console.error('Supabase 登出錯誤:', error);
-            // 如果是會話不存在的錯誤，使用替代方法
-            if (error.message.includes('session missing') || error.message.includes('missing')) {
-              console.log('嘗試 Header 中的替代登出方法...');
-              // 手動清除存儲
-              if (typeof window !== 'undefined') {
-                // 清除 localStorage 中所有的 Supabase 相關項目
-                for (let i = 0; i < localStorage.length; i++) {
-                  const key = localStorage.key(i);
-                  if (key && key.startsWith('supabase.auth')) {
-                    console.log('從 Header 清除存儲項:', key);
-                    localStorage.removeItem(key);
-                  }
-                }
-              }
-            }
-          }
-        } catch (innerError) {
-          console.error('Supabase API 調用出錯:', innerError);
-        }
-        
-        // 無論登出是否成功，都強制重新載入
-        console.log('強制頁面重新載入');
-        // 將會話狀態設置為 null
+    console.log('Header 組件嘗試登出...');
+    
+    // 無論如何，清除會話數據
+    const forceSignOut = () => {
+      console.log('執行強制登出清理...');
+      
+      try {
+        // 1. 重設 React 狀態
         setSession(null);
         
-        // 延遲重載以確保狀態更新
+        // 2. 清除所有相關 localStorage 項目
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const keysToRemove = [];
+          
+          // 先收集所有要刪除的鍵
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && 
+               (key.startsWith('supabase.') || 
+                key.includes('auth') || 
+                key.includes('token') || 
+                key.includes('session'))) {
+              keysToRemove.push(key);
+            }
+          }
+          
+          // 然後再刪除，避免在迭代過程中修改集合
+          keysToRemove.forEach(key => {
+            console.log('清除 localStorage 項:', key);
+            try {
+              localStorage.removeItem(key);
+            } catch (e) {
+              console.warn('無法清除 localStorage 項:', key, e);
+            }
+          });
+        }
+        
+        // 3. 清除所有 cookies
+        if (typeof document !== 'undefined' && document.cookie) {
+          document.cookie.split(";").forEach(function(c) {
+            try {
+              const cookieName = c.trim().split("=")[0];
+              if (cookieName) {
+                document.cookie = cookieName + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+              }
+            } catch (e) {
+              console.warn('無法清除 cookie:', c, e);
+            }
+          });
+        }
+      } catch (e) {
+        console.error('強制登出清理出錯:', e);
+      }
+      
+      // 最後，強制重新載入頁面
+      try {
+        // 延遲確保所有清理操作完成
         setTimeout(() => {
           if (typeof window !== 'undefined') {
-            // 使用完整 URL 重新載入，避免任何緩存問題
-            window.location.href = window.location.origin + '?t=' + new Date().getTime();
+            const cacheBuster = new Date().getTime();
+            window.location.replace(`${window.location.origin}?forceRefresh=${cacheBuster}`);
           }
-        }, 100);
+        }, 300);
+      } catch (e) {
+        console.error('頁面重定向失敗:', e);
+        // 備用重定向方法
+        if (typeof window !== 'undefined') {
+          window.location.href = window.location.origin;
+        }
       }
+    };
+    
+    try {
+      // 嘗試使用 Context 提供的登出方法
+      if (supabaseContext && typeof supabaseContext.signOut === 'function') {
+        console.log('使用 Context 提供的登出方法');
+        try {
+          await supabaseContext.signOut();
+          // 即使 Context 登出成功，也執行強制清理作為額外保障
+          forceSignOut();
+          return;
+        } catch (e) {
+          console.warn('Context 登出方法失敗，使用替代方法:', e);
+        }
+      }
+      
+      // 如果沒有 Context 或 Context 登出失敗，嘗試直接使用 Supabase
+      console.log('直接使用 Supabase 登出');
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {
+        console.warn('直接 Supabase 登出失敗，繼續強制清理:', e);
+      }
+      
+      // 無論上面的方法是否成功，都執行徹底的強制清理
+      forceSignOut();
+      
     } catch (err) {
       console.error('登出過程中發生未預期的錯誤:', err);
-      console.log('即使出錯也嘗試重新載入');
-      
-      // 強制重設頁面狀態
-      setSession(null);
-      if (typeof window !== 'undefined') {
-        window.location.href = window.location.origin;
-      }
+      // 即使出錯也執行強制清理
+      forceSignOut();
     }
   };
 
@@ -141,26 +187,7 @@ export default function Header() {
                 <button 
                   onClick={handleSignOut} 
                   className="hover:underline"
-                  // 添加額外的直接登出方法作為後備
-                  onDoubleClick={() => {
-                    console.log('使用直接登出方法');
-                    // 直接清除所有相關存儲並重新載入
-                    if (typeof window !== 'undefined') {
-                      // 清除 localStorage
-                      try {
-                        for (let i = 0; i < localStorage.length; i++) {
-                          const key = localStorage.key(i);
-                          if (key && key.startsWith('supabase.auth')) {
-                            localStorage.removeItem(key);
-                          }
-                        }
-                      } catch (e) {
-                        console.error('清除 localStorage 出錯:', e);
-                      }
-                      // 強制重新載入
-                      window.location.href = window.location.origin;
-                    }
-                  }}
+                  title="點擊登出"
                 >
                   登出（{session.user?.email || '用戶'}）
                 </button>

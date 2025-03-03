@@ -4,5 +4,11 @@
       "source": "/:shortCode",
       "destination": "/api/:shortCode"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cleanup",
+      "schedule": "0 0 * * *"
+    }
   ]
 }

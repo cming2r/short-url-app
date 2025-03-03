@@ -150,6 +150,7 @@ export async function POST(request) {
         title,
         created_at: new Date().toISOString(),
         click_count: 0,
+        last_clicked_at: new Date().toISOString(), // 初始設置為創建時間
       });
 
       if (error) throw error;
@@ -162,6 +163,7 @@ export async function POST(request) {
         title,
         created_at: new Date().toISOString(),
         click_count: 0,
+        last_clicked_at: new Date().toISOString(), // 初始設置為創建時間
       });
 
       if (error) throw error;

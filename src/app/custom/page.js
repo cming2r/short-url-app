@@ -129,21 +129,33 @@ export default function CustomUrl() {
         }
       }
 
-      // 自定義 fetchTitle 函數，統一適用於所有網站
+      // 通過後端API獲取標題，避免瀏覽器同源策略限制
       async function fetchTitle(url) {
         try {
-          const response = await fetch(url, { timeout: 5000, redirect: 'follow' });
-          const html = await response.text();
-          const titleMatch = html.match(/<title>(.*?)<\/title>/i);
-          if (!titleMatch) return url;
-
-          let title = titleMatch[1].trim();
-          // 移除多餘的空白字符
-          title = title.replace(/^\s*|\s*$/g, '').replace(/\s+/g, ' ');
-          // 限制標題長度，避免過長
-          return title.length > 50 ? title.substring(0, 50) + '...' : title;
+          console.log('通過API獲取標題:', url);
+          
+          const response = await fetch('/api/fetch-title', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url }),
+          });
+          
+          if (!response.ok) {
+            throw new Error(`API返回狀態錯誤: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          
+          if (data.error) {
+            console.warn('獲取標題API返回錯誤:', data.error);
+          }
+          
+          // 即使API返回錯誤，也應該有fallback標題
+          return data.title || url;
         } catch (error) {
-          console.error('Failed to fetch title:', error);
+          console.error('獲取標題失敗:', error);
           return url; // 回傳原始 URL 作為預設標題
         }
       }

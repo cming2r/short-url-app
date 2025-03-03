@@ -46,9 +46,13 @@ export async function GET(request, { params }) {
     console.log(`Found in custom_urls:`, customData);
     // 更新 custom_urls 表的點擊次數
     const newClickCount = (customData.click_count || 0) + 1;
+    // 同時更新點擊次數和最後點擊時間
     const { error: updateError } = await supabaseServer
       .from('custom_urls')
-      .update({ click_count: newClickCount })
+      .update({ 
+        click_count: newClickCount,
+        last_clicked_at: new Date().toISOString() 
+      })
       .eq('short_code', customData.short_code); // 使用儲存的 short_code 值
 
     if (updateError) {
@@ -94,9 +98,13 @@ export async function GET(request, { params }) {
     console.log(`Found in urls:`, urlData);
     // 更新 urls 表的點擊次數
     const newClickCount = (urlData.click_count || 0) + 1;
+    // 同時更新點擊次數和最後點擊時間
     const { error: updateError } = await supabaseServer
       .from('urls')
-      .update({ click_count: newClickCount })
+      .update({ 
+        click_count: newClickCount,
+        last_clicked_at: new Date().toISOString() 
+      })
       .eq('short_code', urlData.short_code); // 使用儲存的 short_code 值
 
     if (updateError) {

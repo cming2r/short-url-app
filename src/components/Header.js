@@ -1,25 +1,39 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { supabase, getCurrentSiteUrl } from '@/lib/supabase';
 import Link from 'next/link';
+import { SupabaseContext } from './SupabaseProvider';
 
 export default function Header() {
+  // 使用來自 SupabaseProvider 的會話狀態
+  const supabaseContext = useContext(SupabaseContext);
   const [session, setSession] = useState(null);
-
+  
+  // 從上下文中獲取會話，同時保持本地狀態作為備份
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session);
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
+    // 如果上下文中有會話，則使用它
+    if (supabaseContext && supabaseContext.session) {
+      console.log('從上下文中獲取會話');
+      setSession(supabaseContext.session);
+    } else {
+      // 否則回退到直接從 Supabase 獲取
+      console.log('直接從 Supabase 獲取會話');
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session);
+      });
+  
+      const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+        console.log('Header 中的認證狀態變更:', event);
+        setSession(session);
+      });
+  
+      return () => {
+        console.log('Header 清理會話監聽器');
+        authListener.subscription.unsubscribe();
+      };
+    }
+  }, [supabaseContext]);
 
   const handleSignIn = async () => {
     // 檢測當前環境
@@ -43,8 +57,29 @@ export default function Header() {
   };
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) console.error('Error signing out:', error);
+    console.log('嘗試登出...');
+    try {
+      // 優先使用上下文中的登出方法
+      if (supabaseContext && supabaseContext.signOut) {
+        console.log('使用 SupabaseContext 的 signOut 方法');
+        await supabaseContext.signOut();
+      } else {
+        // 回退到直接使用 Supabase
+        console.log('直接使用 Supabase 登出');
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+          console.error('登出錯誤:', error);
+          alert('登出失敗: ' + error.message);
+        } else {
+          console.log('成功登出');
+          // 強制刷新頁面以確保狀態更新
+          window.location.href = window.location.origin;
+        }
+      }
+    } catch (err) {
+      console.error('登出過程中發生未預期的錯誤:', err);
+      alert('登出時發生錯誤: ' + err.message);
+    }
   };
 
   return (
@@ -70,11 +105,17 @@ export default function Header() {
             )}
             <li>
               {session ? (
-                <button onClick={handleSignOut} className="hover:underline">
+                <button 
+                  onClick={handleSignOut} 
+                  className="hover:underline"
+                >
                   登出（{session.user?.email || '用戶'}）
                 </button>
               ) : (
-                <button onClick={handleSignIn} className="hover:underline">
+                <button 
+                  onClick={handleSignIn} 
+                  className="hover:underline"
+                >
                   Google 登入
                 </button>
               )}

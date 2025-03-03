@@ -2,9 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@import './animations.css';
+
 :root {
   --background: #ffffff;
   --foreground: #000000; /* 改為純黑色，提高對比度 */
+  --primary: #3b82f6;
+  --primary-dark: #2563eb;
+  --secondary: #64748b;
+  --secondary-dark: #475569;
+  --success: #22c55e;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -12,5 +22,34 @@
     --background: #0a0a0a;
     --foreground: #ededed; /* 深色模式保持不變 */
   }
+}
+
+/* 平滑滾動 */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 頁面轉換效果 */
+body {
+  transition: background-color 0.3s ease;
+}
+
+/* 按鈕點擊效果 */
+button {
+  transition: transform 0.1s ease, background-color 0.2s ease;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* 連結懸停效果 */
+a {
+  transition: color 0.2s ease;
+}
+
+/* 輸入框焦點效果 */
+input:focus {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 

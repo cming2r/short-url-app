@@ -39,21 +39,9 @@ export default function Footer() {
   return (
     <footer className="bg-gray-800 text-white p-6">
       <div className="container mx-auto">
-        <div className="flex flex-col items-center mb-4">
-          <a 
-            href={`${process.env.NEXT_PUBLIC_BASE_URL || 'https://short-url.com'}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-white hover:text-blue-300 transition-colors"
-          >
-            {process.env.NEXT_PUBLIC_BASE_URL || 'https://short-url.com'}
-          </a>
-          <p className="text-sm text-gray-400 mt-1">&copy; {new Date().getFullYear()}</p>
-        </div>
-        
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0">
           {/* 語言切換 - 左側 */}
-          <div className="flex items-center order-2 md:order-1">
+          <div className="flex items-center">
             <span className="mr-2 text-sm text-gray-400">{t.common.language}:</span>
             <select
               value={currentLocale}
@@ -65,16 +53,21 @@ export default function Footer() {
             </select>
           </div>
           
+          {/* 版權信息 - 中間 */}
+          <div className="text-center order-first md:order-none mb-2 md:mb-0">
+            <p className="text-white font-medium">©2020 reurl.cc</p>
+          </div>
+          
           {/* 導航連結 - 右側 */}
-          <nav className="order-1 md:order-2">
-            <ul className="flex flex-wrap justify-center gap-4 md:gap-8">
+          <nav>
+            <ul className="flex flex-wrap justify-center gap-4">
               <li>
                 <Link href={`/${currentLocale}`} className="hover:text-blue-300 transition-colors">
                   {t.common.home}
                 </Link>
               </li>
               <li>
-                <Link href={`/${currentLocale}/privacy`} className="hover:text-blue-300 transition-colors">
+                <Link href={`/${currentLocale}/privacy-policy`} className="hover:text-blue-300 transition-colors">
                   {t.common.privacy}
                 </Link>
               </li>

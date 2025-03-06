@@ -19,6 +19,10 @@ export default {
     terms: 'Terms of Use',
     loginRequired: 'Please login to access this feature',
     backToHome: 'Back to Home',
+    language: 'Language',
+    page: 'Page',
+    previous: 'Previous',
+    next: 'Next',
   },
   home: {
     title: 'URL Shortener',

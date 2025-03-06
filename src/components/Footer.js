@@ -39,46 +39,52 @@ export default function Footer() {
   return (
     <footer className="bg-gray-800 text-white p-6">
       <div className="container mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-center">
-          <div className="mb-4 md:mb-0">
-            <h3 className="text-lg font-semibold">{t.common.appName}</h3>
-            <p className="text-sm text-gray-400">&copy; {new Date().getFullYear()} {t.common.appName}</p>
+        <div className="flex flex-col items-center mb-4">
+          <a 
+            href={`${process.env.NEXT_PUBLIC_BASE_URL || 'https://short-url.com'}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white hover:text-blue-300 transition-colors"
+          >
+            {process.env.NEXT_PUBLIC_BASE_URL || 'https://short-url.com'}
+          </a>
+          <p className="text-sm text-gray-400 mt-1">&copy; {new Date().getFullYear()}</p>
+        </div>
+        
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          {/* 語言切換 - 左側 */}
+          <div className="flex items-center order-2 md:order-1">
+            <span className="mr-2 text-sm text-gray-400">{t.common.language}:</span>
+            <select
+              value={currentLocale}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              className="bg-gray-700 text-white px-2 py-1 rounded border border-gray-600"
+            >
+              <option value="en">English</option>
+              <option value="tw">中文</option>
+            </select>
           </div>
           
-          <div className="flex flex-col items-center md:flex-row md:items-center gap-4">
-            <nav className="mb-3 md:mb-0 md:mr-6">
-              <ul className="flex flex-wrap justify-center gap-4 md:gap-8">
-                <li>
-                  <Link href={`/${currentLocale}`} className="hover:text-blue-300 transition-colors">
-                    {t.common.home}
-                  </Link>
-                </li>
-                <li>
-                  <Link href={`/${currentLocale}/privacy`} className="hover:text-blue-300 transition-colors">
-                    {t.common.privacy}
-                  </Link>
-                </li>
-                <li>
-                  <Link href={`/${currentLocale}/terms`} className="hover:text-blue-300 transition-colors">
-                    {t.common.terms}
-                  </Link>
-                </li>
-              </ul>
-            </nav>
-            
-            {/* 語言切換 */}
-            <div className="flex items-center">
-              <span className="mr-2 text-sm text-gray-400">{t.common.language || '語言'}:</span>
-              <select
-                value={currentLocale}
-                onChange={(e) => handleLanguageChange(e.target.value)}
-                className="bg-gray-700 text-white px-2 py-1 rounded border border-gray-600"
-              >
-                <option value="en">English</option>
-                <option value="tw">中文</option>
-              </select>
-            </div>
-          </div>
+          {/* 導航連結 - 右側 */}
+          <nav className="order-1 md:order-2">
+            <ul className="flex flex-wrap justify-center gap-4 md:gap-8">
+              <li>
+                <Link href={`/${currentLocale}`} className="hover:text-blue-300 transition-colors">
+                  {t.common.home}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${currentLocale}/privacy`} className="hover:text-blue-300 transition-colors">
+                  {t.common.privacy}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${currentLocale}/terms`} className="hover:text-blue-300 transition-colors">
+                  {t.common.terms}
+                </Link>
+              </li>
+            </ul>
+          </nav>
         </div>
       </div>
     </footer>

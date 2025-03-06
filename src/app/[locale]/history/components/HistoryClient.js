@@ -18,6 +18,10 @@ export default function HistoryPageClient({ locale }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  
+  // 分頁相關狀態
+  const [currentPage, setCurrentPage] = useState(1);
+  const urlsPerPage = 15; // 每頁顯示15條記錄
 
   // 設定語言
   useEffect(() => {
@@ -275,7 +279,10 @@ export default function HistoryPageClient({ locale }) {
                           </tr>
                         </thead>
                         <tbody>
-                          {urls.map((url, index) => (
+                          {/* 計算當前頁面應該顯示的項目 */}
+                          {urls
+                            .slice((currentPage - 1) * urlsPerPage, currentPage * urlsPerPage)
+                            .map((url, index) => (
                             <tr key={url.short_code} className="hover:bg-gray-100 slide-in" data-short-code={url.short_code} style={{animationDelay: `${index * 0.05}s`}}>
                               <td className="border border-gray-300 p-2 truncate text-center" title={`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}>
                                 <div className="flex items-center space-x-1 justify-center">
@@ -333,6 +340,33 @@ export default function HistoryPageClient({ locale }) {
                           ))}
                         </tbody>
                       </table>
+                    </div>
+                  )}
+                  
+                  {/* 分頁控制 */}
+                  {urls.length > urlsPerPage && (
+                    <div className="flex justify-center mt-4">
+                      <nav className="flex items-center">
+                        <button
+                          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                          disabled={currentPage === 1}
+                          className="px-3 py-1 bg-gray-200 rounded-l border border-gray-300 disabled:opacity-50"
+                        >
+                          &laquo; {t.common?.previous || '上一頁'}
+                        </button>
+                        
+                        <div className="px-4 py-1 border-t border-b border-gray-300 bg-white">
+                          {t.common?.page || '頁'} {currentPage} / {Math.ceil(urls.length / urlsPerPage)}
+                        </div>
+                        
+                        <button
+                          onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(urls.length / urlsPerPage)))}
+                          disabled={currentPage >= Math.ceil(urls.length / urlsPerPage)}
+                          className="px-3 py-1 bg-gray-200 rounded-r border border-gray-300 disabled:opacity-50"
+                        >
+                          {t.common?.next || '下一頁'} &raquo;
+                        </button>
+                      </nav>
                     </div>
                   )}
                 </div>

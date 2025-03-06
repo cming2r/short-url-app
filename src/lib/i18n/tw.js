@@ -19,6 +19,10 @@ export default {
     terms: '使用條款',
     loginRequired: '請先登入以使用此功能',
     backToHome: '返回首頁',
+    language: '語言',
+    page: '頁',
+    previous: '上一頁',
+    next: '下一頁',
   },
   home: {
     title: '網址縮短器',

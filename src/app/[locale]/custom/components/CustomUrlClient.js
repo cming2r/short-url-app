@@ -59,6 +59,34 @@ export default function CustomUrlPageClient({ locale }) {
       }
     }
   };
+  
+  // 刪除自定義短網址
+  const handleDeleteCustomUrl = async (shortCode) => {
+    try {
+      setLoading(true);
+      
+      const { error } = await supabase
+        .from('custom_urls')
+        .delete()
+        .eq('short_code', shortCode)
+        .eq('user_id', session.user.id);
+        
+      if (error) throw error;
+      
+      // 清除當前顯示的自定義短網址
+      setCustomUrl(null);
+      setError('');
+      
+      // 顯示成功消息
+      alert(t.history?.deleteSuccess || '短網址已成功刪除');
+      
+    } catch (err) {
+      console.error('刪除自定義短網址出錯:', err);
+      setError(t.history?.deleteError || '刪除短網址失敗:' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchCustomUrl();
@@ -248,16 +276,31 @@ export default function CustomUrlPageClient({ locale }) {
                         ，{t.custom?.clickCount || '點擊次數'}：{customUrl.click_count || 0}
                       </p>
                     </div>
-                    <button
-                      onClick={() => {
-                        setLongUrl(customUrl.original_url);
-                        setCustomCode(customUrl.short_code);
-                        setIsEditing(true); // 進入編輯模式
-                      }}
-                      className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
-                    >
-                      {t.custom?.edit || '編輯'}
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setLongUrl(customUrl.original_url);
+                          setCustomCode(customUrl.short_code);
+                          setIsEditing(true); // 進入編輯模式
+                        }}
+                        className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
+                      >
+                        {t.custom?.edit || '編輯'}
+                      </button>
+                      <button 
+                        onClick={() => {
+                          if (confirm(t.history?.deleteConfirm || '確定要刪除此短網址嗎？')) {
+                            handleDeleteCustomUrl(customUrl.short_code);
+                          }
+                        }}
+                        className="bg-red-500 text-white p-1 rounded hover:bg-red-600 flex items-center justify-center"
+                        title={t.history?.deleteTooltip || '刪除短網址'}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <>

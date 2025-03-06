@@ -182,15 +182,34 @@ export default function HomePage({ locale }) {
             {shortUrl && (
               <div className="bg-gray-100 p-4 rounded">
                 <h3 className="font-bold mb-2">{t.home?.shortUrlLabel || 'Your shortened URL:'}</h3>
-                <div className="mb-3">
+                <div className="mb-3 flex items-center">
                   <a 
                     href={shortUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 hover:underline text-lg break-all"
+                    className="text-blue-600 hover:text-blue-800 hover:underline text-lg break-all mr-2"
                   >
                     {shortUrl}
                   </a>
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigator.clipboard.writeText(shortUrl);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    }}
+                    className="ml-1 text-gray-500 hover:text-blue-500 p-1"
+                    title={t.history?.copyTooltip || '複製短網址'}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                  </button>
+                  {copied && (
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded ml-2 animate-pulse">
+                      {t.home?.copied || 'Copied!'}
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <input

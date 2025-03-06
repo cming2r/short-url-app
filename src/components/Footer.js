@@ -1,32 +1,50 @@
 'use client';
 
-import { useTranslation, LanguageSelector } from '@/lib/i18n';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation'; 
+import { useTranslation } from '@/lib/i18n';
 
 export default function Footer() {
   const { t } = useTranslation();
+  const pathname = usePathname();
+  
+  // 從路徑獲取當前語言
+  const getCurrentUrlLocale = () => {
+    // 獲取當前路徑的第一個部分作為語言前綴
+    const pathParts = pathname.split('/').filter(Boolean);
+    return pathParts[0] === 'en' ? 'en' : 'tw';
+  };
+  
+  const currentLocale = getCurrentUrlLocale();
   
   return (
-    <footer className="bg-gray-800 text-white py-6">
-      <div className="container mx-auto px-4">
+    <footer className="bg-gray-800 text-white p-6">
+      <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0">
-            <p>© {new Date().getFullYear()} {t.common.appName}. All rights reserved.</p>
+            <h3 className="text-lg font-semibold">{t.common.appName}</h3>
+            <p className="text-sm text-gray-400">&copy; {new Date().getFullYear()} {t.common.appName}</p>
           </div>
           
-          <div className="flex flex-col items-center md:items-end">
-            <div className="mb-2">
-              <LanguageSelector />
-            </div>
-            
-            <div className="text-sm text-gray-400">
-              <a href="#" className="hover:text-white transition-colors mr-4">
-                隱私政策
-              </a>
-              <a href="#" className="hover:text-white transition-colors">
-                使用條款
-              </a>
-            </div>
-          </div>
+          <nav>
+            <ul className="flex flex-wrap justify-center gap-4 md:gap-8">
+              <li>
+                <Link href={`/${currentLocale}`} className="hover:text-blue-300 transition-colors">
+                  {t.common.home}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${currentLocale}/privacy`} className="hover:text-blue-300 transition-colors">
+                  {t.common.privacy}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${currentLocale}/terms`} className="hover:text-blue-300 transition-colors">
+                  {t.common.terms}
+                </Link>
+              </li>
+            </ul>
+          </nav>
         </div>
       </div>
     </footer>

@@ -1,8 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { nanoid } from 'nanoid';
-import axios from 'axios';
-import { load } from 'cheerio';
+import { fetchTitle } from '@/lib/utils/fetchTitle';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -14,32 +13,6 @@ if (!supabaseServiceKey) {
 export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
   cookies,
 });
-
-async function fetchTitle(url) {
-  try {
-    // 使用 axios 獲取完整的 HTML
-    const response = await axios.get(url, { timeout: 5000 }); // 設置超時，避免延遲過長
-    const html = response.data;
-
-    // 使用 cheerio 解析 HTML
-    const $ = load(html);
-    let title = $('title').text().trim();
-
-    // 處理空標題或無效標題
-    if (!title || title === '') {
-      return url; // 回傳原始 URL 作為預設標題
-    }
-
-    // 移除多餘的空白字符
-    title = title.replace(/^\s*|\s*$/g, '').replace(/\s+/g, ' ');
-
-    // 限制標題長度，避免過長
-    return title.length > 50 ? title.substring(0, 50) + '...' : title;
-  } catch (error) {
-    console.error('Failed to fetch title:', error.message);
-    return url; // 回傳原始 URL 作為預設標題
-  }
-}
 
 export async function POST(request) {
   console.log('POST /api/shorten called');

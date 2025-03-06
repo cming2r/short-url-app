@@ -3,16 +3,34 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+// 檢查是否在瀏覽器環境中
+const isBrowser = typeof window !== 'undefined';
+
+// 在瀏覽器環境中安全檢查 URL 參數
+const hasCodeParam = isBrowser ? 
+  (() => {
+    try {
+      return new URL(window.location.href).searchParams.has('code');
+    } catch (e) {
+      console.error('解析 URL 時出錯:', e);
+      return false;
+    }
+  })() 
+  : false;
+
 // 使用基本配置創建 Supabase 客戶端
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true,
+    detectSessionInUrl: true, // 確保這個設為 true 以自動檢測 URL 中的會話
     flowType: 'pkce', // 使用 PKCE 流程
+    debug: isBrowser && (hasCodeParam || localStorage.getItem('authInProgress') === 'true'), // 在 OAuth 回調時啟用調試
   },
-  headers: {
-    'Accept': 'application/json',
+  global: {
+    headers: {
+      'Accept': 'application/json',
+    },
   },
 });
 

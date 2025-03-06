@@ -14,8 +14,23 @@ const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
 });
 
 export async function GET(request, { params }) {
-  const shortCode = params.shortCode;
-  console.log('GET /api/[shortCode] called with shortCode:', shortCode);
+  // 從路由參數或查詢字符串中獲取短代碼
+  let shortCode;
+  
+  // 檢查查詢參數中是否有短碼
+  const { searchParams } = new URL(request.url);
+  const codeParam = searchParams.get('code');
+  
+  if (codeParam) {
+    // 如果查詢參數中有短碼，使用它
+    shortCode = codeParam;
+    console.log('GET /api/redirect called with code from query param:', shortCode);
+  } else {
+    // 否則使用路由參數中的短碼
+    shortCode = params.shortCode;
+    console.log('GET /api/[shortCode] called with shortCode from path:', shortCode);
+  }
+  
   console.log('Environment variables:', {
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
     hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,

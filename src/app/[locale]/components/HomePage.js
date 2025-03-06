@@ -182,6 +182,16 @@ export default function HomePage({ locale }) {
             {shortUrl && (
               <div className="bg-gray-100 p-4 rounded">
                 <h3 className="font-bold mb-2">{t.home?.shortUrlLabel || 'Your shortened URL:'}</h3>
+                <div className="mb-3">
+                  <a 
+                    href={shortUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 hover:underline text-lg break-all"
+                  >
+                    {shortUrl}
+                  </a>
+                </div>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"

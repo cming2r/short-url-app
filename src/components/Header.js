@@ -163,17 +163,7 @@ export default function Header() {
                 </button>
               )}
             </li>
-            {/* 語言切換 */}
-            <li className="relative group">
-              <select
-                value={currentLocale}
-                onChange={(e) => handleLanguageChange(e.target.value)}
-                className="bg-gray-700 text-white px-2 py-1 rounded"
-              >
-                <option value="en">English</option>
-                <option value="tw">中文</option>
-              </select>
-            </li>
+            {/* 語言切換已移至 Footer */}
           </ul>
         </nav>
       </div>

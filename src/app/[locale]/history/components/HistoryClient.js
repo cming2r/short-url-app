@@ -168,9 +168,9 @@ export default function HistoryPageClient({ locale }) {
   return (
     <>
       <Header />
-      <main className="flex-grow container mx-auto px-4">
-        <div className="flex items-center justify-center bg-gray-100 py-8">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl">
+      <main className="flex-grow container mx-auto px-4 py-8">
+        <div className="w-full max-w-4xl mx-auto">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full">
             <h1 className="text-2xl font-bold text-center mb-4">{t.history?.title || '歷史記錄'}</h1>
 
             {!session ? (

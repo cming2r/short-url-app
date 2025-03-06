@@ -53,23 +53,27 @@ export async function POST(request) {
 
   try {
     let currentUserId = userId || null;
-
-    if (customCode) {
-      // 自定義短網址要求已登入用戶，驗證 access_token
-      if (!userId || !accessToken) {
-        return new Response(JSON.stringify({ error: 'User not authenticated for custom URL' }), {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }
-
+    
+    // 如果提供了 userId 和 accessToken，驗證用戶身份
+    if (userId && accessToken) {
       // 使用 access_token 驗證會話
       const { data: { user }, error: tokenError } = await supabaseServer.auth.getUser(accessToken);
-
+      
       console.log('User verification result:', { user, tokenError });
-
+      
       if (tokenError || !user || user.id !== userId) {
-        return new Response(JSON.stringify({ error: 'Invalid access token for custom URL' }), {
+        console.warn('User verification failed but continuing without user ID');
+        currentUserId = null; // 重置用戶ID為 null
+      } else {
+        console.log('User verified successfully:', user.id);
+        currentUserId = user.id; // 使用驗證後的用戶 ID
+      }
+    }
+
+    if (customCode) {
+      // 自定義短網址要求已登入用戶
+      if (!currentUserId) {
+        return new Response(JSON.stringify({ error: 'User not authenticated for custom URL' }), {
           status: 401,
           headers: { 'Content-Type': 'application/json' },
         });

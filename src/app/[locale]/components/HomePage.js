@@ -105,10 +105,23 @@ export default function HomePage({ locale }) {
     setLoading(true);
     
     try {
+      // 如果有登入，加入用戶 ID 和 token
+      const userId = session?.user?.id || null;
+      const accessToken = session?.access_token || null;
+      
+      console.log('Shortening URL with user info:', { 
+        isLoggedIn: !!session, 
+        hasUserId: !!userId 
+      });
+      
       const response = await fetch('/api/shorten', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ 
+          url,
+          userId,  // 添加用戶 ID
+          accessToken  // 添加訪問 token
+        }),
       });
       
       if (!response.ok) {

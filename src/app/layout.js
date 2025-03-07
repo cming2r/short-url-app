@@ -38,6 +38,57 @@ export default function RootLayout({ children }) {
             })
           }}
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "Is this service free?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, our URL shortening service is completely free to use with no hidden fees."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How long do short URLs last?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Short URLs do not have a fixed expiration date. They remain active as long as they are regularly visited."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Can I create custom short codes?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, logged-in users can create custom short codes that follow our rule of 4-5 characters with at least one letter and one number."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Can I track how many times my short URL has been clicked?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, logged-in users can view the click count and last clicked time for each short URL in their history."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How do I delete short URLs I've created?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "After logging in, you can find and delete your short URLs from the history page."
+                  }
+                }
+              ]
+            })
+          }}
+        />
       </head>
       <body className="flex flex-col min-h-screen bg-white" suppressHydrationWarning={true}>
         <SupabaseProvider>

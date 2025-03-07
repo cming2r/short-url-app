@@ -270,19 +270,32 @@ export default function HomePage({ locale }) {
             <div className="mt-10 w-full max-w-5xl mx-auto">
               {/* 特色功能區 */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                  <div className="text-blue-500 text-4xl mb-3">⚡</div>
-                  <h3 className="text-xl font-bold mb-2">{t.home?.features?.fast?.title || '快速縮短'}</h3>
+                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                  <div className="text-blue-500 mb-4 flex justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12">
+                      <path d="M3.478 2.404a.75.75 0 00-.926.941l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.404z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 text-center">{t.home?.features?.fast?.title || '快速縮短'}</h3>
                   <p className="text-gray-600">{t.home?.features?.fast?.description || '即時生成短網址，無需等待。使用優化算法生成簡短的URL。'}</p>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                  <div className="text-green-500 text-4xl mb-3">🔒</div>
-                  <h3 className="text-xl font-bold mb-2">{t.home?.features?.secure?.title || '安全可靠'}</h3>
+                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                  <div className="text-green-500 mb-4 flex justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12">
+                      <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 text-center">{t.home?.features?.secure?.title || '安全可靠'}</h3>
                   <p className="text-gray-600">{t.home?.features?.secure?.description || '所有鏈接都經過驗證，確保安全。網址永不過期，除非閒置太久。'}</p>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                  <div className="text-purple-500 text-4xl mb-3">✏️</div>
-                  <h3 className="text-xl font-bold mb-2">{t.home?.features?.custom?.title || '自定義短網址'}</h3>
+                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                  <div className="text-purple-500 mb-4 flex justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12">
+                      <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32l8.4-8.4z" />
+                      <path d="M5.25 5.25a3 3 0 00-3 3v10.5a3 3 0 003 3h10.5a3 3 0 003-3V13.5a.75.75 0 00-1.5 0v5.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5V8.25a1.5 1.5 0 011.5-1.5h5.25a.75.75 0 000-1.5H5.25z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 text-center">{t.home?.features?.custom?.title || '自定義短網址'}</h3>
                   <p className="text-gray-600">{t.home?.features?.custom?.description || '登入後享有更多功能，包括自定義短網址、使用統計及歷史記錄。'}</p>
                 </div>
               </div>

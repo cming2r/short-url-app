@@ -20,17 +20,19 @@ export default function Header() {
     // 獲取當前路徑的第一個部分作為語言前綴
     const pathParts = pathname.split('/').filter(Boolean);
     
-    // 添加調試訊息
+    // 添加詳細調試訊息
+    console.log('Current pathname:', pathname);
     console.log('Current path parts:', pathParts);
     
-    // 如果路徑為空或不是 /tw 開頭，則為英文
-    if (pathParts.length === 0 || pathParts[0] !== 'tw') {
-      console.log('Detected locale: en');
-      return 'en';
+    // 如果路徑以 /tw 開頭，則為中文
+    if (pathParts.length > 0 && pathParts[0] === 'tw') {
+      console.log('Path starts with /tw, using Chinese');
+      return 'tw';
     }
     
-    console.log('Detected locale: tw');
-    return 'tw';
+    // 所有其他情況，包括 /custom, /history 等，都視為英文
+    console.log('Using English locale for path:', pathname);
+    return 'en';
   };
   
   const currentLocale = getCurrentUrlLocale();
@@ -93,19 +95,27 @@ export default function Header() {
     // 移除開頭的 /
     const cleanPath = path.startsWith('/') ? path.substring(1) : path;
     
+    // 添加調試信息
+    console.log('Building URL for path:', path);
+    console.log('Current locale:', currentLocale);
+    
     // 英文版使用根路徑，無需前綴
     if (currentLocale === 'en') {
       if (cleanPath === '') {
+        console.log('Returning English homepage: /');
         return '/';
       }
+      console.log(`Returning English path: /${cleanPath}`);
       return `/${cleanPath}`;
     } 
     
     // 中文版需要 /tw 前綴
     if (cleanPath === '') {
+      console.log('Returning Chinese homepage: /tw');
       return `/tw`;
     }
     
+    console.log(`Returning Chinese path: /tw/${cleanPath}`);
     return `/tw/${cleanPath}`;
   }
 

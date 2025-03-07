@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { DEFAULT_LOCALE } from '@/lib/i18n/constants';
 
+// 使用普通組件，不需要客戶端的 useTranslation
 const TermsContent = ({ locale }) => {
   // 中文內容
   const zhContent = (

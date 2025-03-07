@@ -53,11 +53,19 @@ export async function POST(request) {
   }
 
   let shortCode = customCode || nanoid(6);
-  if (customCode && (customCode.length !== 6 || !/^[a-zA-Z0-9]+$/.test(customCode))) {
-    return new Response(JSON.stringify({ error: '自訂短碼必須為6位元字母或數字' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+  if (customCode) {
+    // 更新為與前端一致的驗證規則：4-5個字符，至少一個字母和一個數字
+    const isValidLength = customCode.length >= 4 && customCode.length <= 5;
+    const hasLetter = /[a-zA-Z]/.test(customCode);
+    const hasNumber = /[0-9]/.test(customCode);
+    const isValidChars = /^[a-zA-Z0-9]+$/.test(customCode);
+    
+    if (!isValidLength || !hasLetter || !hasNumber || !isValidChars) {
+      return new Response(JSON.stringify({ error: '自訂短碼必須為4-5位元，且至少包含一個字母及一個數字' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
   }
 
   try {

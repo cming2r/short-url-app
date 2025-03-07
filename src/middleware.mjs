@@ -117,6 +117,7 @@ export function middleware(request) {
         return NextResponse.rewrite(new URL(shortcodeUrl, request.url));
       } catch (error) {
         console.error(`Error processing shortcode: ${shortCode}`, error);
+        // 直接讓 Next.js 處理，將顯示 404 頁面
         return NextResponse.next();
       }
     }

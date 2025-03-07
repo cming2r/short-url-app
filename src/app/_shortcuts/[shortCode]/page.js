@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation';
+import { redirect, notFound } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
 // 檢查這是否是語言代碼 (en/tw)
@@ -17,6 +17,12 @@ export default async function ShortCodeHandler({ params }) {
   if (isLocaleCode(shortCode)) {
     console.log(`[Server] ${shortCode} is a locale code, redirecting`);
     redirect(`/${shortCode}`);
+  }
+  
+  // 特殊處理 not-found 路徑，避免循環重定向
+  if (shortCode === 'not-found') {
+    console.log(`[Server] Handling /not-found path, showing 404 page`);
+    notFound();
   }
   
   // 查詢數據庫獲取原始 URL
@@ -40,8 +46,8 @@ export default async function ShortCodeHandler({ params }) {
       
       if (customError || !customData) {
         console.error('[Server] Short code not found in any table:', shortCode);
-        // 重定向到英文首頁
-        redirect('/en');
+        // 顯示404頁面，不做重定向
+        notFound();
       }
       
       // 更新自定義短網址的點擊計數器
@@ -89,7 +95,7 @@ export default async function ShortCodeHandler({ params }) {
     
   } catch (error) {
     console.error('[Server] Error processing redirect:', error);
-    // 重定向到英文首頁
-    redirect('/en');
+    // 顯示404頁面，不做重定向
+    notFound();
   }
 }

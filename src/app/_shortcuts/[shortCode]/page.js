@@ -1,7 +1,7 @@
 import { redirect, notFound } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
-// 檢查這是否是語言代碼或保留路徑 (en/tw)
+// 檢查這是否是保留路徑或語言代碼
 const RESERVED_PATHS = ['en', 'tw', 'privacy-policy', 'terms', 'custom', 'history', 'not-found'];
 function isReservedPath(code) {
   return RESERVED_PATHS.includes(code);
@@ -13,7 +13,7 @@ export default async function ShortCodeHandler({ params }) {
   const shortCode = resolvedParams?.shortCode || '';
   console.log('[Server] Processing shortCode:', shortCode);
   
-  // For reserved paths, including language routes, redirect appropriately
+  // For reserved paths, redirect appropriately
   if (isReservedPath(shortCode)) {
     console.log(`[Server] ${shortCode} is a reserved path, redirecting`);
     
@@ -53,6 +53,7 @@ export default async function ShortCodeHandler({ params }) {
       
       if (customError || !customData) {
         console.error('[Server] Short code not found in any table:', shortCode);
+        // 使用 notFound() 而不是重定向，這會觸發 Next.js 的 404 頁面
         notFound();
       }
       
@@ -101,6 +102,7 @@ export default async function ShortCodeHandler({ params }) {
     
   } catch (error) {
     console.error('[Server] Error processing redirect:', error);
+    // 使用 notFound() 而不是重定向，這會觸發 Next.js 的 404 頁面
     notFound();
   }
 }

@@ -19,7 +19,13 @@ export default function Header() {
   const getCurrentUrlLocale = () => {
     // 獲取當前路徑的第一個部分作為語言前綴
     const pathParts = pathname.split('/').filter(Boolean);
-    return pathParts[0] === 'en' ? 'en' : 'tw';
+    
+    // 如果路徑為空或不是 /tw 開頭，則為英文
+    if (pathParts.length === 0 || pathParts[0] !== 'tw') {
+      return 'en';
+    }
+    
+    return 'tw';
   };
   
   const currentLocale = getCurrentUrlLocale();
@@ -77,16 +83,25 @@ export default function Header() {
     }
   };
   
-  // 構建頁面 URL 函數
+  // 構建頁面 URL 函數，適用於新的 URL 結構（根路徑為英文）
   function getLocalizedHref(path) {
     // 移除開頭的 /
     const cleanPath = path.startsWith('/') ? path.substring(1) : path;
     
+    // 英文版使用根路徑，無需前綴
+    if (currentLocale === 'en') {
+      if (cleanPath === '') {
+        return '/';
+      }
+      return `/${cleanPath}`;
+    } 
+    
+    // 中文版需要 /tw 前綴
     if (cleanPath === '') {
-      return `/${currentLocale}`;
+      return `/tw`;
     }
     
-    return `/${currentLocale}/${cleanPath}`;
+    return `/tw/${cleanPath}`;
   }
 
   // 處理語言切換

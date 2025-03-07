@@ -12,28 +12,48 @@ export default function Footer() {
   const getCurrentUrlLocale = () => {
     // 獲取當前路徑的第一個部分作為語言前綴
     const pathParts = pathname.split('/').filter(Boolean);
-    return pathParts[0] === 'en' ? 'en' : 'tw';
+    
+    // 如果路徑為空或不是 /tw 開頭，則為英文
+    if (pathParts.length === 0 || pathParts[0] !== 'tw') {
+      return 'en';
+    }
+    
+    return 'tw';
   };
   
   const currentLocale = getCurrentUrlLocale();
   
-  // 處理語言切換
+  // 處理語言切換 - 針對新的 URL 結構 (根路徑為英文)
   const handleLanguageChange = (newLocale) => {
     if (newLocale === currentLocale) return;
     
-    // 先獲取當前路徑，然後替換語言部分
+    // 獲取當前路徑，不含語言前綴部分
     const urlParts = pathname.split('/').filter(Boolean);
+    let pathWithoutLocale = '';
+    
+    // 如果路徑有內容且第一個部分是語言代碼，則去除第一個部分
     if (urlParts.length > 0 && (urlParts[0] === 'en' || urlParts[0] === 'tw')) {
-      urlParts[0] = newLocale;
+      pathWithoutLocale = urlParts.slice(1).join('/');
     } else {
-      urlParts.unshift(newLocale);
+      // 如果沒有語言代碼，直接使用完整路徑
+      pathWithoutLocale = urlParts.join('/');
+    }
+    
+    // 生成新路徑
+    let newPath;
+    if (newLocale === 'en') {
+      // 英文應該是根路徑，後面跟著其他部分
+      newPath = pathWithoutLocale ? `/${pathWithoutLocale}` : '/';
+    } else {
+      // 中文需要添加 /tw 前綴
+      newPath = pathWithoutLocale ? `/tw/${pathWithoutLocale}` : '/tw';
     }
     
     // 更新語言狀態
     changeLanguage(newLocale);
     
     // 重定向到新的本地化路徑
-    window.location.href = `/${urlParts.join('/')}`;
+    window.location.href = newPath;
   };
   
   return (
@@ -62,17 +82,26 @@ export default function Footer() {
           <nav>
             <ul className="flex flex-wrap justify-center gap-4">
               <li>
-                <Link href={`/${currentLocale}`} className="hover:text-blue-300 transition-colors">
+                <Link 
+                  href={currentLocale === 'en' ? '/' : '/tw'} 
+                  className="hover:text-blue-300 transition-colors"
+                >
                   {t.common.home}
                 </Link>
               </li>
               <li>
-                <Link href={`/${currentLocale}/privacy-policy`} className="hover:text-blue-300 transition-colors">
+                <Link 
+                  href={currentLocale === 'en' ? '/privacy-policy' : '/tw/privacy-policy'} 
+                  className="hover:text-blue-300 transition-colors"
+                >
                   {t.common.privacy}
                 </Link>
               </li>
               <li>
-                <Link href={`/${currentLocale}/terms`} className="hover:text-blue-300 transition-colors">
+                <Link 
+                  href={currentLocale === 'en' ? '/terms' : '/tw/terms'} 
+                  className="hover:text-blue-300 transition-colors"
+                >
                   {t.common.terms}
                 </Link>
               </li>

@@ -75,7 +75,7 @@ export default function Footer() {
           
           {/* 版權信息 - 中間 */}
           <div className="text-center order-first md:order-none mb-2 md:mb-0">
-            <p className="text-white font-medium">©2020 reurl.cc</p>
+            <p className="text-white font-medium">©2025 vvrl.cc</p>
           </div>
           
           {/* 導航連結 - 右側 */}

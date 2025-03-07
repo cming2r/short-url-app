@@ -64,6 +64,13 @@ export function middleware(request) {
     return NextResponse.redirect(new URL(`/${locale}`, request.url));
   }
   
+  // 處理可能被混淆的保留路徑
+  if (pathname === '/privacy-policy' || pathname === '/terms' || pathname === '/custom' || pathname === '/history') {
+    const locale = getLocale(request);
+    console.log(`Redirecting ${pathname} to /${locale}${pathname}`);
+    return NextResponse.redirect(new URL(`/${locale}${pathname}`, request.url));
+  }
+  
   // 處理 /en 和 /tw 路徑
   if (pathname === '/en' || pathname === '/tw') {
     const locale = pathname.substring(1); // 移除前導斜線
@@ -80,7 +87,15 @@ export function middleware(request) {
     return NextResponse.rewrite(new URL(`/${locale}/${rest}`, request.url));
   }
   
-  // 檢查是否可能是短碼（不是以已知路徑開頭）
+  // 定義保留路徑
+  const RESERVED_PATHS = [
+    '/en', '/tw', '/not-found', '/favicon.ico', '/manifest.json',
+    '/privacy-policy', '/terms', '/custom', '/history',
+    '/en/privacy-policy', '/en/terms', '/en/custom', '/en/history',
+    '/tw/privacy-policy', '/tw/terms', '/tw/custom', '/tw/history'
+  ];
+  
+  // 檢查是否可能是短碼（不是以已知路徑開頭且不是保留路徑）
   if (
     !pathname.startsWith('/en/') && 
     !pathname.startsWith('/tw/') && 
@@ -88,11 +103,7 @@ export function middleware(request) {
     !pathname.startsWith('/api/') &&
     !pathname.startsWith('/_') &&
     !pathname.startsWith('/icons/') &&
-    pathname !== '/en' && 
-    pathname !== '/tw' && 
-    pathname !== '/not-found' &&
-    pathname !== '/favicon.ico' &&
-    pathname !== '/manifest.json'
+    !RESERVED_PATHS.includes(pathname)
   ) {
     // 提取潛在的短碼
     const shortCode = pathname.substring(1); // 移除前導斜線

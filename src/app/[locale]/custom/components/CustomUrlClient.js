@@ -266,13 +266,16 @@ export default function CustomUrlPageClient({ locale }) {
                         </a>
                       </p>
                       <p className="text-sm text-gray-500">
-                        {t.custom?.createdAt || '產生時間'}：{new Date(customUrl.created_at).toLocaleString(locale === 'en' ? 'en-US' : 'zh-TW', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        }).replace(/\//g, '/')}
+                        {t.custom?.createdAt || '產生時間'}：{typeof window !== 'undefined' ? 
+                          new Date(customUrl.created_at).toLocaleString(locale === 'en' ? 'en-US' : 'zh-TW', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          }).replace(/\//g, '/') : 
+                          new Date(customUrl.created_at).toISOString().split('T')[0]
+                        }
                         ，{t.custom?.clickCount || '點擊次數'}：{customUrl.click_count || 0}
                       </p>
                     </div>

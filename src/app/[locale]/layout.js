@@ -1,7 +1,9 @@
 import { DEFAULT_LOCALE } from '@/lib/i18n/constants';
 
 export async function generateMetadata({ params }) {
-  const locale = params?.locale || DEFAULT_LOCALE;
+  // 在 Next.js 14+ 中，需要先 await params
+  const resolvedParams = await params;
+  const locale = resolvedParams?.locale || DEFAULT_LOCALE;
   const isTW = locale === 'tw';
   
   return {
@@ -37,10 +39,12 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default function LocaleLayout({ children, params }) {
+export default async function LocaleLayout({ children, params }) {
   // 透過 script 設置 HTML 的語言屬性
   // (根布局已經定義了 html 和 body 標籤，這裡我們只能修改子內容)
-  const locale = params?.locale || DEFAULT_LOCALE;
+  // 在 Next.js 14+ 中，需要先 await params
+  const resolvedParams = await params;
+  const locale = resolvedParams?.locale || DEFAULT_LOCALE;
   const htmlLang = locale === 'tw' ? 'zh-TW' : 'en';
   
   return (

@@ -23,9 +23,34 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true, // 確保這個設為 true 以自動檢測 URL 中的會話
+    detectSessionInUrl: true, // 自動檢測 URL 中的會話
     flowType: 'pkce', // 使用 PKCE 流程
-    debug: isBrowser && (hasCodeParam || localStorage.getItem('authInProgress') === 'true'), // 在 OAuth 回調時啟用調試
+    debug: false, // 禁用調試模式避免多餘日誌
+    storageKey: 'supabase.auth.token',
+    storage: {
+      getItem: key => {
+        try {
+          return isBrowser ? localStorage.getItem(key) : null;
+        } catch (e) {
+          console.error('讀取本地存儲出錯:', e);
+          return null;
+        }
+      },
+      setItem: (key, value) => {
+        try {
+          if (isBrowser) localStorage.setItem(key, value);
+        } catch (e) {
+          console.error('寫入本地存儲出錯:', e);
+        }
+      },
+      removeItem: key => {
+        try {
+          if (isBrowser) localStorage.removeItem(key);
+        } catch (e) {
+          console.error('刪除本地存儲出錯:', e);
+        }
+      }
+    }
   },
   global: {
     headers: {

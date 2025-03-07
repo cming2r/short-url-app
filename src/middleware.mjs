@@ -44,17 +44,10 @@ export function middleware(request) {
   }
   
   // 特殊處理 OAuth 回調 (處理 Google 登入的關鍵)
-  if (pathname === '/' && (url.searchParams.has('code') || url.searchParams.has('error'))) {
-    const locale = getLocale(request);
-    console.log(`OAuth callback detected, redirecting to /${locale} with query params`);
-    
-    // 保留所有查詢參數
-    const redirectUrl = new URL(`/${locale}`, request.url);
-    url.searchParams.forEach((value, key) => {
-      redirectUrl.searchParams.set(key, value);
-    });
-    
-    return NextResponse.redirect(redirectUrl);
+  // 避免重定向OAuth回調，讓Supabase直接處理，防止redirect loop
+  if (url.searchParams.has('code') || url.searchParams.has('error')) {
+    console.log(`OAuth callback detected, letting Supabase handle it directly`);
+    return NextResponse.next();
   }
   
   // 根路徑不需要重寫，直接顯示英文內容
@@ -97,13 +90,14 @@ export function middleware(request) {
     return NextResponse.rewrite(new URL(`/${locale}/${rest}`, request.url));
   }
   
-  // 處理 privacy-policy 和 terms 路徑
-  if (pathname === '/privacy-policy' || pathname === '/terms') {
+  // 處理需要語言本地化的路由路徑
+  if (pathname === '/history' || pathname === '/custom' || 
+      pathname === '/privacy-policy' || pathname === '/terms') {
     const locale = getLocale(request);
     console.log(`Redirecting ${pathname} to /${locale}${pathname}`);
     return NextResponse.redirect(new URL(`/${locale}${pathname}`, request.url));
   }
-  
+
   // 檢查是否可能是短碼（不是以已知路徑開頭）
   if (
     !pathname.startsWith('/en/') && 
@@ -114,8 +108,13 @@ export function middleware(request) {
     !pathname.startsWith('/icons/') &&
     pathname !== '/en' && 
     pathname !== '/tw' && 
+    pathname !== '/history' &&
+    pathname !== '/custom' &&
+    pathname !== '/privacy-policy' &&
+    pathname !== '/terms' &&
     pathname !== '/favicon.ico' &&
-    pathname !== '/manifest.json'
+    pathname !== '/manifest.json' &&
+    pathname !== '/'
   ) {
     // 提取潛在的短碼
     const shortCode = pathname.substring(1); // 移除前導斜線

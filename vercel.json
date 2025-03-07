@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/:shortCode",
+      "source": "/:shortCode((?!custom|history|privacy-policy|terms|en|tw|api|_next).+)",
       "destination": "/api/:shortCode"
     }
   ],

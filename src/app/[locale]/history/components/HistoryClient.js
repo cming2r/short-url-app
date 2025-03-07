@@ -232,13 +232,16 @@ export default function HistoryPageClient({ locale }) {
                               </a>
                             </td>
                             <td className="border border-gray-300 p-2 text-center">
-                              {new Date(customUrl.created_at).toLocaleString(locale === 'en' ? 'en-US' : 'zh-TW', {
-                                year: 'numeric',
-                                month: '2-digit',
-                                day: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              }).replace(/\//g, '/')}
+                              {typeof window !== 'undefined' ? 
+                                new Date(customUrl.created_at).toLocaleString(locale === 'en' ? 'en-US' : 'zh-TW', {
+                                  year: 'numeric',
+                                  month: '2-digit',
+                                  day: '2-digit',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                }).replace(/\//g, '/') :
+                                new Date(customUrl.created_at).toISOString().split('T')[0]
+                              }
                             </td>
                             <td className="border border-gray-300 p-2 text-center">{customUrl.click_count || 0}</td>
                             <td className="border border-gray-300 p-2 text-center">
@@ -316,13 +319,16 @@ export default function HistoryPageClient({ locale }) {
                                 </a>
                               </td>
                               <td className="border border-gray-300 p-2 text-center">
-                                {new Date(url.created_at).toLocaleString(locale === 'en' ? 'en-US' : 'zh-TW', {
-                                  year: 'numeric',
-                                  month: '2-digit',
-                                  day: '2-digit',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                }).replace(/\//g, '/')}
+                                {typeof window !== 'undefined' ? 
+                                  new Date(url.created_at).toLocaleString(locale === 'en' ? 'en-US' : 'zh-TW', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  }).replace(/\//g, '/') :
+                                  new Date(url.created_at).toISOString().split('T')[0]
+                                }
                               </td>
                               <td className="border border-gray-300 p-2 text-center">{url.click_count || 0}</td>
                               <td className="border border-gray-300 p-2 text-center">

@@ -9,6 +9,12 @@ export const SupabaseContext = createContext(null);
 export function SupabaseProvider({ children }) {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+  
+  // 使用useEffect來確保水合完成
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     console.log('SupabaseProvider 初始化中...');
@@ -65,22 +71,13 @@ export function SupabaseProvider({ children }) {
           localStorage.removeItem('authStartPath');
           console.log('恢復到原始路徑:', savedPath);
           
-          // 如果當前已在正確路徑，只需重載頁面
-          if (window.location.pathname === savedPath) {
-            console.log('已在正確路徑，刷新頁面');
-            window.location.reload();
-          } else {
-            // 否則重定向到正確路徑
-            console.log('重定向到原始路徑:', savedPath);
-            window.location.href = savedPath;
-          }
-        } else {
-          // 沒有保存路徑，直接重載
-          if (isBrowser) {
-            console.log('無保存路徑，刷新當前頁面');
-            window.location.reload();
+          // 使用replaceState而不是reload或redirect，避免重定向循環
+          if (window.location.pathname !== savedPath) {
+            console.log('使用history.replaceState切換到原始路徑:', savedPath);
+            window.history.replaceState({}, '', savedPath);
           }
         }
+        // 無需再調用window.location.reload()，避免重定向循環
       }
     }).catch(error => {
       console.error('載入會話時出錯:', error);
@@ -145,7 +142,7 @@ export function SupabaseProvider({ children }) {
       localStorage.removeItem('authInProgress');
       const savedPath = localStorage.getItem('authStartPath');
       
-      // 延遲一下再重載頁面，確保狀態已完全更新
+      // 輕量處理，避免重定向循環
       setTimeout(() => {
         // 清除 URL 中的 code 參數
         if (hasCodeParam) {
@@ -159,21 +156,15 @@ export function SupabaseProvider({ children }) {
           console.log('從認證回調恢復到路徑:', savedPath);
           localStorage.removeItem('authStartPath');
           
-          // 如果當前已在正確路徑，只需重載
-          if (window.location.pathname === savedPath) {
-            console.log('已在正確路徑，刷新頁面');
-            window.location.reload();
-          } else {
-            // 否則重定向到正確路徑
-            console.log('重定向到原始路徑:', savedPath);
-            window.location.href = savedPath;
+          // 使用history API替換URL，避免重定向
+          if (window.location.pathname !== savedPath) {
+            console.log('使用history.replaceState切換到:', savedPath);
+            window.history.replaceState({}, '', savedPath);
           }
-        } else {
-          // 沒有保存路徑，直接重載
-          console.log('無保存路徑，刷新當前頁面');
-          window.location.reload();
+          // 不再調用reload，避免重定向循環
         }
-      }, 500);
+        // 不再重載頁面，避免重定向循環
+      }, 100);
     }
 
     return () => {
@@ -200,6 +191,7 @@ export function SupabaseProvider({ children }) {
     session,
     signOut: handleSignOut,
     isLoading: loading,
+    isClient
   };
 
   return (

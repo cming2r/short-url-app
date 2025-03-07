@@ -17,8 +17,8 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html>
-      <body className="flex flex-col min-h-screen bg-white">
+    <html lang="en" suppressHydrationWarning={true}>
+      <body className="flex flex-col min-h-screen bg-white" suppressHydrationWarning={true}>
         <SupabaseProvider>
           <LanguageProvider>
             {children}

@@ -78,7 +78,6 @@ export default {
     longUrlPlaceholder: 'Enter a long URL',
     customCodeLabel: 'Custom Code',
     customCodePlaceholder: 'Custom code (4-5 characters, at least 1 letter and 1 number)',
-    customCodeHint: 'Invalid password format. Ensure it is 4-5 characters long and includes at least 1 letter and 1 number.',
     createButton: 'Create Custom Short URL',
     updateButton: 'Submit Edit',
     edit: 'Edit',
@@ -116,7 +115,7 @@ export default {
   errors: {
     invalidUrl: 'Please enter a valid URL (must include http:// or https://)',
     enterCustomCode: 'Please enter a custom code',
-    invalidCustomCode: 'Custom code must be 3-20 letters, numbers, hyphens or underscores',
+    invalidCustomCode: 'Custom code must be 4-5 characters with at least 1 letter and 1 number',
     codeInUse: 'This custom code is already in use',
     alreadyHasCustom: 'You already have a custom short URL, you cannot create a new one',
     serverError: 'Server error',

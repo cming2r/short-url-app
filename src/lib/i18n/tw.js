@@ -78,7 +78,6 @@ export default {
     longUrlPlaceholder: '輸入長網址',
     customCodeLabel: '自訂短碼',
     customCodePlaceholder: '自訂短碼（4-5字元，至少需1英文1數字）',
-    customCodeHint: '密碼格式錯誤，請確保長度為4-5個字元，並包含至少1個字母和1個數字。',
     createButton: '定義自訂短網址',
     updateButton: '提交編輯',
     edit: '編輯',
@@ -116,7 +115,7 @@ export default {
   errors: {
     invalidUrl: '請輸入有效的 URL（需包含 http:// 或 https://）',
     enterCustomCode: '請輸入自訂短碼',
-    invalidCustomCode: '自訂短碼必須為3-20位元字母、數字、連字符或底線',
+    invalidCustomCode: '自訂短碼必須為4-5位元，且至少包含一個字母及一個數字',
     codeInUse: '此自訂短碼已被使用',
     alreadyHasCustom: '已存在自訂短網址，無法再創建新的自訂短網址',
     serverError: '伺服器錯誤',

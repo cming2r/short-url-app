@@ -98,7 +98,7 @@ export default function HistoryPageClient({ locale }) {
         console.log('Regular URLs data:', regularData);
       } catch (err) {
         console.error('Fetch history error:', err);
-        setError(t.errors?.loadError || '載入歷史記錄失敗: ' + err.message);
+        setError(t.errors?.loadError || 'Failed to load history: ' + err.message);
       } finally {
         setLoading(false);
       }
@@ -127,14 +127,14 @@ export default function HistoryPageClient({ locale }) {
       .then(() => {
         // 使用通知組件
         setNotification({
-          message: t.history?.copySuccess || '已複製短網址到剪貼簿！',
+          message: t.history?.copySuccess || 'Short URL copied to clipboard!',
           type: 'success'
         });
       })
       .catch(err => {
-        console.error('複製失敗:', err);
+        console.error('Copy failed:', err);
         setNotification({
-          message: t.history?.copyError || '複製短網址失敗',
+          message: t.history?.copyError || 'Failed to copy short URL',
           type: 'error'
         });
       });
@@ -150,7 +150,7 @@ export default function HistoryPageClient({ locale }) {
       }, 400);
     }
     
-    if (!confirm(t.history?.deleteConfirm || '確定要刪除此短網址嗎？')) {
+    if (!confirm(t.history?.deleteConfirm || 'Are you sure you want to delete this short URL?')) {
       return;
     }
     
@@ -179,16 +179,16 @@ export default function HistoryPageClient({ locale }) {
       
       // 使用通知組件
       setNotification({
-        message: t.history?.deleteSuccess || '短網址已成功刪除',
+        message: t.history?.deleteSuccess || 'Short URL deleted successfully',
         type: 'success'
       });
       
       // 重新加載數據
       await fetchHistory();
     } catch (err) {
-      console.error('刪除短網址出錯:', err);
+      console.error('Error deleting short URL:', err);
       setNotification({
-        message: `${t.history?.deleteError || '刪除短網址失敗:'} ${err.message}`,
+        message: `${t.history?.deleteError || 'Failed to delete short URL:'} ${err.message}`,
         type: 'error'
       });
     } finally {
@@ -202,27 +202,27 @@ export default function HistoryPageClient({ locale }) {
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="w-full max-w-4xl mx-auto">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full">
-            <h1 className="text-2xl font-bold text-center mb-4">{t.history?.title || '歷史記錄'}</h1>
+            <h1 className="text-2xl font-bold text-center mb-4">{t.history?.title || 'History'}</h1>
 
             {!session ? (
-              <p className="text-center">{t.history?.loginRequired || '請先登入以查看歷史記錄'}</p>
+              <p className="text-center">{t.history?.loginRequired || 'Please log in to view your history'}</p>
             ) : loading ? (
-              <p className="text-center">{t.common?.loading || '載入中...'}</p>
+              <p className="text-center">{t.common?.loading || 'Loading...'}</p>
             ) : (
               <>
                 {/* 自定義短網址區塊 */}
                 <div className="mb-6">
-                  <h2 className="text-xl font-bold mb-2">{t.history?.customUrlTitle || '自定義短網址'}</h2>
+                  <h2 className="text-xl font-bold mb-2">{t.history?.customUrlTitle || 'Custom URL'}</h2>
                   {customUrl ? (
                     <div className="overflow-hidden">
                       <table className="w-full border-collapse border border-gray-300 table-fixed">
                         <thead>
                           <tr className="bg-gray-200">
-                            <th className="border border-gray-300 p-2 w-[280px] text-center">{t.history?.urlColumn || '短網址'}</th>
-                            <th className="border border-gray-300 p-2 w-[260px] text-center">{t.history?.titleColumn || '標題'}</th>
-                            <th className="border border-gray-300 p-2 w-[150px] text-center">{t.history?.createdAtColumn || '產生時間'}</th>
-                            <th className="border border-gray-300 p-2 w-[80px] text-center">{t.history?.clickCountColumn || '點擊次數'}</th>
-                            <th className="border border-gray-300 p-2 w-[80px] text-center">{t.history?.actionsColumn || '操作'}</th>
+                            <th className="border border-gray-300 p-2 w-[280px] text-center">{t.history?.urlColumn || 'URL'}</th>
+                            <th className="border border-gray-300 p-2 w-[260px] text-center">{t.history?.titleColumn || 'Title'}</th>
+                            <th className="border border-gray-300 p-2 w-[150px] text-center">{t.history?.createdAtColumn || 'Created'}</th>
+                            <th className="border border-gray-300 p-2 w-[80px] text-center">{t.history?.clickCountColumn || 'Clicks'}</th>
+                            <th className="border border-gray-300 p-2 w-[80px] text-center">{t.history?.actionsColumn || 'Actions'}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -242,26 +242,26 @@ export default function HistoryPageClient({ locale }) {
                               <button 
                                 onClick={(e) => handleCopy(`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`, e)}
                                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-500 bg-white rounded-full p-1"
-                                title={t.history?.copyTooltip || '複製短網址'}
+                                title={t.history?.copyTooltip || 'Copy URL'}
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                                 </svg>
                               </button>
                             </td>
-                            <td className="border border-gray-300 p-2 truncate text-center" title={customUrl.title || (t.custom?.noTitle || '無標題')}>
+                            <td className="border border-gray-300 p-2 truncate text-center" title={customUrl.title || (t.custom?.noTitle || 'No title')}>
                               <a
                                 href={customUrl.original_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-500 underline"
                               >
-                                {customUrl.title || (t.custom?.noTitle || '無標題')}
+                                {customUrl.title || (t.custom?.noTitle || 'No title')}
                               </a>
                             </td>
                             <td className="border border-gray-300 p-2 text-center">
                               {typeof window !== 'undefined' ? 
-                                new Date(customUrl.created_at).toLocaleString(locale === 'en' ? 'en-US' : 'zh-TW', {
+                                new Date(customUrl.created_at).toLocaleString('en-US', {
                                   year: 'numeric',
                                   month: '2-digit',
                                   day: '2-digit',
@@ -276,7 +276,7 @@ export default function HistoryPageClient({ locale }) {
                               <button 
                                 onClick={(e) => handleDelete(customUrl.short_code, true, e)}
                                 className="text-red-500 hover:text-red-700"
-                                title={t.history?.deleteTooltip || '刪除短網址'}
+                                title={t.history?.deleteTooltip || 'Delete URL'}
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -288,25 +288,25 @@ export default function HistoryPageClient({ locale }) {
                       </table>
                     </div>
                   ) : (
-                    <p className="text-center">{t.history?.noCustomUrl || '尚未定義自訂短網址'}</p>
+                    <p className="text-center">{t.history?.noCustomUrl || 'No custom URL defined yet'}</p>
                   )}
                 </div>
 
                 {/* 普通縮網址歷史記錄 */}
                 <div>
-                  <h2 className="text-xl font-bold mb-2">{t.history?.historyTitle || '縮網址歷史記錄'}</h2>
+                  <h2 className="text-xl font-bold mb-2">{t.history?.historyTitle || 'URL History'}</h2>
                   {urls.length === 0 ? (
-                    <p className="text-center">{t.history?.noHistory || '尚無縮網址記錄'}</p>
+                    <p className="text-center">{t.history?.noHistory || 'No URL history yet'}</p>
                   ) : (
                     <div className="overflow-hidden">
                       <table className="w-full border-collapse border border-gray-300 table-fixed">
                         <thead>
                           <tr className="bg-gray-200">
-                            <th className="border border-gray-300 p-2 w-[280px] text-center">{t.history?.urlColumn || '短網址'}</th>
-                            <th className="border border-gray-300 p-2 w-[260px] text-center">{t.history?.titleColumn || '標題'}</th>
-                            <th className="border border-gray-300 p-2 w-[150px] text-center">{t.history?.createdAtColumn || '產生時間'}</th>
-                            <th className="border border-gray-300 p-2 w-[80px] text-center">{t.history?.clickCountColumn || '點擊次數'}</th>
-                            <th className="border border-gray-300 p-2 w-[80px] text-center">{t.history?.actionsColumn || '操作'}</th>
+                            <th className="border border-gray-300 p-2 w-[280px] text-center">{t.history?.urlColumn || 'URL'}</th>
+                            <th className="border border-gray-300 p-2 w-[260px] text-center">{t.history?.titleColumn || 'Title'}</th>
+                            <th className="border border-gray-300 p-2 w-[150px] text-center">{t.history?.createdAtColumn || 'Created'}</th>
+                            <th className="border border-gray-300 p-2 w-[80px] text-center">{t.history?.clickCountColumn || 'Clicks'}</th>
+                            <th className="border border-gray-300 p-2 w-[80px] text-center">{t.history?.actionsColumn || 'Actions'}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -330,26 +330,26 @@ export default function HistoryPageClient({ locale }) {
                                 <button 
                                   onClick={(e) => handleCopy(`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`, e)}
                                   className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-500 bg-white rounded-full p-1"
-                                  title={t.history?.copyTooltip || '複製短網址'}
+                                  title={t.history?.copyTooltip || 'Copy URL'}
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                                   </svg>
                                 </button>
                               </td>
-                              <td className="border border-gray-300 p-2 truncate text-center" title={url.title || (t.custom?.noTitle || '無標題')}>
+                              <td className="border border-gray-300 p-2 truncate text-center" title={url.title || (t.custom?.noTitle || 'No title')}>
                                 <a
                                   href={url.original_url}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-blue-500 underline"
                                 >
-                                  {url.title || (t.custom?.noTitle || '無標題')}
+                                  {url.title || (t.custom?.noTitle || 'No title')}
                                 </a>
                               </td>
                               <td className="border border-gray-300 p-2 text-center">
                                 {typeof window !== 'undefined' ? 
-                                  new Date(url.created_at).toLocaleString(locale === 'en' ? 'en-US' : 'zh-TW', {
+                                  new Date(url.created_at).toLocaleString('en-US', {
                                     year: 'numeric',
                                     month: '2-digit',
                                     day: '2-digit',
@@ -364,7 +364,7 @@ export default function HistoryPageClient({ locale }) {
                                 <button 
                                   onClick={(e) => handleDelete(url.short_code, false, e)}
                                   className="text-red-500 hover:text-red-700"
-                                  title={t.history?.deleteTooltip || '刪除短網址'}
+                                  title={t.history?.deleteTooltip || 'Delete URL'}
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -387,11 +387,11 @@ export default function HistoryPageClient({ locale }) {
                           disabled={currentPage === 1}
                           className="px-3 py-1 bg-gray-200 rounded-l border border-gray-300 disabled:opacity-50"
                         >
-                          &laquo; {t.common?.previous || '上一頁'}
+                          &laquo; {t.common?.previous || 'Previous'}
                         </button>
                         
                         <div className="px-4 py-1 border-t border-b border-gray-300 bg-white">
-                          {t.common?.page || '頁'} {currentPage} / {Math.ceil(urls.length / urlsPerPage)}
+                          {t.common?.page || 'Page'} {currentPage} / {Math.ceil(urls.length / urlsPerPage)}
                         </div>
                         
                         <button
@@ -399,7 +399,7 @@ export default function HistoryPageClient({ locale }) {
                           disabled={currentPage >= Math.ceil(urls.length / urlsPerPage)}
                           className="px-3 py-1 bg-gray-200 rounded-r border border-gray-300 disabled:opacity-50"
                         >
-                          {t.common?.next || '下一頁'} &raquo;
+                          {t.common?.next || 'Next'} &raquo;
                         </button>
                       </nav>
                     </div>

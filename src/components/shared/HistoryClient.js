@@ -212,7 +212,7 @@ export default function HistoryPageClient({ locale }) {
               <>
                 {/* 自定義短網址區塊 */}
                 <div className="mb-6">
-                  <h2 className="text-xl font-bold mb-2">{t.history?.customUrlTitle || '自定義短網址'}</h2>
+                  <h2 className="text-xl font-bold mb-2">{t.history?.customUrlTitle || '自訂短網址'}</h2>
                   {customUrl ? (
                     <div className="overflow-hidden">
                       <table className="w-full border-collapse border border-gray-300 table-fixed">

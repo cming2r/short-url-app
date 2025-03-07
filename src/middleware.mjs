@@ -90,12 +90,18 @@ export function middleware(request) {
     return NextResponse.rewrite(new URL(`/${locale}/${rest}`, request.url));
   }
   
-  // 處理需要語言本地化的路由路徑
-  if (pathname === '/history' || pathname === '/custom' || 
+  // 處理 /tw 和 /tw/* 路徑的語言本地化
+  if (pathname.startsWith('/tw/') || pathname === '/tw') {
+    console.log(`處理中文路徑: ${pathname}`);
+    // 對於 /tw/* 路徑，不需要做特殊處理，因為它們是有效的[locale]路由
+    return NextResponse.next();
+  }
+  
+  // 英文版頁面已經直接在 /custom 和 /history 實現，不需要重定向
+  if (pathname === '/custom' || pathname === '/history' || 
       pathname === '/privacy-policy' || pathname === '/terms') {
-    const locale = getLocale(request);
-    console.log(`Redirecting ${pathname} to /${locale}${pathname}`);
-    return NextResponse.redirect(new URL(`/${locale}${pathname}`, request.url));
+    console.log(`使用英文版頁面: ${pathname}`);
+    return NextResponse.next();
   }
 
   // 專門為短網址格式添加檢測 (6-8字符的字母數字)

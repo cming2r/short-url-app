@@ -129,17 +129,44 @@ export default function HomePage({ locale }) {
       console.log('Shortening URL with user info:', { 
         isLoggedIn: !!session, 
         hasUserId: !!userId,
-        hasToken: !!accessToken
+        hasToken: !!accessToken,
+        userId: userId,
+        sessionDetails: session ? {
+          userId: session.user?.id,
+          hasUser: !!session.user,
+          email: session.user?.email
+        } : null
+      });
+      
+      // 確保我們有一個實際的userId值
+      if (!userId && session?.user?.id) {
+        console.log('Using session.user.id as userId was null');
+        userId = session.user.id;
+      }
+      
+      // 添加請求時間戳，避免緩存問題
+      const timestamp = new Date().getTime();
+      
+      const requestData = { 
+        url,
+        userId,  // 添加用戶 ID
+        accessToken,  // 添加訪問 token
+        _t: timestamp  // 添加時間戳防止緩存
+      };
+      
+      console.log('Sending shorten request with data:', {
+        url: url,
+        userId: userId,
+        hasAccessToken: !!accessToken
       });
       
       const response = await fetch('/api/shorten', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          url,
-          userId,  // 添加用戶 ID
-          accessToken  // 添加訪問 token
-        }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
+        },
+        body: JSON.stringify(requestData),
       });
       
       if (!response.ok) {

@@ -1,7 +1,7 @@
 // 伺服器組件部分
 import { Suspense } from 'react';
 import { DEFAULT_LOCALE } from '@/lib/i18n/constants';
-import HistoryPageClient from './components/HistoryClient';
+import HistoryPageClient from '@/components/shared/HistoryClient';
 
 // 加載中顯示
 function HistoryPageLoading() {

@@ -18,7 +18,16 @@ export async function POST(request) {
   console.log('POST /api/shorten called');
   console.log('BASE_URL:', process.env.NEXT_PUBLIC_BASE_URL);
 
-  const { url, customCode, userId, accessToken } = await request.json();
+  const requestBody = await request.json();
+  const { url, customCode, userId, accessToken } = requestBody;
+  
+  console.log('Request body received:', { 
+    hasUrl: !!url, 
+    hasCustomCode: !!customCode, 
+    hasUserId: !!userId, 
+    hasAccessToken: !!accessToken,
+    rawUserId: userId
+  });
 
   if (!url) {
     return new Response(JSON.stringify({ error: 'Invalid URL, URL is required' }), {
@@ -136,6 +145,11 @@ export async function POST(request) {
     }
 
     console.log('Current user ID for URL:', currentUserId);
+    console.log('User ID status check:', {
+      originalUserId: userId,
+      finalUserId: currentUserId,
+      willAssociateWithUser: !!currentUserId
+    });
 
     // 獲取 original_url 的標題
     const title = await fetchTitle(formattedUrl);
@@ -155,7 +169,8 @@ export async function POST(request) {
       if (error) throw error;
     } else {
       // 插入普通縮網址到 urls 表，確保記錄 user_id
-      const { error } = await supabaseServer.from('urls').insert({
+      // 創建URL插入數據
+      const urlData = {
         short_code: shortCode,
         original_url: formattedUrl,
         user_id: currentUserId,
@@ -163,9 +178,22 @@ export async function POST(request) {
         created_at: new Date().toISOString(),
         click_count: 0,
         last_clicked_at: new Date().toISOString(), // 初始設置為創建時間
-      });
+      };
+      
+      console.log('Inserting URL data with user_id:', currentUserId);
+      console.log('Full insert data:', urlData);
+      
+      const { data: insertedData, error } = await supabaseServer
+        .from('urls')
+        .insert(urlData)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting URL:', error);
+        throw error;
+      }
+      
+      console.log('Insert result:', insertedData);
     }
 
     console.log('Inserted into database successfully');

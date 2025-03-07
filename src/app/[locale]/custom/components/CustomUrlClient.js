@@ -113,9 +113,29 @@ export default function CustomUrlPageClient({ locale }) {
 
     try {
       const userId = session?.user?.id || null;
-      const accessToken = session?.access_token || null;
-      console.log('User ID sent from custom/page.js:', userId);
-      console.log('Access token sent from custom/page.js:', accessToken);
+      let accessToken = null;
+      
+      // 確保獲取正確的access token
+      if (session) {
+        try {
+          // 直接從session獲取token
+          accessToken = session.access_token;
+          
+          // 如果session中沒有token，嘗試從supabase獲取
+          if (!accessToken) {
+            console.log('No token in session, attempting to get fresh token');
+            const { data } = await supabase.auth.getSession();
+            accessToken = data.session?.access_token;
+          }
+        } catch (tokenError) {
+          console.error('Error getting access token:', tokenError);
+        }
+      }
+      
+      console.log('User info for custom URL:', { 
+        userId,
+        hasToken: !!accessToken
+      });
 
       const response = await fetch('/api/shorten', {
         method: 'POST',
@@ -169,6 +189,31 @@ export default function CustomUrlPageClient({ locale }) {
     }
 
     try {
+      const userId = session?.user?.id || null;
+      let accessToken = null;
+      
+      // 確保獲取正確的access token
+      if (session) {
+        try {
+          // 直接從session獲取token
+          accessToken = session.access_token;
+          
+          // 如果session中沒有token，嘗試從supabase獲取
+          if (!accessToken) {
+            console.log('No token in session, attempting to get fresh token');
+            const { data } = await supabase.auth.getSession();
+            accessToken = data.session?.access_token;
+          }
+        } catch (tokenError) {
+          console.error('Error getting access token:', tokenError);
+        }
+      }
+      
+      console.log('User info for editing custom URL:', { 
+        userId,
+        hasToken: !!accessToken
+      });
+    
       // 檢查新短碼是否已被使用（排除當前記錄的短碼）
       if (customCode !== customUrl.short_code) {
         const { data: existingCode, error: codeError } = await supabase
@@ -229,7 +274,7 @@ export default function CustomUrlPageClient({ locale }) {
           title: title,
           created_at: new Date().toISOString(),
         })
-        .eq('user_id', session.user.id)
+        .eq('user_id', userId)
         .eq('short_code', customUrl.short_code);
 
       if (error) {

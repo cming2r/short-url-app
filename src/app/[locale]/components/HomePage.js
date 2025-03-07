@@ -107,11 +107,29 @@ export default function HomePage({ locale }) {
     try {
       // 如果有登入，加入用戶 ID 和 token
       const userId = session?.user?.id || null;
-      const accessToken = session?.access_token || null;
+      let accessToken = null;
+      
+      // 確保獲取正確的access token
+      if (session) {
+        try {
+          // 直接從session獲取token
+          accessToken = session.access_token;
+          
+          // 如果session中沒有token，嘗試從supabase獲取
+          if (!accessToken) {
+            console.log('No token in session, attempting to get fresh token');
+            const { data } = await supabase.auth.getSession();
+            accessToken = data.session?.access_token;
+          }
+        } catch (tokenError) {
+          console.error('Error getting access token:', tokenError);
+        }
+      }
       
       console.log('Shortening URL with user info:', { 
         isLoggedIn: !!session, 
-        hasUserId: !!userId 
+        hasUserId: !!userId,
+        hasToken: !!accessToken
       });
       
       const response = await fetch('/api/shorten', {

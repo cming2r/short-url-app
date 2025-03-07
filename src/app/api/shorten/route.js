@@ -56,18 +56,40 @@ export async function POST(request) {
     
     // 如果提供了 userId 和 accessToken，驗證用戶身份
     if (userId && accessToken) {
-      // 使用 access_token 驗證會話
-      const { data: { user }, error: tokenError } = await supabaseServer.auth.getUser(accessToken);
-      
-      console.log('User verification result:', { user, tokenError });
-      
-      if (tokenError || !user || user.id !== userId) {
-        console.warn('User verification failed but continuing without user ID');
-        currentUserId = null; // 重置用戶ID為 null
-      } else {
-        console.log('User verified successfully:', user.id);
-        currentUserId = user.id; // 使用驗證後的用戶 ID
+      try {
+        // 使用 access_token 驗證會話
+        const { data: { user }, error: tokenError } = await supabaseServer.auth.getUser(accessToken);
+        
+        console.log('User verification result:', { 
+          userProvided: !!user,
+          userId: userId,
+          retrievedUserId: user?.id,
+          hasTokenError: !!tokenError
+        });
+        
+        if (tokenError) {
+          console.warn('Token verification error:', tokenError.message);
+          currentUserId = null; // 重置用戶ID為 null
+        } else if (!user) {
+          console.warn('No user found with provided token');
+          currentUserId = null;
+        } else if (user.id !== userId) {
+          console.warn('User ID mismatch:', { providedId: userId, tokenUserId: user.id });
+          currentUserId = user.id; // 使用驗證後的用戶 ID，而不是傳入的ID
+        } else {
+          console.log('User verified successfully:', user.id);
+          currentUserId = user.id; // 使用驗證後的用戶 ID
+        }
+      } catch (authError) {
+        console.error('Error during authentication:', authError);
+        // 出錯時仍然使用提供的用戶 ID
+        console.log('Falling back to provided user ID due to auth error');
+        currentUserId = userId;
       }
+    } else if (userId) {
+      // 如果只有userId但沒有accessToken，仍然使用userId
+      console.log('Using provided userId without token verification');
+      currentUserId = userId;
     }
 
     if (customCode) {
@@ -83,7 +105,7 @@ export async function POST(request) {
       const { data: existingCustom, error: customError } = await supabaseServer
         .from('custom_urls')
         .select('short_code')
-        .eq('user_id', userId)
+        .eq('user_id', currentUserId)
         .single();
 
       if (customError && customError.code !== 'PGRST116') { // PGRST116 表示無記錄

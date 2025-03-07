@@ -98,7 +98,20 @@ export function middleware(request) {
     return NextResponse.redirect(new URL(`/${locale}${pathname}`, request.url));
   }
 
-  // 檢查是否可能是短碼（不是以已知路徑開頭）
+  // 專門為短網址格式添加檢測 (6-8字符的字母數字)
+  const shortCodeRegex = /^\/[a-zA-Z0-9]{6,8}$/;
+  if (shortCodeRegex.test(pathname)) {
+    console.log(`[MIDDLEWARE] Detected potential shortcode format in path: ${pathname}`);
+    // 提取潛在的短碼
+    const shortCode = pathname.substring(1); // 移除前導斜線
+    
+    // 重寫到 _shortcuts 處理程序
+    const shortcodeUrl = `/_shortcuts/${encodeURIComponent(shortCode)}`;
+    console.log(`[MIDDLEWARE] Forwarding to shortcode handler: ${shortcodeUrl}`);
+    return NextResponse.rewrite(new URL(shortcodeUrl, request.url));
+  }
+  
+  // 原來的短碼處理邏輯保留為後備
   if (
     !pathname.startsWith('/en/') && 
     !pathname.startsWith('/tw/') && 
@@ -120,19 +133,19 @@ export function middleware(request) {
     const shortCode = pathname.substring(1); // 移除前導斜線
     if (shortCode && shortCode.length > 0) {
       try {
-        console.log(`Potential shortcode: ${shortCode}, processing...`);
+        console.log(`[MIDDLEWARE] Checking alternative shortcode: ${shortCode}`);
         // 如果像是靜態文件，則跳過處理
         if (shortCode.match(/\.(ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf|eot)$/i)) {
-          console.log(`${shortCode} appears to be a static file, not processing as shortcode`);
+          console.log(`[MIDDLEWARE] ${shortCode} appears to be a static file, not processing as shortcode`);
           return NextResponse.next();
         }
         
         // 重寫到 _shortcuts 處理程序
         const shortcodeUrl = `/_shortcuts/${encodeURIComponent(shortCode)}`;
-        console.log(`Forwarding to shortcode handler: ${shortcodeUrl}`);
+        console.log(`[MIDDLEWARE] Forwarding to shortcode handler: ${shortcodeUrl}`);
         return NextResponse.rewrite(new URL(shortcodeUrl, request.url));
       } catch (error) {
-        console.error(`Error processing shortcode: ${shortCode}`, error);
+        console.error(`[MIDDLEWARE] Error processing shortcode: ${shortCode}`, error);
         // 直接讓 Next.js 處理，將顯示 404 頁面
         return NextResponse.next();
       }

@@ -98,9 +98,17 @@ export default function CustomUrlPageClient({ locale }) {
       setError(t.errors?.invalidUrl || '請輸入有效的 URL（需包含 http:// 或 https://）');
       return;
     }
-    if (customCode && (customCode.length !== 6 || !/^[a-zA-Z0-9]+$/.test(customCode))) {
-      setError(t.errors?.invalidCustomCode || '自訂短碼必須為6位元字母或數字');
-      return;
+    // 檢查自訂短碼是否符合新要求：4-5個字符，必須包含至少一個字母和一個數字
+    if (customCode) {
+      const isValidLength = customCode.length >= 4 && customCode.length <= 5;
+      const hasLetter = /[a-zA-Z]/.test(customCode);
+      const hasNumber = /[0-9]/.test(customCode);
+      const isValidChars = /^[a-zA-Z0-9]+$/.test(customCode);
+      
+      if (!isValidLength || !hasLetter || !hasNumber || !isValidChars) {
+        setError(t.errors?.invalidCustomCode || '自訂短碼必須為4-5位元，且至少包含一個字母及一個數字');
+        return;
+      }
     }
 
     try {
@@ -144,8 +152,19 @@ export default function CustomUrlPageClient({ locale }) {
       return;
     }
 
-    if (!customCode || customCode.length !== 6 || !/^[a-zA-Z0-9]+$/.test(customCode)) {
-      setError(t.errors?.invalidCustomCode || '請輸入有效的 URL 和 6 位元字母或數字的自訂短碼');
+    // 檢查自訂短碼是否符合新要求：4-5個字符，必須包含至少一個字母和一個數字
+    if (!customCode) {
+      setError(t.errors?.invalidCustomCode || '請輸入自訂短碼');
+      return;
+    }
+    
+    const isValidLength = customCode.length >= 4 && customCode.length <= 5;
+    const hasLetter = /[a-zA-Z]/.test(customCode);
+    const hasNumber = /[0-9]/.test(customCode);
+    const isValidChars = /^[a-zA-Z0-9]+$/.test(customCode);
+    
+    if (!isValidLength || !hasLetter || !hasNumber || !isValidChars) {
+      setError(t.errors?.invalidCustomCode || '自訂短碼必須為4-5位元，且至少包含一個字母及一個數字');
       return;
     }
 
@@ -318,8 +337,8 @@ export default function CustomUrlPageClient({ locale }) {
                       type="text"
                       value={customCode}
                       onChange={(e) => setCustomCode(e.target.value)}
-                      placeholder={t.custom?.customCodePlaceholder || '自訂短碼（6位元字母或數字）'}
-                      maxLength={6}
+                      placeholder={t.custom?.customCodePlaceholder || '自訂短碼（4-5位元，至少1字母及1數字）'}
+                      maxLength={5}
                       className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <button

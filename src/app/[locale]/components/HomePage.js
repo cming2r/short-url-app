@@ -211,20 +211,12 @@ export default function HomePage({ locale }) {
                     </span>
                   )}
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    type="text"
-                    value={shortUrl}
-                    readOnly
-                    className="flex-grow p-2 border border-gray-300 rounded bg-white"
-                  />
-                  <button
-                    onClick={copyToClipboard}
-                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                  >
-                    {copied ? t.home?.copied || 'Copied!' : t.home?.copyButton || 'Copy'}
-                  </button>
-                </div>
+                <button
+                  onClick={copyToClipboard}
+                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full"
+                >
+                  {copied ? t.home?.copied || 'Copied!' : t.home?.copyButton || 'Copy'}
+                </button>
               </div>
             )}
           </div>

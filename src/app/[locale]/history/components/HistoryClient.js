@@ -200,26 +200,27 @@ export default function HistoryPageClient({ locale }) {
                         </thead>
                         <tbody>
                           <tr className="hover:bg-gray-100 slide-in" data-short-code={customUrl.short_code}>
-                            <td className="border border-gray-300 p-2 truncate text-center" title={`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`}>
-                              <div className="flex items-center space-x-1 justify-center">
+                            <td className="border border-gray-300 p-2 text-center relative">
+                              <div className="max-w-[260px] mx-auto truncate">
                                 <a
                                   href={`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-blue-500 underline"
+                                  title={`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`}
                                 >
                                   {`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`}
                                 </a>
-                                <button 
-                                  onClick={(e) => handleCopy(`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`, e)}
-                                  className="ml-1 text-gray-500 hover:text-blue-500"
-                                  title={t.history?.copyTooltip || '複製短網址'}
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                                  </svg>
-                                </button>
                               </div>
+                              <button 
+                                onClick={(e) => handleCopy(`${process.env.NEXT_PUBLIC_BASE_URL}/${customUrl.short_code}`, e)}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-500 bg-white rounded-full p-1"
+                                title={t.history?.copyTooltip || '複製短網址'}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                              </button>
                             </td>
                             <td className="border border-gray-300 p-2 truncate text-center" title={customUrl.title || (t.custom?.noTitle || '無標題')}>
                               <a
@@ -287,26 +288,27 @@ export default function HistoryPageClient({ locale }) {
                             .slice((currentPage - 1) * urlsPerPage, currentPage * urlsPerPage)
                             .map((url, index) => (
                             <tr key={url.short_code} className="hover:bg-gray-100 slide-in" data-short-code={url.short_code} style={{animationDelay: `${index * 0.05}s`}}>
-                              <td className="border border-gray-300 p-2 truncate text-center" title={`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}>
-                                <div className="flex items-center space-x-1 justify-center">
+                              <td className="border border-gray-300 p-2 text-center relative">
+                                <div className="max-w-[260px] mx-auto truncate">
                                   <a
                                     href={`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-blue-500 underline"
+                                    title={`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}
                                   >
                                     {`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`}
                                   </a>
-                                  <button 
-                                    onClick={(e) => handleCopy(`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`, e)}
-                                    className="ml-1 text-gray-500 hover:text-blue-500"
-                                    title={t.history?.copyTooltip || '複製短網址'}
-                                  >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                                    </svg>
-                                  </button>
                                 </div>
+                                <button 
+                                  onClick={(e) => handleCopy(`${process.env.NEXT_PUBLIC_BASE_URL}/${url.short_code}`, e)}
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-500 bg-white rounded-full p-1"
+                                  title={t.history?.copyTooltip || '複製短網址'}
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                  </svg>
+                                </button>
                               </td>
                               <td className="border border-gray-300 p-2 truncate text-center" title={url.title || (t.custom?.noTitle || '無標題')}>
                                 <a

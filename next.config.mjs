@@ -75,6 +75,15 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      // 處理短網址 - 將符合6-8字符的短碼重寫到_shortcuts處理器
+      {
+        source: '/:shortCode([a-zA-Z0-9]{6,8})',
+        destination: '/_shortcuts/:shortCode',
+      }
+    ];
+  },
 };
 
 export default nextConfig;

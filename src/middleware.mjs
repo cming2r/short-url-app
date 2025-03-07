@@ -57,24 +57,41 @@ export function middleware(request) {
     return NextResponse.redirect(redirectUrl);
   }
   
-  // 處理根路徑 - 重定向到特定語言的首頁
+  // 根路徑不需要重寫，直接顯示英文內容
+  // 已在 /app/page.js 中實現直接顯示英文內容
   if (pathname === '/') {
-    const locale = getLocale(request);
-    console.log(`Redirecting / to /${locale}`);
-    return NextResponse.redirect(new URL(`/${locale}`, request.url));
+    console.log(`Root path / directly displays English content`);
+    return NextResponse.next();
   }
   
-  // 處理 /en 和 /tw 路徑
-  if (pathname === '/en' || pathname === '/tw') {
+  // 處理 /en 路徑 (重定向到根路徑) 和 /tw 路徑
+  if (pathname === '/en') {
+    console.log(`Redirecting /en to root path (/) for canonical URL structure`);
+    // 使用 301 永久重定向到根路徑
+    return NextResponse.redirect(new URL('/', request.url), 301);
+  } else if (pathname === '/tw') {
     const locale = pathname.substring(1); // 移除前導斜線
     console.log(`Rewriting ${pathname} to use parameterized route`);
     return NextResponse.rewrite(new URL(`/${locale}`, request.url));
   }
   
   // 處理 /en/* 和 /tw/* 路徑
-  if (pathname.startsWith('/en/') || pathname.startsWith('/tw/')) {
+  if (pathname.startsWith('/en/')) {
+    // 對於 /en/* 路徑，我們應該將其重定向到 /* 路徑（除了特殊頁面）
     const parts = pathname.split('/');
-    const locale = parts[1]; // 'en' 或 'tw'
+    const rest = parts.slice(2).join('/');
+    
+    // 不重定向特殊頁面，如果需要這些頁面存在於 /en/ 路徑下
+    if (rest === 'privacy-policy' || rest === 'terms') {
+      console.log(`Rewriting ${pathname} to use parameterized route for special page`);
+      return NextResponse.rewrite(new URL(`/en/${rest}`, request.url));
+    }
+    
+    console.log(`Redirecting ${pathname} to /${rest} for canonical URL structure`);
+    return NextResponse.redirect(new URL(`/${rest}`, request.url), 301);
+  } else if (pathname.startsWith('/tw/')) {
+    const parts = pathname.split('/');
+    const locale = parts[1]; // 'tw'
     const rest = parts.slice(2).join('/');
     console.log(`Rewriting ${pathname} to use parameterized route`);
     return NextResponse.rewrite(new URL(`/${locale}/${rest}`, request.url));

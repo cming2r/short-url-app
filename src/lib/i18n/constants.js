@@ -4,7 +4,7 @@
 export const SUPPORTED_LOCALES = ['en', 'tw'];
 
 // 默認語言
-export const DEFAULT_LOCALE = 'tw';
+export const DEFAULT_LOCALE = 'en';
 
 // 將 URL 語言路徑映射到內部語言代碼
 export const LOCALE_MAPPING = {

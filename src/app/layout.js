@@ -3,25 +3,9 @@ import { SupabaseProvider } from '@/components/SupabaseProvider';
 import { LanguageProvider } from '@/lib/i18n';
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
+// 基本元數據 - 具體元數據將由子布局提供
 export const metadata = {
-  title: 'URL Shortener',
-  description: 'Simple, fast, and reliable URL shortening tool',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'URL Shortener',
-  },
-  // 確保 icon 請求能被正確處理
-  icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
-    apple: '/favicon.ico',
-    other: {
-      rel: 'apple-touch-icon-precomposed',
-      url: '/favicon.ico',
-    },
-  },
-  manifest: '/manifest.json',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://vvrl.cc'),
 };
 
 export const viewport = {

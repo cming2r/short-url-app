@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/:shortCode((?!custom|history|privacy-policy|terms|en|tw|api|_next).+)",
+      "source": "/:shortCode((?!custom|history|privacy-policy|terms|en|tw|api|_next|favicon|manifest).+)",
       "destination": "/api/:shortCode"
     }
   ],

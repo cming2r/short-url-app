@@ -19,12 +19,6 @@ export default async function ShortCodeHandler({ params }) {
     redirect(`/${shortCode}`);
   }
   
-  // Check for not-found codes
-  if (shortCode === 'not-found' || shortCode === '_not-found') {
-    console.log(`[Server] Short code is "${shortCode}", redirecting to not-found`);
-    redirect('/not-found');
-  }
-  
   // 查詢數據庫獲取原始 URL
   try {
     console.log(`[Server] Looking up shortcode in database: ${shortCode}`);
@@ -46,7 +40,8 @@ export default async function ShortCodeHandler({ params }) {
       
       if (customError || !customData) {
         console.error('[Server] Short code not found in any table:', shortCode);
-        redirect('/not-found');
+        // 重定向到英文首頁
+        redirect('/en');
       }
       
       // 更新自定義短網址的點擊計數器
@@ -94,6 +89,7 @@ export default async function ShortCodeHandler({ params }) {
     
   } catch (error) {
     console.error('[Server] Error processing redirect:', error);
-    redirect('/not-found');
+    // 重定向到英文首頁
+    redirect('/en');
   }
 }

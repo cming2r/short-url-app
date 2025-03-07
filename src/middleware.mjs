@@ -1,30 +1,9 @@
 import { NextResponse } from 'next/server';
 
-// 支持的語言和默認語言
+// 支持的語言
 const SUPPORTED_LOCALES = ['en', 'tw'];
-const DEFAULT_LOCALE = 'tw';
-
-// 獲取用戶偏好語言
-function getLocale(request) {
-  // 獲取 Accept-Language 頭
-  const acceptLanguage = request.headers.get('accept-language') || '';
-  const languages = acceptLanguage.split(',').map(lang => lang.split(';')[0].trim().toLowerCase());
-  
-  // 根據 Accept-Language 確定最佳匹配語言
-  let locale = DEFAULT_LOCALE; // 默認為繁體中文
-  
-  for (const lang of languages) {
-    if (lang.startsWith('zh-tw') || lang.startsWith('zh-hk') || lang.startsWith('zh')) {
-      locale = 'tw';
-      break;
-    } else if (lang.startsWith('en')) {
-      locale = 'en';
-      break;
-    }
-  }
-  
-  return locale;
-}
+// 取消自動語言偵測，所有用戶首頁默認英文
+const DEFAULT_LOCALE = 'en';
 
 export function middleware(request) {
   // 獲取完整 URL 以處理查詢參數

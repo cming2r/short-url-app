@@ -265,6 +265,97 @@ export default function HomePage({ locale }) {
               </div>
             )}
           </div>
+          
+          {!shortUrl && (
+            <div className="mt-10 w-full max-w-5xl mx-auto">
+              {/* 特色功能區 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <div className="text-blue-500 text-4xl mb-3">⚡</div>
+                  <h3 className="text-xl font-bold mb-2">{t.home?.features?.fast?.title || '快速縮短'}</h3>
+                  <p className="text-gray-600">{t.home?.features?.fast?.description || '即時生成短網址，無需等待。使用優化算法生成簡短的URL。'}</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <div className="text-green-500 text-4xl mb-3">🔒</div>
+                  <h3 className="text-xl font-bold mb-2">{t.home?.features?.secure?.title || '安全可靠'}</h3>
+                  <p className="text-gray-600">{t.home?.features?.secure?.description || '所有鏈接都經過驗證，確保安全。網址永不過期，除非閒置太久。'}</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <div className="text-purple-500 text-4xl mb-3">✏️</div>
+                  <h3 className="text-xl font-bold mb-2">{t.home?.features?.custom?.title || '自定義短網址'}</h3>
+                  <p className="text-gray-600">{t.home?.features?.custom?.description || '登入後享有更多功能，包括自定義短網址、使用統計及歷史記錄。'}</p>
+                </div>
+              </div>
+              
+              {/* 使用步驟區 */}
+              <div className="mb-12">
+                <h2 className="text-2xl font-bold text-center mb-8">{t.home?.howTo?.title || '如何使用'}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4">
+                    <div className="bg-blue-100 text-blue-800 rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-4">1</div>
+                    <h3 className="font-bold mb-2">{t.home?.howTo?.steps?.[0]?.title || '輸入長網址'}</h3>
+                    <p className="text-sm text-gray-600">{t.home?.howTo?.steps?.[0]?.description || '在上方輸入框中粘貼您想要縮短的網址。'}</p>
+                  </div>
+                  <div className="text-center p-4">
+                    <div className="bg-blue-100 text-blue-800 rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-4">2</div>
+                    <h3 className="font-bold mb-2">{t.home?.howTo?.steps?.[1]?.title || '點擊縮短按鈕'}</h3>
+                    <p className="text-sm text-gray-600">{t.home?.howTo?.steps?.[1]?.description || '系統將立即為您生成一個簡短的網址。'}</p>
+                  </div>
+                  <div className="text-center p-4">
+                    <div className="bg-blue-100 text-blue-800 rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-4">3</div>
+                    <h3 className="font-bold mb-2">{t.home?.howTo?.steps?.[2]?.title || '複製並分享'}</h3>
+                    <p className="text-sm text-gray-600">{t.home?.howTo?.steps?.[2]?.description || '點擊複製按鈕，然後分享短網址。'}</p>
+                  </div>
+                  <div className="text-center p-4">
+                    <div className="bg-blue-100 text-blue-800 rounded-full w-10 h-10 flex items-center justify-center mx-auto mb-4">4</div>
+                    <h3 className="font-bold mb-2">{t.home?.howTo?.steps?.[3]?.title || '登入獲取更多功能'}</h3>
+                    <p className="text-sm text-gray-600">{t.home?.howTo?.steps?.[3]?.description || '登入後可以查看點擊統計和創建自定義短網址。'}</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* FAQ 區域 */}
+              <div className="bg-gray-50 p-6 rounded-lg mb-12">
+                <h2 className="text-2xl font-bold mb-6 text-center">{t.home?.faq?.title || '常見問題'}</h2>
+                <div className="space-y-4">
+                  <div className="border-b pb-4">
+                    <h3 className="font-bold mb-2">{t.home?.faq?.q1 || '這項服務是否免費？'}</h3>
+                    <p className="text-gray-600">{t.home?.faq?.a1 || '是的，我們的短網址服務完全免費使用，沒有隱藏費用。'}</p>
+                  </div>
+                  <div className="border-b pb-4">
+                    <h3 className="font-bold mb-2">{t.home?.faq?.q2 || '短網址有效期多久？'}</h3>
+                    <p className="text-gray-600">{t.home?.faq?.a2 || '短網址沒有固定的到期時間，只要定期被訪問，就會永久有效。'}</p>
+                  </div>
+                  <div className="border-b pb-4">
+                    <h3 className="font-bold mb-2">{t.home?.faq?.q3 || '我可以自訂短碼嗎？'}</h3>
+                    <p className="text-gray-600">{t.home?.faq?.a3 || '可以，登入後您可以創建自定義短碼，但需要遵循4-5位元，且至少包含一個字母及一個數字的規則。'}</p>
+                  </div>
+                  <div className="border-b pb-4">
+                    <h3 className="font-bold mb-2">{t.home?.faq?.q4 || '我可以查看我的短網址被點擊的次數嗎？'}</h3>
+                    <p className="text-gray-600">{t.home?.faq?.a4 || '可以，登入用戶可以在歷史記錄中查看每個短網址的點擊次數和最後點擊時間。'}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-bold mb-2">{t.home?.faq?.q5 || '如何刪除我創建的短網址？'}</h3>
+                    <p className="text-gray-600">{t.home?.faq?.a5 || '登入後在歷史記錄中可以找到並刪除您創建的短網址。'}</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* 好處區塊 */}
+              <div className="bg-blue-50 p-6 rounded-lg">
+                <h2 className="text-2xl font-bold mb-4 text-center">{t.home?.benefits?.title || '為什麼選擇我們的短網址服務？'}</h2>
+                <ul className="list-disc pl-6 space-y-2">
+                  <li>{t.home?.benefits?.point1 || '完全免費使用，沒有隱藏收費'}</li>
+                  <li>{t.home?.benefits?.point2 || '不限制點擊次數或到期時間'}</li>
+                  <li>{t.home?.benefits?.point3 || '提供點擊統計和分析'}</li>
+                  <li>{t.home?.benefits?.point4 || '自訂短碼選項（登入用戶）'}</li>
+                  <li>{t.home?.benefits?.point5 || '清晰的歷史記錄'}</li>
+                  <li>{t.home?.benefits?.point6 || '簡單直覺的用戶界面'}</li>
+                  <li>{t.home?.benefits?.point7 || '支持多語言（中文和英文）'}</li>
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
       </main>
       <Footer />

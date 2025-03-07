@@ -38,34 +38,20 @@ export function LanguageProvider({ children }) {
     return null;
   };
   
-  // 從 localStorage 獲取保存的語言，如果沒有則檢測瀏覽器語言
+  // 取得初始語言 - 不再根據瀏覽器偏好自動切換
   const getInitialLanguage = () => {
-    // 首先嘗試從路徑獲取語言
+    // 只從路徑獲取語言，忽略瀏覽器設定
     const pathLocale = getLocaleFromPath();
     if (pathLocale && localeMapping[pathLocale]) {
       return localeMapping[pathLocale];
     }
     
-    if (typeof window === 'undefined') return 'zh-TW'; // 默認語言
-
-    const savedLanguage = localStorage.getItem('language');
-    if (savedLanguage && translations[savedLanguage]) {
-      return savedLanguage;
-    }
-    
-    // 檢測瀏覽器語言
-    const browserLanguage = navigator.language || navigator.userLanguage;
-    
-    // 根據瀏覽器語言選擇最接近的語言版本
-    if (browserLanguage.startsWith('zh')) {
-      return 'zh-TW';
-    } else {
-      return 'en'; // 默認為英文
-    }
+    // 不再檢測瀏覽器語言，而是直接使用預設英文
+    return 'en';
   };
 
-  const [language, setLanguage] = useState('zh-TW'); // 預設繁體中文
-  const [translations_, setTranslations] = useState(translations['zh-TW']);
+  const [language, setLanguage] = useState('en'); // 預設英文
+  const [translations_, setTranslations] = useState(translations['en']);
   
   // 初始化語言
   useEffect(() => {

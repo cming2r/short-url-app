@@ -18,6 +18,27 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "vvrl.cc URL Shortener",
+              "url": "https://vvrl.cc",
+              "description": "Free URL shortener service with tracking and custom URLs",
+              "applicationCategory": "Utility",
+              "operatingSystem": "Any",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              }
+            })
+          }}
+        />
+      </head>
       <body className="flex flex-col min-h-screen bg-white" suppressHydrationWarning={true}>
         <SupabaseProvider>
           <LanguageProvider>

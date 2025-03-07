@@ -20,11 +20,16 @@ export default function Header() {
     // 獲取當前路徑的第一個部分作為語言前綴
     const pathParts = pathname.split('/').filter(Boolean);
     
+    // 添加調試訊息
+    console.log('Current path parts:', pathParts);
+    
     // 如果路徑為空或不是 /tw 開頭，則為英文
     if (pathParts.length === 0 || pathParts[0] !== 'tw') {
+      console.log('Detected locale: en');
       return 'en';
     }
     
+    console.log('Detected locale: tw');
     return 'tw';
   };
   
@@ -148,16 +153,28 @@ export default function Header() {
             <li>
               <Link href={getLocalizedHref('')} className="hover:text-blue-300 transition-colors block py-1">{t.common.home}</Link>
             </li>
-            {session && (
-              <>
-                <li>
-                  <Link href={getLocalizedHref('custom')} className="hover:text-blue-300 transition-colors block py-1">{t.common.customUrl}</Link>
-                </li>
-                <li>
-                  <Link href={getLocalizedHref('history')} className="hover:text-blue-300 transition-colors block py-1">{t.common.history}</Link>
-                </li>
-              </>
-            )}
+            <li>
+              <Link href={getLocalizedHref('custom')} className="hover:text-blue-300 transition-colors block py-1 group relative">
+                {t.common.customUrl}
+                {!session && (
+                  <span className="absolute -top-1 -right-2 flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                  </span>
+                )}
+              </Link>
+            </li>
+            <li>
+              <Link href={getLocalizedHref('history')} className="hover:text-blue-300 transition-colors block py-1 group relative">
+                {t.common.history}
+                {!session && (
+                  <span className="absolute -top-1 -right-2 flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                  </span>
+                )}
+              </Link>
+            </li>
             <li>
               {session ? (
                 <button 

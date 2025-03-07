@@ -16,8 +16,9 @@ function HomePageLoading() {
 
 // 設置根路徑 (英文) 的元數據
 export const metadata = {
-  title: 'URL Shortener - Create Short URLs Instantly',
-  description: 'Free URL shortener service - Create short, memorable links that redirect to your original URL. Simple, fast and reliable.',
+  title: 'URL Shortener - Create Short URLs Instantly | vvrl.cc',
+  description: 'Free URL shortener service - Create short, memorable links that redirect to your original URL. Track clicks, create custom links, and manage your URLs with ease.',
+  keywords: 'URL shortener, short URL, link shortener, URL tracker, custom short links, free link shortener',
   
   // Root path (English) SEO settings - 明確的 hreflang 和規範連結配置
   alternates: {
@@ -26,6 +27,19 @@ export const metadata = {
       'en': 'https://vvrl.cc/',
       'zh-TW': 'https://vvrl.cc/tw',
     },
+  },
+  openGraph: {
+    type: 'website',
+    url: 'https://vvrl.cc/',
+    title: 'URL Shortener - Create Short URLs Instantly',
+    description: 'Free URL shortener service with tracking, custom links, and more. No registration required for basic URL shortening.',
+    images: [{ url: 'https://vvrl.cc/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'URL Shortener - Create Short URLs Instantly',
+    description: 'Free URL shortener service with tracking, custom links, and more.',
+    images: ['https://vvrl.cc/og-image.png'],
   },
 };
 

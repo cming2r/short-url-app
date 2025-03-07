@@ -1,10 +1,9 @@
-import { redirect, notFound } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
-// 檢查這是否是保留路徑或語言代碼
-const RESERVED_PATHS = ['en', 'tw', 'privacy-policy', 'terms', 'custom', 'history', 'not-found'];
-function isReservedPath(code) {
-  return RESERVED_PATHS.includes(code);
+// 檢查這是否是語言代碼 (en/tw)
+function isLocaleCode(code) {
+  return code === 'en' || code === 'tw';
 }
 
 export default async function ShortCodeHandler({ params }) {
@@ -13,23 +12,17 @@ export default async function ShortCodeHandler({ params }) {
   const shortCode = resolvedParams?.shortCode || '';
   console.log('[Server] Processing shortCode:', shortCode);
   
-  // For reserved paths, redirect appropriately
-  if (isReservedPath(shortCode)) {
-    console.log(`[Server] ${shortCode} is a reserved path, redirecting`);
-    
-    // 如果是語言代碼，直接重定向到該語言的首頁
-    if (shortCode === 'en' || shortCode === 'tw') {
-      redirect(`/${shortCode}`);
-    } else {
-      // 其他保留路徑，重定向到英文版本
-      redirect(`/en/${shortCode}`);
-    }
+  // For language routes, this should never be reached because we have explicit routes
+  // but just in case, redirect appropriately
+  if (isLocaleCode(shortCode)) {
+    console.log(`[Server] ${shortCode} is a locale code, redirecting`);
+    redirect(`/${shortCode}`);
   }
   
   // Check for not-found codes
   if (shortCode === 'not-found' || shortCode === '_not-found') {
-    console.log(`[Server] Short code is "${shortCode}", triggering 404 page`);
-    notFound();
+    console.log(`[Server] Short code is "${shortCode}", redirecting to not-found`);
+    redirect('/not-found');
   }
   
   // 查詢數據庫獲取原始 URL
@@ -53,8 +46,7 @@ export default async function ShortCodeHandler({ params }) {
       
       if (customError || !customData) {
         console.error('[Server] Short code not found in any table:', shortCode);
-        // 使用 notFound() 而不是重定向，這會觸發 Next.js 的 404 頁面
-        notFound();
+        redirect('/not-found');
       }
       
       // 更新自定義短網址的點擊計數器
@@ -102,7 +94,6 @@ export default async function ShortCodeHandler({ params }) {
     
   } catch (error) {
     console.error('[Server] Error processing redirect:', error);
-    // 使用 notFound() 而不是重定向，這會觸發 Next.js 的 404 頁面
-    notFound();
+    redirect('/not-found');
   }
 }

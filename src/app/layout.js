@@ -39,6 +39,30 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <head>
+        {/* Organization schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "vvrl.cc",
+              "url": "https://vvrl.cc",
+              "logo": "https://vvrl.cc/logo.png",
+              "description": "Free URL shortener service with custom URLs and analytics",
+              "sameAs": [
+                "https://twitter.com/vvrlcc",
+                "https://facebook.com/vvrlcc"
+              ],
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "contactType": "Customer Support",
+                "email": "support@vvrl.cc"
+              }
+            })
+          }}
+        />
+        {/* WebApplication schema */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -58,6 +82,7 @@ export default function RootLayout({ children }) {
             })
           }}
         />
+        {/* FAQ schema */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

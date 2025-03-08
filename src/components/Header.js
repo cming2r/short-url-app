@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { SupabaseContext } from './SupabaseProvider';
 import { useTranslation } from '@/lib/i18n';
 import enTranslations from '@/lib/i18n/en';
+import BreadcrumbSchema from './BreadcrumbSchema';
 
 export default function Header() {
   // 使用來自 SupabaseProvider 的會話狀態
@@ -106,6 +107,7 @@ export default function Header() {
 
   return (
     <header className="bg-gray-800 text-white p-4">
+      <BreadcrumbSchema />
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
         <div className="flex justify-between items-center w-full md:w-auto mb-4 md:mb-0">
           <h1 className="text-xl font-bold">

@@ -21,10 +21,16 @@ export default function HomePage({ locale }) {
   const searchParams = useSearchParams();
   const code = searchParams.get('code');
   
-  // 強制設定語言為英文
+  // 完全禁用語言設置功能 - 讓頁面保持在當前 URL
   useEffect(() => {
-    changeLanguage('en');
-  }, [changeLanguage]);
+    // 不設定任何語言，保持當前頁面狀態
+    console.log(`禁用自動語言設置，頁面將保持在: ${typeof window !== 'undefined' ? window.location.pathname : '未知'}`);
+    
+    // 防止語言設置影響頁面路徑
+    localStorage.removeItem('language');
+    
+    // 不呼叫 changeLanguage 函數
+  }, []);
   
   // 處理 Google 登入回調
   useEffect(() => {

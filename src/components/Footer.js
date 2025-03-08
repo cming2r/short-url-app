@@ -22,36 +22,38 @@ export default function Footer() {
             <select
               value={currentLocale}
               onChange={(e) => {
-                // 取得目前完整路徑
-                const path = pathname;
-                // 根據當前語言決定路徑格式
-                const isLocalized = path.startsWith('/tw/') || path.startsWith('/en/');
-                
-                // 決定新路徑
-                let newPath;
+                // 新的語言選擇
                 const newLocale = e.target.value;
                 
-                // 如果是主頁
+                // 當前路徑
+                const path = pathname;
+                
+                // 用正則表達式分解路徑
+                const pathParts = path.split('/').filter(Boolean);
+                console.log('路徑部分:', pathParts);
+                
+                let newPath;
+                
+                // 特殊處理主頁
                 if (path === '/' || path === '/tw' || path === '/en') {
-                  newPath = newLocale === 'en' ? '/' : `/${newLocale}`;
+                  newPath = newLocale === 'en' ? '/' : '/tw';
                 }
-                // 如果是語言路徑
-                else if (isLocalized) {
-                  const pathParts = path.split('/').filter(Boolean);
-                  const restPath = pathParts.slice(1).join('/');
-                  newPath = newLocale === 'en' ? `/${restPath}` : `/${newLocale}/${restPath}`;
-                }
-                // 如果是純英文路徑
+                // 其他所有路徑
                 else {
-                  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-                  newPath = newLocale === 'en' ? path : `/${newLocale}/${cleanPath}`;
+                  // 如果路徑以 /tw/ 或 /en/ 開頭，提取路徑的其餘部分
+                  let pagePath = path;
+                  if (pathParts.length > 0 && (pathParts[0] === 'tw' || pathParts[0] === 'en')) {
+                    pagePath = '/' + pathParts.slice(1).join('/');
+                  }
+                  
+                  // 根據所選語言添加正確的前綴
+                  newPath = newLocale === 'en' ? pagePath : `/tw${pagePath}`;
                 }
                 
-                console.log(`切換語言: ${currentLocale} -> ${newLocale}, 路徑: ${path} -> ${newPath}`);
+                console.log(`語言切換處理: ${path} → ${newPath}`);
                 
-                // 更新語言並跳轉
-                changeLanguage(newLocale);
-                window.location.href = newPath;
+                // 使用替換方法而非重定向，更新整個URL
+                window.location.replace(newPath);
               }}
               className="bg-gray-700 text-white px-2 py-1 rounded border border-gray-600"
             >

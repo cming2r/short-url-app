@@ -66,13 +66,7 @@ export function middleware(request) {
     return NextResponse.next();
   }
   
-  // 特別處理: 從英文主頁導航到 /custom 和 /history
-  const referer = request.headers.get('referer');
-  if ((pathname === '/custom' || pathname === '/history') && 
-      referer && (referer.endsWith('/') || referer.endsWith('localhost:3000'))) {
-    console.log(`從主頁導航: ${referer} -> ${pathname}, 強制使用英文版`);
-    return NextResponse.next();
-  }
+  // 移除特殊主頁導航處理，讓路由系統自然運作
 
   // 專門為短網址格式添加檢測 (6-8字符的字母數字)
   const shortCodeRegex = /^\/[a-zA-Z0-9]{6,8}$/;

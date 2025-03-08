@@ -21,13 +21,9 @@ export const metadata = {
   description: 'Free URL shortener service - Create short, memorable links that redirect to your original URL. Track clicks, create custom links, and manage your URLs with ease.',
   keywords: 'URL shortener, short URL, link shortener, URL tracker, custom short links, free link shortener',
   
-  // 設置多語言 SEO 配置 - 英文版為標準版本，中文版為備選版本
+  // 只有英文版的規範連結配置
   alternates: {
     canonical: 'https://vvrl.cc/',
-    languages: {
-      'en': 'https://vvrl.cc/',
-      'zh-TW': 'https://vvrl.cc/tw',
-    },
   },
   openGraph: {
     type: 'website',
@@ -44,36 +40,12 @@ export const metadata = {
   },
 };
 
-// 清除客戶端 localStorage 的腳本 (將在客戶端執行)
-const clearLanguagePreferencesScript = `
+// 簡單清除語言設置的腳本
+const clearLanguageScript = `
   if (typeof window !== 'undefined' && window.location.pathname === '/') {
-    console.log('主頁 - 強制英文模式');
+    // 在首頁上清除語言偏好，確保不會自動切換
     localStorage.removeItem('language');
-    
-    // 強制設置為英文
     document.documentElement.lang = 'en';
-    localStorage.setItem('forceEnglish', 'true');
-    
-    // 監聽所有導航連結點擊
-    document.addEventListener('click', function(e) {
-      if (e.target.tagName === 'A' || e.target.closest('a')) {
-        const link = e.target.tagName === 'A' ? e.target : e.target.closest('a');
-        const href = link.getAttribute('href');
-        
-        // 檢查是非相對路徑且不是外部連結
-        if (href && href.startsWith('/') && !href.startsWith('//')) {
-          // 如果是英文主要頁面，強制使用英文URL
-          if (href === '/custom' || href === '/history' || 
-              href === '/privacy-policy' || href === '/terms') {
-            console.log('強制使用英文路徑:', href);
-          }
-          // 保留中文路徑
-          else if (href.startsWith('/tw/')) {
-            console.log('保留中文路徑:', href);
-          }
-        }
-      }
-    });
   }
 `;
 
@@ -81,8 +53,8 @@ export default function Home() {
   // 根路徑直接顯示英文版
   return (
     <>
-      {/* 插入自動清除腳本 */}
-      <script dangerouslySetInnerHTML={{ __html: clearLanguagePreferencesScript }} />
+      {/* 插入簡單的語言清除腳本 */}
+      <script dangerouslySetInnerHTML={{ __html: clearLanguageScript }} />
       <Suspense fallback={<HomePageLoading />}>
         <ClientPage locale="en" />
       </Suspense>

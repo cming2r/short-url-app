@@ -23,10 +23,16 @@ export default function HistoryPageClient({ locale }) {
   const [currentPage, setCurrentPage] = useState(1);
   const urlsPerPage = 15; // 每頁顯示15條記錄
 
-  // 設定語言
+  // 完全禁用語言設置功能 - 讓頁面保持在當前 URL
   useEffect(() => {
-    changeLanguage(locale);
-  }, [changeLanguage, locale]);
+    // 不設定任何語言，保持當前頁面狀態
+    console.log(`禁用自動語言設置，頁面將保持在: ${typeof window !== 'undefined' ? window.location.pathname : '未知'}`);
+    
+    // 防止語言設置影響頁面路徑
+    localStorage.removeItem('language');
+    
+    // 不呼叫 changeLanguage 函數
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {

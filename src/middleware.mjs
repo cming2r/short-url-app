@@ -36,22 +36,20 @@ export function middleware(request) {
     return NextResponse.next();
   }
   
-  // 處理 /en 和 /tw 路徑 - 全部重定向到根路徑
-  if (pathname === '/en' || pathname === '/tw') {
-    console.log(`Redirecting ${pathname} to root path (/) for English only`);
+  // 處理 /en 路徑 - 重定向到根路徑
+  if (pathname === '/en') {
+    console.log(`Redirecting ${pathname} to root path (/) for English`);
     // 使用 301 永久重定向到根路徑
     return NextResponse.redirect(new URL('/', request.url), 301);
   }
   
-  // 處理所有 /[locale]/ 路徑 - 全部重定向到相對應的英文路徑
-  const localeRegex = /^\/(en|tw)\/(.+)$/;
-  const match = pathname.match(localeRegex);
-  
-  if (match) {
-    const restPath = match[2];
-    console.log(`Redirecting ${pathname} to /${restPath} for English only`);
-    return NextResponse.redirect(new URL(`/${restPath}`, request.url), 301);
+  // 保留 /tw 路徑和所有 /tw/ 開頭的路徑，允許中文版本存在
+  if (pathname === '/tw' || pathname.startsWith('/tw/')) {
+    console.log(`Allowing Chinese path: ${pathname}`);
+    return NextResponse.next();
   }
+  
+  // 不再處理 /[locale]/ 路徑的重定向
   
   // 特別捕獲直接的 /[locale]/ 請求 (這些應該無法通過分隔符匹配)
   if (pathname.startsWith('/[locale]/')) {
@@ -61,10 +59,18 @@ export function middleware(request) {
     return NextResponse.redirect(new URL(`/${rest}`, request.url), 301);
   }
   
-  // 英文版頁面已經直接在 /custom 和 /history 實現，不需要重定向
+  // 確保英文版頁面路徑保持不變，強制在主頁及直接訪問 /custom, /history 等時使用英文版
   if (pathname === '/custom' || pathname === '/history' || 
       pathname === '/privacy-policy' || pathname === '/terms') {
     console.log(`使用英文版頁面: ${pathname}`);
+    return NextResponse.next();
+  }
+  
+  // 特別處理: 從英文主頁導航到 /custom 和 /history
+  const referer = request.headers.get('referer');
+  if ((pathname === '/custom' || pathname === '/history') && 
+      referer && (referer.endsWith('/') || referer.endsWith('localhost:3000'))) {
+    console.log(`從主頁導航: ${referer} -> ${pathname}, 強制使用英文版`);
     return NextResponse.next();
   }
 

@@ -29,11 +29,42 @@ export const metadata = {
   },
 };
 
+// 強制使用英文的客戶端腳本
+const forceEnglishScript = `
+  (function() {
+    // 檢查當前是否正好在 /custom 路徑（不是 /tw/custom）
+    if (window.location.pathname === '/custom') {
+      console.log('強制使用英文版 /custom');
+      localStorage.removeItem('language');
+      document.documentElement.lang = 'en';
+      
+      // 檢查是否有重定向
+      const checkRedirectInterval = setInterval(function() {
+        // 如果 URL 已經改變，但仍然在相同頁面上
+        if (window.location.pathname.includes('/tw/custom')) {
+          console.log('檢測到重定向到 /tw/custom，強制回到 /custom');
+          window.location.href = '/custom';
+          clearInterval(checkRedirectInterval);
+        }
+      }, 100);
+      
+      // 5秒後清除檢查
+      setTimeout(function() {
+        clearInterval(checkRedirectInterval);
+      }, 5000);
+    }
+  })();
+`;
+
 // 伺服器組件作為入口，包裝客戶端組件
 export default async function CustomPage() {
   return (
-    <Suspense fallback={<CustomPageLoading />}>
-      <CustomUrlPageClient locale="en" />
-    </Suspense>
+    <>
+      {/* 插入強制英文腳本 */}
+      <script dangerouslySetInnerHTML={{ __html: forceEnglishScript }} />
+      <Suspense fallback={<CustomPageLoading />}>
+        <CustomUrlPageClient locale="en" />
+      </Suspense>
+    </>
   );
 }

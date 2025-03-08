@@ -38,15 +38,34 @@ export function LanguageProvider({ children }) {
     return null;
   };
   
-  // 取得初始語言 - 不再根據瀏覽器偏好自動切換
+  // 取得初始語言 - 嚴格依據路徑決定，默認英文
   const getInitialLanguage = () => {
-    // 只從路徑獲取語言，忽略瀏覽器設定
+    // 當前瀏覽器路徑
+    const browserPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    console.log(`初始化語言 - 當前瀏覽器路徑: ${browserPath}`);
+    
+    // 嚴格檢測路徑，移除所有自動語言檢測
+    if (browserPath === '/' || 
+        browserPath === '/custom' || 
+        browserPath === '/history' || 
+        browserPath === '/privacy-policy' || 
+        browserPath === '/terms') {
+      console.log(`檢測到英文路徑: ${browserPath}, 強制使用英文`);
+      if (typeof window !== 'undefined') {
+        // 清除可能存在的語言偏好，防止後續自動轉址
+        localStorage.removeItem('language');
+      }
+      return 'en';
+    }
+    
+    // 只從路徑獲取語言
     const pathLocale = getLocaleFromPath();
     if (pathLocale && localeMapping[pathLocale]) {
+      console.log(`檢測到路徑語言標記: ${pathLocale}`);
       return localeMapping[pathLocale];
     }
     
-    // 不再檢測瀏覽器語言，而是直接使用預設英文
+    // 默認為英文
     return 'en';
   };
 
@@ -58,12 +77,13 @@ export function LanguageProvider({ children }) {
     setLanguage(getInitialLanguage());
   }, []);
   
-  // 當路徑變化時更新語言
+  // 當路徑變化時，根據路徑更新語言
   useEffect(() => {
     const pathLocale = getLocaleFromPath();
     if (pathLocale && localeMapping[pathLocale]) {
       const newLang = localeMapping[pathLocale];
       if (newLang !== language) {
+        console.log(`根據路徑切換語言: ${pathname} -> ${newLang}`);
         setLanguage(newLang);
       }
     }
@@ -79,19 +99,67 @@ export function LanguageProvider({ children }) {
     }
   }, [language]);
 
-  // 切換語言函數
+  // 切換語言函數 - 接受語言參數並切換，但考慮當前路徑
   const changeLanguage = (lang) => {
     // 檢查是否為 URL 語言代碼，如果是則轉換為內部語言代碼
     const internalLang = localeMapping[lang] || lang;
+    
+    // 獲取當前路徑
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    console.log(`changeLanguage - 當前路徑: ${currentPath}, 請求語言: ${lang}`);
+    
+    // 檢查是否在關鍵英文路徑上
+    const isEnglishPath = currentPath === '/' || 
+                          currentPath === '/custom' || 
+                          currentPath === '/history' || 
+                          currentPath === '/privacy-policy' || 
+                          currentPath === '/terms';
 
+    // 特別處理案例：當在英文路徑上時，只允許設置為英文
+    if (isEnglishPath && lang !== 'en') {
+      console.log(`在英文路徑上 (${currentPath}) 忽略語言切換請求: ${lang}`);
+      // 清除可能存在的語言偏好
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('language');
+      }
+      // 強制維持英文
+      setLanguage('en');
+      return;
+    }
+    
+    // 正常處理其他情況
     if (translations[internalLang]) {
+      console.log(`切換語言至: ${internalLang}`);
       setLanguage(internalLang);
+      
+      // 保存語言偏好到 localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('language', internalLang);
+      }
     }
   };
 
   // 獲取當前語言的 URL 路徑代碼
   const getUrlLocale = () => {
-    return urlLocaleMapping[language] || 'tw'; // 默認為 tw
+    // 檢查當前路徑
+    if (typeof window !== 'undefined') {
+      const currentPath = window.location.pathname;
+      
+      // 在所有英文路徑上，強制使用英文
+      if (currentPath === '/' || 
+          currentPath === '/custom' || 
+          currentPath === '/history' || 
+          currentPath === '/privacy-policy' || 
+          currentPath === '/terms') {
+        console.log(`getUrlLocale - 檢測到英文路徑: ${currentPath}, 返回 'en'`);
+        return 'en';
+      }
+    }
+    
+    // 依據語言返回對應代碼
+    const locale = urlLocaleMapping[language] || 'en';
+    console.log(`getUrlLocale - 返回語言代碼: ${locale}, 當前語言: ${language}`);
+    return locale;
   };
 
   return (

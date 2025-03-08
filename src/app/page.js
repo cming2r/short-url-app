@@ -44,11 +44,48 @@ export const metadata = {
   },
 };
 
+// 清除客戶端 localStorage 的腳本 (將在客戶端執行)
+const clearLanguagePreferencesScript = `
+  if (typeof window !== 'undefined' && window.location.pathname === '/') {
+    console.log('主頁 - 強制英文模式');
+    localStorage.removeItem('language');
+    
+    // 強制設置為英文
+    document.documentElement.lang = 'en';
+    localStorage.setItem('forceEnglish', 'true');
+    
+    // 監聽所有導航連結點擊
+    document.addEventListener('click', function(e) {
+      if (e.target.tagName === 'A' || e.target.closest('a')) {
+        const link = e.target.tagName === 'A' ? e.target : e.target.closest('a');
+        const href = link.getAttribute('href');
+        
+        // 檢查是非相對路徑且不是外部連結
+        if (href && href.startsWith('/') && !href.startsWith('//')) {
+          // 如果是英文主要頁面，強制使用英文URL
+          if (href === '/custom' || href === '/history' || 
+              href === '/privacy-policy' || href === '/terms') {
+            console.log('強制使用英文路徑:', href);
+          }
+          // 保留中文路徑
+          else if (href.startsWith('/tw/')) {
+            console.log('保留中文路徑:', href);
+          }
+        }
+      }
+    });
+  }
+`;
+
 export default function Home() {
   // 根路徑直接顯示英文版
   return (
-    <Suspense fallback={<HomePageLoading />}>
-      <ClientPage locale="en" />
-    </Suspense>
+    <>
+      {/* 插入自動清除腳本 */}
+      <script dangerouslySetInnerHTML={{ __html: clearLanguagePreferencesScript }} />
+      <Suspense fallback={<HomePageLoading />}>
+        <ClientPage locale="en" />
+      </Suspense>
+    </>
   );
 }

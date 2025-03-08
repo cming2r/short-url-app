@@ -205,7 +205,74 @@ export default function HistoryPageClient({ locale }) {
             <h1 className="text-2xl font-bold text-center mb-4">{t.history?.title || '歷史記錄'}</h1>
 
             {!session ? (
-              <p className="text-center">{t.history?.loginRequired || '請先登入以查看歷史記錄'}</p>
+              <>
+                <div className="text-center mb-6 p-4 bg-blue-50 rounded-lg">
+                  <p className="text-lg font-medium text-blue-800 mb-4">{t.history?.loginRequired || 'Please login to view your URL history'}</p>
+                  
+                  {/* 介紹區塊 - 現代風格 */}
+                  <div className="mt-8">
+                    <h2 className="text-xl font-bold mb-4 text-gray-800">{t.history?.featureTitle || 'URL History Features'}</h2>
+                    <p className="text-gray-600 mb-6">{t.history?.featureDescription || 'Track and manage all your shortened URLs in one convenient dashboard.'}</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                      <div className="bg-white p-4 rounded-lg shadow">
+                        <div className="text-blue-500 mb-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                          </svg>
+                        </div>
+                        <h3 className="font-bold text-center mb-2">{t.history?.completeHistory?.title || 'Complete History'}</h3>
+                        <p className="text-sm">{t.history?.completeHistory?.description || 'Access all your shortened URLs in one place, sorted by creation date.'}</p>
+                      </div>
+                      
+                      <div className="bg-white p-4 rounded-lg shadow">
+                        <div className="text-green-500 mb-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                          </svg>
+                        </div>
+                        <h3 className="font-bold text-center mb-2">{t.history?.analytics?.title || 'Analytics'}</h3>
+                        <p className="text-sm">{t.history?.analytics?.description || 'Track engagement with click counts for each of your shortened URLs.'}</p>
+                      </div>
+                      
+                      <div className="bg-white p-4 rounded-lg shadow">
+                        <div className="text-purple-500 mb-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </div>
+                        <h3 className="font-bold text-center mb-2">{t.history?.urlManagement?.title || 'URL Management'}</h3>
+                        <p className="text-sm">{t.history?.urlManagement?.description || 'Copy and delete your URLs with easy one-click actions.'}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-8 bg-blue-100 p-4 rounded-lg">
+                      <h3 className="font-semibold mb-2">{t.history?.benefits?.title || 'Benefits of URL History Tracking'}</h3>
+                      <ul className="text-sm text-left list-disc pl-5 space-y-1">
+                        {t.history?.benefits?.points ? (
+                          t.history.benefits.points.map((point, index) => (
+                            <li key={index}>{point}</li>
+                          ))
+                        ) : (
+                          <>
+                            <li>Keep track of all shortened URLs you've created</li>
+                            <li>Monitor which links generate the most engagement</li>
+                            <li>Easily access your most important links</li>
+                            <li>Delete outdated links that are no longer needed</li>
+                            <li>See the title and original URL for each shortened link</li>
+                          </>
+                        )}
+                      </ul>
+                    </div>
+                    
+                    <div className="mt-8 p-4 bg-green-50 rounded-lg border border-green-200">
+                      <h3 className="font-semibold text-green-800 mb-2">{t.history?.proTip?.title || 'Pro Tip'}</h3>
+                      <p className="text-sm">{t.history?.proTip?.description || 'Login once and all your shortened URLs will be automatically saved to your history, allowing you to track their performance over time.'}</p>
+                    </div>
+                  </div>
+                </div>
+              </>
             ) : loading ? (
               <p className="text-center">{t.common?.loading || '載入中...'}</p>
             ) : (

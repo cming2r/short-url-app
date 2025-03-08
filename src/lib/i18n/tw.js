@@ -112,6 +112,31 @@ export default {
     noTitle: '無標題',
     createdAt: '產生時間',
     clickCount: '點擊次數',
+    // 介紹區塊相關翻譯
+    featureTitle: '自訂短網址功能',
+    featureDescription: '創建屬於您的個性化短網址，使用能反映您品牌或內容的自訂短碼。',
+    personalBranding: {
+      title: '個人品牌化',
+      description: '創建專業、具品牌特色的短連結，增強您的線上身份。',
+    },
+    memorableUrls: {
+      title: '易記的網址',
+      description: '選擇容易記住的自訂短碼，讓您的受眾不易忘記。',
+    },
+    trackPerformance: {
+      title: '效能追蹤',
+      description: '隨時監控您的自訂短網址的點擊量和互動情況。',
+    },
+    howItWorks: {
+      title: '自訂短網址如何運作',
+      steps: [
+        '登入您的帳戶以使用此功能',
+        '輸入您想要縮短的長網址',
+        '建立自訂短碼（4-5個字符，必須包含至少一個字母和一個數字）',
+        '您的自訂短網址將被保存並與您的帳戶連結',
+        '在歷史記錄中追蹤點擊次數等效能指標',
+      ],
+    },
   },
   history: {
     title: '歷史記錄',
@@ -134,6 +159,35 @@ export default {
     copyError: '複製短網址失敗',
     created: '產生時間',
     clicks: '點擊次數',
+    // 介紹區塊相關翻譯
+    featureTitle: '網址歷史功能',
+    featureDescription: '在一個方便的儀表板中追蹤和管理您的所有縮短網址。',
+    completeHistory: {
+      title: '完整歷史',
+      description: '在一個地方查看所有縮短網址，按創建日期排序。',
+    },
+    analytics: {
+      title: '數據分析',
+      description: '追蹤每個縮短網址的點擊數和互動情況。',
+    },
+    urlManagement: {
+      title: '網址管理',
+      description: '透過簡單的單擊操作，複製和刪除您的網址。',
+    },
+    benefits: {
+      title: '網址歷史追蹤的好處',
+      points: [
+        '追蹤您創建的所有縮短網址',
+        '監測哪些連結產生最多互動',
+        '輕鬆訪問您最重要的連結',
+        '刪除不再需要的過時連結',
+        '查看每個縮短連結的標題和原始網址',
+      ],
+    },
+    proTip: {
+      title: '專業提示',
+      description: '登入一次，所有縮短的網址將自動保存到您的歷史記錄中，讓您可以長期追蹤其效能。',
+    },
   },
   errors: {
     invalidUrl: '請輸入有效的 URL（需包含 http:// 或 https://）',

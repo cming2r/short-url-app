@@ -112,6 +112,31 @@ export default {
     noTitle: 'No Title',
     createdAt: 'Created at',
     clickCount: 'Click count',
+    // Introduction block translations
+    featureTitle: 'Custom URL Feature',
+    featureDescription: 'Create your own personalized short URLs with memorable custom codes that reflect your brand or content.',
+    personalBranding: {
+      title: 'Personal Branding',
+      description: 'Create professional, branded links that reinforce your identity online.',
+    },
+    memorableUrls: {
+      title: 'Memorable URLs',
+      description: 'Choose easy-to-remember custom codes that your audience won\'t forget.',
+    },
+    trackPerformance: {
+      title: 'Track Performance',
+      description: 'Monitor clicks and engagement with your custom short URLs over time.',
+    },
+    howItWorks: {
+      title: 'How Custom URLs Work',
+      steps: [
+        'Login to your account to access this feature',
+        'Enter the long URL you want to shorten',
+        'Create a custom code (4-5 characters, must include at least one letter and one number)',
+        'Your custom URL will be saved and linked to your account',
+        'Track performance metrics like click count in your history',
+      ],
+    },
   },
   history: {
     title: 'History',
@@ -134,6 +159,35 @@ export default {
     copyError: 'Failed to copy short URL',
     created: 'Created at',
     clicks: 'Clicks',
+    // Introduction block translations
+    featureTitle: 'URL History Features',
+    featureDescription: 'Track and manage all your shortened URLs in one convenient dashboard.',
+    completeHistory: {
+      title: 'Complete History',
+      description: 'Access all your shortened URLs in one place, sorted by creation date.',
+    },
+    analytics: {
+      title: 'Analytics',
+      description: 'Track engagement with click counts for each of your shortened URLs.',
+    },
+    urlManagement: {
+      title: 'URL Management',
+      description: 'Copy and delete your URLs with easy one-click actions.',
+    },
+    benefits: {
+      title: 'Benefits of URL History Tracking',
+      points: [
+        'Keep track of all shortened URLs you\'ve created',
+        'Monitor which links generate the most engagement',
+        'Easily access your most important links',
+        'Delete outdated links that are no longer needed',
+        'See the title and original URL for each shortened link',
+      ],
+    },
+    proTip: {
+      title: 'Pro Tip',
+      description: 'Login once and all your shortened URLs will be automatically saved to your history, allowing you to track their performance over time.',
+    },
   },
   errors: {
     invalidUrl: 'Please enter a valid URL (must include http:// or https://)',

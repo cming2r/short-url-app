@@ -1,6 +1,7 @@
-// 根路徑頁面 - 直接顯示英文內容
+// 根路徑頁面 - 只使用英文版
 import { Suspense } from 'react';
-import ClientPage from './[locale]/components/HomePage';
+// 複製 HomePage.js 到 components/HomePage.js 而不是使用 [locale] 路徑
+import ClientPage from '@/components/HomePage';
 
 // 首頁懸掛狀態顯示元件
 function HomePageLoading() {
@@ -20,7 +21,7 @@ export const metadata = {
   description: 'Free URL shortener service - Create short, memorable links that redirect to your original URL. Track clicks, create custom links, and manage your URLs with ease.',
   keywords: 'URL shortener, short URL, link shortener, URL tracker, custom short links, free link shortener',
   
-  // Root path (English) SEO settings - 明確的 hreflang 和規範連結配置
+  // 設置多語言 SEO 配置 - 英文版為標準版本，中文版為備選版本
   alternates: {
     canonical: 'https://vvrl.cc/',
     languages: {

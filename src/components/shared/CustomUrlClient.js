@@ -311,7 +311,68 @@ export default function CustomUrlClient({ locale }) {
             <h1 className="text-2xl font-bold text-center mb-4">{t.custom?.title || '自訂短網址'}</h1>
 
             {!session ? (
-              <p className="text-center">{t.custom?.loginRequired || '請先登入以自定義短網址'}</p>
+              <>
+                <div className="text-center mb-6 p-4 bg-blue-50 rounded-lg">
+                  <p className="text-lg font-medium text-blue-800 mb-4">{t.custom?.loginRequired || 'Please login to create custom short URLs'}</p>
+                  
+                  {/* 介紹區塊 - 現代風格 */}
+                  <div className="mt-8">
+                    <h2 className="text-xl font-bold mb-4 text-gray-800">{t.custom?.featureTitle || 'Custom URL Feature'}</h2>
+                    <p className="text-gray-600 mb-6">{t.custom?.featureDescription || 'Create your own personalized short URLs with memorable custom codes that reflect your brand or content.'}</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                      <div className="bg-white p-4 rounded-lg shadow">
+                        <div className="text-blue-500 mb-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <h3 className="font-bold text-center mb-2">{t.custom?.personalBranding?.title || 'Personal Branding'}</h3>
+                        <p className="text-sm">{t.custom?.personalBranding?.description || 'Create professional, branded links that reinforce your identity online.'}</p>
+                      </div>
+                      
+                      <div className="bg-white p-4 rounded-lg shadow">
+                        <div className="text-green-500 mb-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <h3 className="font-bold text-center mb-2">{t.custom?.memorableUrls?.title || 'Memorable URLs'}</h3>
+                        <p className="text-sm">{t.custom?.memorableUrls?.description || 'Choose easy-to-remember custom codes that your audience won\'t forget.'}</p>
+                      </div>
+                      
+                      <div className="bg-white p-4 rounded-lg shadow">
+                        <div className="text-purple-500 mb-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                          </svg>
+                        </div>
+                        <h3 className="font-bold text-center mb-2">{t.custom?.trackPerformance?.title || 'Track Performance'}</h3>
+                        <p className="text-sm">{t.custom?.trackPerformance?.description || 'Monitor clicks and engagement with your custom short URLs over time.'}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-8 bg-blue-100 p-4 rounded-lg">
+                      <h3 className="font-semibold mb-2">{t.custom?.howItWorks?.title || 'How Custom URLs Work'}</h3>
+                      <ul className="text-sm text-left list-disc pl-5 space-y-1">
+                        {t.custom?.howItWorks?.steps ? (
+                          t.custom.howItWorks.steps.map((step, index) => (
+                            <li key={index}>{step}</li>
+                          ))
+                        ) : (
+                          <>
+                            <li>Login to your account to access this feature</li>
+                            <li>Enter the long URL you want to shorten</li>
+                            <li>Create a custom code (4-5 characters, must include at least one letter and one number)</li>
+                            <li>Your custom URL will be saved and linked to your account</li>
+                            <li>Track performance metrics like click count in your history</li>
+                          </>
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </>
             ) : loading ? (
               <p className="text-center">{t.common?.loading || '載入中...'}</p>
             ) : (

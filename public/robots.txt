@@ -1,0 +1,15 @@
+# *
+User-agent: *
+Allow: /
+
+# 禁止爬取 API 路徑
+Disallow: /api/
+Disallow: /_shortcuts/
+Disallow: /_next/
+
+# Host
+Host: https://vvrl.cc
+
+# Sitemaps
+Sitemap: https://vvrl.cc/sitemap.xml
+Sitemap: https://vvrl.cc/server-sitemap.xml

@@ -6,6 +6,26 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 // 基本元數據 - 具體元數據將由子布局提供
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://vvrl.cc'),
+  title: {
+    template: '%s | vvrl.cc URL Shortener',
+    default: 'Free URL Shortener with Custom URLs & Analytics | vvrl.cc',
+  },
+  description: 'Shorten long URLs into memorable links. Track clicks, customize your short URLs, and manage your links with our free URL shortening service.',
+  keywords: ['URL shortener', 'link shortener', 'short URL', 'custom URL', 'URL analytics', 'free URL service', 'URL tracking', 'link management'],
+  authors: [{ name: 'vvrl.cc Team' }],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
+  },
 };
 
 export const viewport = {

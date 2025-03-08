@@ -43,12 +43,21 @@ export function middleware(request) {
     return NextResponse.redirect(new URL('/', request.url), 301);
   }
   
-  // 處理 /en/* 和 /tw/* 路徑 - 全部重定向到相對應的英文路徑
-  if (pathname.startsWith('/en/') || pathname.startsWith('/tw/')) {
+  // 處理所有 /[locale]/ 路徑 - 全部重定向到相對應的英文路徑
+  const localeRegex = /^\/(en|tw)\/(.+)$/;
+  const match = pathname.match(localeRegex);
+  
+  if (match) {
+    const restPath = match[2];
+    console.log(`Redirecting ${pathname} to /${restPath} for English only`);
+    return NextResponse.redirect(new URL(`/${restPath}`, request.url), 301);
+  }
+  
+  // 特別捕獲直接的 /[locale]/ 請求 (這些應該無法通過分隔符匹配)
+  if (pathname.startsWith('/[locale]/')) {
     const parts = pathname.split('/');
     const rest = parts.slice(2).join('/');
-    
-    console.log(`Redirecting ${pathname} to /${rest} for English only`);
+    console.log(`Redirecting special dynamic path ${pathname} to /${rest}`);
     return NextResponse.redirect(new URL(`/${rest}`, request.url), 301);
   }
   

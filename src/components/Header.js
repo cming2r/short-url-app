@@ -90,33 +90,44 @@ export default function Header() {
     }
   };
   
-  // 構建頁面 URL 函數，適用於新的 URL 結構（根路徑為英文）
+  // 構建頁面 URL 函數，完全修復
   function getLocalizedHref(path) {
-    // 移除開頭的 /
+    // 清理路徑
     const cleanPath = path.startsWith('/') ? path.substring(1) : path;
     
-    // 添加調試信息
-    console.log('Building URL for path:', path);
-    console.log('Current locale:', currentLocale);
+    // 添加詳細調試
+    console.log('----------');
+    console.log('getLocalizedHref called with path:', path);
+    console.log('Current pathname:', pathname);
     
-    // 英文版使用根路徑，無需前綴
-    if (currentLocale === 'en') {
+    // 完全簡化邏輯：
+    // 1. 如果當前在根路徑(/)，返回純英文路徑，確保在英文版時鏈接不會跳到中文版
+    // 2. 如果當前是中文路徑(/tw或/tw/*)，則生成中文版URL
+    // 3. 其他所有情況(包括/custom,/history)，生成英文版URL
+    
+    const isChinesePath = pathname === '/tw' || pathname.startsWith('/tw/');
+    console.log('Is current path Chinese?', isChinesePath);
+    
+    // 根據當前路徑生成相應語言的鏈接
+    if (isChinesePath) {
+      // 在中文頁面，生成中文鏈接
       if (cleanPath === '') {
-        console.log('Returning English homepage: /');
-        return '/';
+        console.log('Generating Chinese home link: /tw');
+        return '/tw';
+      } else {
+        console.log(`Generating Chinese path link: /tw/${cleanPath}`);
+        return `/tw/${cleanPath}`;
       }
-      console.log(`Returning English path: /${cleanPath}`);
-      return `/${cleanPath}`;
-    } 
-    
-    // 中文版需要 /tw 前綴
-    if (cleanPath === '') {
-      console.log('Returning Chinese homepage: /tw');
-      return `/tw`;
+    } else {
+      // 在英文頁面或其他頁面，生成英文鏈接
+      if (cleanPath === '') {
+        console.log('Generating English home link: /');
+        return '/';
+      } else {
+        console.log(`Generating English path link: /${cleanPath}`);
+        return `/${cleanPath}`;
+      }
     }
-    
-    console.log(`Returning Chinese path: /tw/${cleanPath}`);
-    return `/tw/${cleanPath}`;
   }
 
   // 處理語言切換

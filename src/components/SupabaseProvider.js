@@ -55,29 +55,54 @@ export function SupabaseProvider({ children }) {
       // 如果是從認證流程返回且已經有會話或有回調代碼，執行特殊處理
       if ((isAuthReturn || hasCodeParam) && session) {
         console.log('從認證流程返回，已有會話，處理頁面更新');
+        // 立即清除認證標記，防止重複處理
         localStorage.removeItem('authInProgress');
         
-        // 處理 URL 清理 - 刪除 code 和 error 參數
-        if (hasCodeParam && isBrowser) {
-          const cleanUrl = new URL(window.location.href);
-          cleanUrl.searchParams.delete('code');
-          cleanUrl.searchParams.delete('error');
-          window.history.replaceState({}, '', cleanUrl.toString());
-        }
-        
-        // 如果有保存的原始路徑，確保返回到正確的路徑
-        const savedPath = localStorage.getItem('authStartPath');
-        if (savedPath && isBrowser) {
-          localStorage.removeItem('authStartPath');
-          console.log('恢復到原始路徑:', savedPath);
-          
-          // 使用replaceState而不是reload或redirect，避免重定向循環
-          if (window.location.pathname !== savedPath) {
-            console.log('使用history.replaceState切換到原始路徑:', savedPath);
-            window.history.replaceState({}, '', savedPath);
+        try {
+          // 處理 URL 清理 - 刪除 code 和 error 參數，但保留當前路徑
+          if (hasCodeParam && isBrowser) {
+            console.log('清理 URL 中的認證參數');
+            const cleanUrl = new URL(window.location.href);
+            cleanUrl.searchParams.delete('code');
+            cleanUrl.searchParams.delete('error');
+            // 使用 replaceState 而不是 reload，避免刷新循環
+            window.history.replaceState({}, '', cleanUrl.toString());
           }
+          
+          // 獲取保存的原始路徑，如果存在則恢復，但避免導致循環
+          const savedPath = localStorage.getItem('authStartPath');
+          
+          // 只有在有保存路徑且與當前路徑不同時才恢復
+          if (savedPath && isBrowser && window.location.pathname !== savedPath) {
+            console.log('檢測到保存的原始路徑:', savedPath);
+            localStorage.removeItem('authStartPath'); // 立即清除，防止重複處理
+            
+            // 關鍵改進：檢查是否已經處於正確的路徑
+            // 如果當前路徑包含 "code=" 查詢參數但路徑正確，則不需要跳轉
+            const currentPathWithoutQuery = window.location.pathname;
+            
+            if (currentPathWithoutQuery !== savedPath) {
+              console.log('恢復到原始路徑 (無重載):', savedPath);
+              
+              // 使用 replaceState 而非 location.href，避免觸發整頁重載
+              window.history.replaceState(
+                {}, 
+                '', 
+                savedPath
+              );
+            } else {
+              console.log('當前路徑已經正確，不需要跳轉');
+            }
+          } else {
+            console.log('無需恢復路徑或路徑已正確');
+            localStorage.removeItem('authStartPath');
+          }
+        } catch (error) {
+          console.error('處理認證重定向時出錯:', error);
+          // 出錯時清理所有標記，確保不會陷入循環
+          localStorage.removeItem('authInProgress');
+          localStorage.removeItem('authStartPath');
         }
-        // 無需再調用window.location.reload()，避免重定向循環
       }
     }).catch(error => {
       console.error('載入會話時出錯:', error);

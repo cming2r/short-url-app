@@ -47,47 +47,28 @@ export default function HomePage({ locale }) {
     };
   }, []);
   
-  // 處理 OAuth 回調代碼
+  // 簡化 OAuth 回調處理，避免與 SupabaseProvider 衝突
   useEffect(() => {
     if (code) {
-      console.log('Detected OAuth callback code:', code);
+      console.log('HomePage detected OAuth callback code:', code);
+      // 不再在這裡處理 OAuth 回調和頁面重整
+      // 因為 SupabaseProvider 已經負責了這部分邏輯
+      // 這樣可以避免兩個組件同時嘗試處理 OAuth 回調導致的重載循環
       
-      // 檢查 URL 中是否有 OAuth 回調代碼，並處理登入
-      const handleOAuthCallback = async () => {
+      // 只進行會話檢查，不觸發頁面重整
+      const checkSession = async () => {
         try {
-          // 這是從 Google OAuth 返回的回調
-          console.log('Processing OAuth callback with code:', code);
-          
-          // 嘗試直接從 URL 提取會話 (Supabase 應該會自動處理這個)
-          const { data, error } = await supabase.auth.getSession();
-          console.log('Current session after OAuth redirect:', Boolean(data.session));
-          
-          if (error) {
-            console.error('Error getting session:', error);
-          }
-          
-          if (!data.session) {
-            console.log('No session found after OAuth callback, trying to exchange code');
-            
-            // 記錄認證流程正在進行中
-            localStorage.setItem('authInProgress', 'true');
-            
-            // 使用 code 作為觸發器讓 Supabase 處理內部會話設置
-            // 創建頁面重載計時器以等待 Supabase 完成 OAuth 處理
-            setTimeout(() => {
-              console.log('Reloading page to finalize authentication');
-              window.location.reload();
-            }, 1000);
-          } else {
-            console.log('Session found, authentication successful');
+          const { data } = await supabase.auth.getSession();
+          if (data?.session) {
+            console.log('HomePage: Session found after OAuth redirect');
             setSession(data.session);
           }
         } catch (error) {
-          console.error('Error processing OAuth callback:', error);
+          console.error('HomePage: Error checking session:', error);
         }
       };
       
-      handleOAuthCallback();
+      checkSession();
     }
   }, [code]);
   

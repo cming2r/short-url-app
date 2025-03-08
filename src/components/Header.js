@@ -15,27 +15,8 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   
-  // 從路徑獲取當前語言
-  const getCurrentUrlLocale = () => {
-    // 獲取當前路徑的第一個部分作為語言前綴
-    const pathParts = pathname.split('/').filter(Boolean);
-    
-    // 添加詳細調試訊息
-    console.log('Current pathname:', pathname);
-    console.log('Current path parts:', pathParts);
-    
-    // 如果路徑以 /tw 開頭，則為中文
-    if (pathParts.length > 0 && pathParts[0] === 'tw') {
-      console.log('Path starts with /tw, using Chinese');
-      return 'tw';
-    }
-    
-    // 所有其他情況，包括 /custom, /history 等，都視為英文
-    console.log('Using English locale for path:', pathname);
-    return 'en';
-  };
-  
-  const currentLocale = getCurrentUrlLocale();
+  // 設定預設為英文
+  const currentLocale = 'en';
   
   // 從上下文中獲取會話
   useEffect(() => {
@@ -90,64 +71,20 @@ export default function Header() {
     }
   };
   
-  // 構建頁面 URL 函數，完全修復
+  // 構建頁面 URL 函數 - 始終返回英文 URL
   function getLocalizedHref(path) {
     // 清理路徑
     const cleanPath = path.startsWith('/') ? path.substring(1) : path;
     
-    // 添加詳細調試
-    console.log('----------');
-    console.log('getLocalizedHref called with path:', path);
-    console.log('Current pathname:', pathname);
-    
-    // 完全簡化邏輯：
-    // 1. 如果當前在根路徑(/)，返回純英文路徑，確保在英文版時鏈接不會跳到中文版
-    // 2. 如果當前是中文路徑(/tw或/tw/*)，則生成中文版URL
-    // 3. 其他所有情況(包括/custom,/history)，生成英文版URL
-    
-    const isChinesePath = pathname === '/tw' || pathname.startsWith('/tw/');
-    console.log('Is current path Chinese?', isChinesePath);
-    
-    // 根據當前路徑生成相應語言的鏈接
-    if (isChinesePath) {
-      // 在中文頁面，生成中文鏈接
-      if (cleanPath === '') {
-        console.log('Generating Chinese home link: /tw');
-        return '/tw';
-      } else {
-        console.log(`Generating Chinese path link: /tw/${cleanPath}`);
-        return `/tw/${cleanPath}`;
-      }
+    // 簡化：統一返回英文路徑，無視當前語言
+    if (cleanPath === '') {
+      return '/';
     } else {
-      // 在英文頁面或其他頁面，生成英文鏈接
-      if (cleanPath === '') {
-        console.log('Generating English home link: /');
-        return '/';
-      } else {
-        console.log(`Generating English path link: /${cleanPath}`);
-        return `/${cleanPath}`;
-      }
+      return `/${cleanPath}`;
     }
   }
 
-  // 處理語言切換
-  const handleLanguageChange = (newLocale) => {
-    if (newLocale === currentLocale) return;
-    
-    // 先獲取當前路徑，然後替換語言部分
-    const urlParts = pathname.split('/').filter(Boolean);
-    if (urlParts.length > 0 && (urlParts[0] === 'en' || urlParts[0] === 'tw')) {
-      urlParts[0] = newLocale;
-    } else {
-      urlParts.unshift(newLocale);
-    }
-    
-    // 更新語言狀態
-    changeLanguage(newLocale);
-    
-    // 重定向到新的本地化路徑
-    window.location.href = `/${urlParts.join('/')}`;
-  };
+  // 移除語言切換功能
 
   return (
     <header className="bg-gray-800 text-white p-4">

@@ -36,44 +36,20 @@ export function middleware(request) {
     return NextResponse.next();
   }
   
-  // 處理 /en 路徑 (重定向到根路徑) 和 /tw 路徑
-  if (pathname === '/en') {
-    console.log(`Redirecting /en to root path (/) for canonical URL structure`);
+  // 處理 /en 和 /tw 路徑 - 全部重定向到根路徑
+  if (pathname === '/en' || pathname === '/tw') {
+    console.log(`Redirecting ${pathname} to root path (/) for English only`);
     // 使用 301 永久重定向到根路徑
     return NextResponse.redirect(new URL('/', request.url), 301);
-  } else if (pathname === '/tw') {
-    const locale = pathname.substring(1); // 移除前導斜線
-    console.log(`Rewriting ${pathname} to use parameterized route`);
-    return NextResponse.rewrite(new URL(`/${locale}`, request.url));
   }
   
-  // 處理 /en/* 和 /tw/* 路徑
-  if (pathname.startsWith('/en/')) {
-    // 對於 /en/* 路徑，我們應該將其重定向到 /* 路徑（除了特殊頁面）
+  // 處理 /en/* 和 /tw/* 路徑 - 全部重定向到相對應的英文路徑
+  if (pathname.startsWith('/en/') || pathname.startsWith('/tw/')) {
     const parts = pathname.split('/');
     const rest = parts.slice(2).join('/');
     
-    // 不重定向特殊頁面，如果需要這些頁面存在於 /en/ 路徑下
-    if (rest === 'privacy-policy' || rest === 'terms') {
-      console.log(`Rewriting ${pathname} to use parameterized route for special page`);
-      return NextResponse.rewrite(new URL(`/en/${rest}`, request.url));
-    }
-    
-    console.log(`Redirecting ${pathname} to /${rest} for canonical URL structure`);
+    console.log(`Redirecting ${pathname} to /${rest} for English only`);
     return NextResponse.redirect(new URL(`/${rest}`, request.url), 301);
-  } else if (pathname.startsWith('/tw/')) {
-    const parts = pathname.split('/');
-    const locale = parts[1]; // 'tw'
-    const rest = parts.slice(2).join('/');
-    console.log(`Rewriting ${pathname} to use parameterized route`);
-    return NextResponse.rewrite(new URL(`/${locale}/${rest}`, request.url));
-  }
-  
-  // 處理 /tw 和 /tw/* 路徑的語言本地化
-  if (pathname.startsWith('/tw/') || pathname === '/tw') {
-    console.log(`處理中文路徑: ${pathname}`);
-    // 對於 /tw/* 路徑，不需要做特殊處理，因為它們是有效的[locale]路由
-    return NextResponse.next();
   }
   
   // 英文版頁面已經直接在 /custom 和 /history 實現，不需要重定向

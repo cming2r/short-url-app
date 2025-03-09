@@ -1,14 +1,12 @@
 # *
 User-agent: *
 Allow: /
+Allow: /api/server-sitemap.xml
 
 # 禁止爬取 API 路徑
 Disallow: /api/
 Disallow: /_shortcuts/
 Disallow: /_next/
-
-# Host
-Host: https://vvrl.cc
 
 # Sitemaps
 Sitemap: https://vvrl.cc/sitemap.xml

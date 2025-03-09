@@ -1,6 +1,6 @@
-我的網站主要功能為縮短網址，並且支援google登入，登入用戶可以有自訂短網址(/custom)及歷史紀錄(/history)兩種功能。
-網站同時支援中文及英文，進入首頁時會判定使用語言來進入英文(/)或中文（/tw）。
-前端採用 Next.js 14，JavaScript (ES6+)開發，搭配 Tailwind CSS 處理樣式。
+我的網站主要功能為縮短網址，並且支援google登入，登入用戶可以使用額外的自訂短網址(/custom)及歷史紀錄(/history)兩種功能。
+網站主要為英文(/)，目前支援中文（/tw）版本可以供用戶選擇。
+前端採用 Next.js，JavaScript (ES6+)開發，搭配 Tailwind CSS 處理樣式。
 網站主要部署於vercel，並連接supabase的資料庫。同時也會使用vscode的終端機進行本地測試。
 
 按照我敘述的功能，有需要

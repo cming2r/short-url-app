@@ -4,12 +4,13 @@ module.exports = {
   generateRobotsTxt: true,
   robotsTxtOptions: {
     additionalSitemaps: [
-      'https://vvrl.cc/server-sitemap.xml', // 動態生成的 sitemap
+      'https://vvrl.cc/api/server-sitemap.xml', // 動態生成的 sitemap
     ],
     policies: [
       {
         userAgent: '*',
         allow: '/',
+        allow: '/api/server-sitemap.xml', // 允許搜尋引擎訪問sitemap
         disallow: [
           '/_shortcuts/',
           '/api/',

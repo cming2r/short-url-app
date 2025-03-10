@@ -14,30 +14,16 @@ function CustomPageLoading() {
   );
 }
 
+// 引入共享元數據生成工具
+import { generateMetadata as baseGenerateMetadata } from '@/lib/utils/metadata';
+
 // 設置英文版自訂短網址頁面的SEO元數據
-export const metadata = {
-  title: 'Custom URL - Create Your Personalized Short URL | vvrl.cc',
+export const metadata = baseGenerateMetadata({
+  title: 'Custom URL - Create Your Personalized Short URL',
   description: 'Create your own personalized short URL with our custom URL feature. Simple to use and easy to remember. Free customized short links.',
-  keywords: 'custom URL, personalized URL, short link, branded link, custom short URL, custom link',
-  
-  // 只有英文版的規範連結配置
-  alternates: {
-    canonical: 'https://vvrl.cc/custom',
-  },
-  openGraph: {
-    type: 'website',
-    url: 'https://vvrl.cc/custom',
-    title: 'Custom URL - Create Your Personalized Short URL',
-    description: 'Create your own personalized short URL with our custom URL feature. Simple to use and easy to remember.',
-    images: [{ url: 'https://vvrl.cc/og-custom.png', width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Custom URL - Create Your Personalized Short URL',
-    description: 'Create your own personalized short URL with vvrl.cc',
-    images: ['https://vvrl.cc/og-custom.png'],
-  },
-};
+  path: '/custom',
+  ogImagePath: '/og-image.png', // 您可以使用特定圖片如 '/og-custom.png'
+});
 
 // 清除語言設置的簡單腳本
 const clearLanguageScript = `

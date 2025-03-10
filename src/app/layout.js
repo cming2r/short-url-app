@@ -27,6 +27,28 @@ export const metadata = {
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
   },
+  openGraph: {
+    type: 'website',
+    siteName: 'vvrl.cc',
+    title: 'vvrl.cc URL Shortener',
+    description: 'Shorten long URLs into memorable links. Track clicks, customize your short URLs, and manage your links with our free URL shortening service.',
+    url: 'https://vvrl.cc',
+    images: [
+      {
+        url: 'https://vvrl.cc/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'vvrl.cc URL Shortener',
+      }
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'vvrl.cc URL Shortener',
+    description: 'Free URL shortener with tracking and custom URLs',
+    images: ['https://vvrl.cc/og-image.png'],
+    creator: '@vvrlcc',
+  },
 };
 
 export const viewport = {
@@ -40,6 +62,16 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <head>
+        {/* Meta tags for social media sharing */}
+        <meta property="og:title" content="vvrl.cc URL Shortener" />
+        <meta property="og:description" content="Free URL shortener service with custom URLs and analytics" />
+        <meta property="og:url" content="https://vvrl.cc" />
+        <meta property="og:image" content="https://vvrl.cc/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="vvrl.cc" />
+
         {/* Organization schema */}
         <script
           type="application/ld+json"
@@ -49,7 +81,7 @@ export default function RootLayout({ children }) {
               "@type": "Organization",
               "name": "vvrl.cc",
               "url": "https://vvrl.cc",
-              "logo": "https://vvrl.cc/logo.png",
+              "logo": "https://vvrl.cc/og-image.png",
               "description": "Free URL shortener service with custom URLs and analytics",
               "sameAs": [
                 "https://twitter.com/vvrlcc",

@@ -83,14 +83,15 @@ const PrivacyContent = () => (
   </div>
 );
 
-// English version metadata
-export const metadata = {
-  title: 'Privacy Policy | vvrl.cc URL Shortener',
+// 引入共享元數據生成工具
+import { generateMetadata as baseGenerateMetadata } from '@/lib/utils/metadata';
+
+// 使用函數生成元數據
+export const metadata = baseGenerateMetadata({
+  title: 'Privacy Policy',
   description: 'Privacy Policy for vvrl.cc URL shortening service. Learn how we collect, use, and protect your information.',
-  alternates: {
-    canonical: 'https://vvrl.cc/privacy-policy',
-  },
-};
+  path: '/privacy-policy',
+});
 
 export default function PrivacyPage() {
   return (

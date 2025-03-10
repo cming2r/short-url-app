@@ -14,30 +14,16 @@ function HistoryPageLoading() {
   );
 }
 
+// 引入共享元數據生成工具
+import { generateMetadata as baseGenerateMetadata } from '@/lib/utils/metadata';
+
 // 設置英文版歷史頁面的SEO元數據
-export const metadata = {
-  title: 'URL History - View & Manage Your Shortened URLs | vvrl.cc',
+export const metadata = baseGenerateMetadata({
+  title: 'URL History - View & Manage Your Shortened URLs',
   description: 'View and manage your history of shortened URLs. Track clicks, analyze traffic, copy links, and delete URLs. Free URL analytics for all users.',
-  keywords: 'URL history, link analytics, short URL tracking, URL management, link metrics, click statistics',
-  
-  // 只有英文版的規範連結配置
-  alternates: {
-    canonical: 'https://vvrl.cc/history',
-  },
-  openGraph: {
-    type: 'website',
-    url: 'https://vvrl.cc/history',
-    title: 'URL History - Track and Manage Your Shortened URLs',
-    description: 'View and manage your history of shortened URLs. Track clicks, copy links, and delete URLs as needed.',
-    images: [{ url: 'https://vvrl.cc/og-history.png', width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'URL History - Track and Manage Your Shortened URLs',
-    description: 'Track clicks and manage all your shortened URLs with vvrl.cc',
-    images: ['https://vvrl.cc/og-history.png'],
-  },
-};
+  path: '/history',
+  ogImagePath: '/og-image.png', // 您可以使用特定圖片如 '/og-history.png'
+});
 
 // 清除語言設置的簡單腳本
 const clearLanguageScript = `

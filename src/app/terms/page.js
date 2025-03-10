@@ -104,14 +104,15 @@ const TermsContent = () => (
   </div>
 );
 
-// English version metadata
-export const metadata = {
-  title: 'Terms of Service | vvrl.cc URL Shortener',
+// 引入共享元數據生成工具
+import { generateMetadata as baseGenerateMetadata } from '@/lib/utils/metadata';
+
+// 使用函數生成元數據
+export const metadata = baseGenerateMetadata({
+  title: 'Terms of Service',
   description: 'Terms of Service for vvrl.cc URL shortening service. Learn about our rules, policies, and guidelines.',
-  alternates: {
-    canonical: 'https://vvrl.cc/terms',
-  },
-};
+  path: '/terms',
+});
 
 export default function TermsPage() {
   return (

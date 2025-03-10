@@ -11,11 +11,6 @@ module.exports = {
         userAgent: '*',
         allow: '/',
         allow: '/api/server-sitemap.xml', // 允許搜尋引擎訪問sitemap
-        disallow: [
-          '/_shortcuts/',
-          '/api/',
-          '/_next/',
-        ],
       },
     ],
   },

@@ -3,10 +3,6 @@ User-agent: *
 Allow: /
 Allow: /api/server-sitemap.xml
 
-# 禁止爬取 API 路徑
-Disallow: /api/
-Disallow: /_shortcuts/
-Disallow: /_next/
 
 # Sitemaps
 Sitemap: https://vvrl.cc/sitemap.xml

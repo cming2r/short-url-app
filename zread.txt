@@ -3,4 +3,9 @@
 前端採用 Next.js，JavaScript (ES6+)開發，搭配 Tailwind CSS 處理樣式。
 網站主要部署於vercel，並連接supabase的資料庫。同時也會使用vscode的終端機進行本地測試。
 
+# 禁止爬取 API 路徑
+Disallow: /api/
+Disallow: /_shortcuts/
+Disallow: /_next/
+
 按照我敘述的功能，有需要

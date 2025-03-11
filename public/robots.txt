@@ -1,8 +1,0 @@
-# *
-User-agent: *
-Allow: /
-Allow: /api/server-sitemap.xml
-
-# Sitemaps
-Sitemap: https://vvrl.cc/sitemap.xml
-Sitemap: https://vvrl.cc/server-sitemap.xml

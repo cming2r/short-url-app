@@ -17,6 +17,9 @@ export function middleware(request) {
     pathname.startsWith('/_shortcuts/') ||
     pathname.startsWith('/favicon.ico') ||
     pathname.startsWith('/manifest.json') ||
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/server-sitemap.xml' ||
     pathname.includes('.') // 靜態文件通常有擴展名
   ) {
     return NextResponse.next();

@@ -4,13 +4,12 @@ module.exports = {
   generateRobotsTxt: true,
   robotsTxtOptions: {
     additionalSitemaps: [
-      'https://vvrl.cc/api/server-sitemap.xml', // 動態生成的 sitemap
+      'https://vvrl.cc/server-sitemap.xml', // 動態生成的 sitemap
     ],
     policies: [
       {
         userAgent: '*',
         allow: '/',
-        allow: '/api/server-sitemap.xml', // 允許搜尋引擎訪問sitemap
       },
     ],
   },
@@ -84,6 +83,6 @@ module.exports = {
   
   // 靜態路徑配置
   sitemapSize: 7000,
-  generateIndexSitemap: true,
+  generateIndexSitemap: false,
   autoLastmod: true,
 };

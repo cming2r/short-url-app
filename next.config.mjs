@@ -11,6 +11,11 @@ const nextConfig = {
       {
         source: '/:shortCode([a-zA-Z0-9]{6,8})',
         destination: '/_shortcuts/:shortCode',
+      },
+      // 處理動態sitemap訪問
+      {
+        source: '/server-sitemap.xml',
+        destination: '/api/server-sitemap.xml',
       }
     ];
   },

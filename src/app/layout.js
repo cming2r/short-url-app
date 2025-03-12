@@ -1,8 +1,8 @@
 import './globals.css';
 import { SupabaseProvider } from '@/components/SupabaseProvider';
 import { LanguageProvider } from '@/lib/i18n';
-import { SpeedInsights } from "@vercel/speed-insights/next"
-import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
 
 // 基本元數據 - 具體元數據將由子布局提供
 export const metadata = {

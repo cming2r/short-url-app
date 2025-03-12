@@ -175,6 +175,7 @@ export default function RootLayout({ children }) {
           </LanguageProvider>
         </SupabaseProvider>
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

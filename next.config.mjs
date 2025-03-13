@@ -16,32 +16,10 @@ const nextConfig = {
         source: '/tw/:path*',
         destination: '/tw/:path*',
       },
-      // 處理短網址 - 將符合6-8字符的短碼重寫到_shortcuts處理器
+      // 處理短網址 - 將符合短碼格式的路徑重寫到_shortcuts處理器
       {
-        source: '/:shortCode([a-zA-Z0-9]{6,8})',
+        source: '/:shortCode((?!custom|history|privacy-policy|terms|en|tw|api|_next|_shortcuts|favicon|manifest).+)',
         destination: '/_shortcuts/:shortCode',
-      },
-      // 處理任何可能是短碼的路徑 (middleware 中的備用邏輯)
-      {
-        source: '/:shortCode([^/]+)',
-        destination: '/_shortcuts/:shortCode',
-        has: [
-          {
-            type: 'header',
-            key: 'host',
-            value: '(?!api|_next|_shortcuts|icons).*'
-          }
-        ],
-        missing: [
-          {
-            type: 'query',
-            key: 'en'
-          },
-          {
-            type: 'query',
-            key: 'tw'
-          }
-        ]
       },
       // 處理 OAuth 回調
       {

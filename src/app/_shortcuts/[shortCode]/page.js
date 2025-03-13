@@ -1,4 +1,4 @@
-import { redirect, notFound } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
 // 檢查這是否是語言代碼 (en/tw)
@@ -12,26 +12,12 @@ export default async function ShortCodeHandler({ params }) {
   const shortCode = resolvedParams?.shortCode || '';
   console.log('[SHORTCUTS] ShortCodeHandler activated');
   console.log('[SHORTCUTS] Processing shortCode:', shortCode);
-  console.log('[SHORTCUTS] Raw params:', JSON.stringify(resolvedParams));
   
-  // For language routes, this should never be reached because we have explicit routes
-  // but just in case, redirect appropriately
-  if (isLocaleCode(shortCode)) {
-    console.log(`[SHORTCUTS] ${shortCode} is a locale code, redirecting`);
-    return new Response(null, {
-      status: 302,
-      headers: {
-        'Location': `/${shortCode}`,
-      },
-    });
-  }
-  
-  // 不再特殊處理 not-found 路徑
-  console.log(`[SHORTCUTS] Processing shortcode: ${shortCode}`);
-  
-  // 查詢數據庫獲取原始 URL
   try {
-    console.log(`[Server] Looking up shortcode in database: ${shortCode}`);
+    // 直接將所有日誌輸出到瀏覽器控制台
+    if (typeof window !== 'undefined') {
+      console.log('Client-side: Short code handler activated for', shortCode);
+    }
     
     // 首先嘗試查詢普通短網址
     let { data, error } = await supabase
@@ -42,6 +28,7 @@ export default async function ShortCodeHandler({ params }) {
     
     // 如果普通短網址不存在，嘗試查詢自定義短網址
     if (error || !data) {
+      console.log('Regular URL not found, checking custom URLs');
       const { data: customData, error: customError } = await supabase
         .from('custom_urls')
         .select('original_url')
@@ -49,87 +36,86 @@ export default async function ShortCodeHandler({ params }) {
         .single();
       
       if (customError || !customData) {
-        console.error('[Server] Short code not found in any table:', shortCode);
-        // 顯示原始404頁面
-        return new Response(null, {
-          status: 404
+        console.error('Short code not found in any table:', shortCode);
+        return new Response(`<html><body><h1>404 - Short URL not found</h1><p>The short URL ${shortCode} does not exist.</p></body></html>`, {
+          status: 404,
+          headers: {
+            'Content-Type': 'text/html',
+          }
         });
       }
       
       // 更新自定義短網址的點擊計數器
-      await supabase
-        .from('custom_urls')
-        .update({ click_count: supabase.rpc('increment', { x: 1 }) })
-        .eq('short_code', shortCode);
+      try {
+        await supabase
+          .from('custom_urls')
+          .update({ 
+            click_count: supabase.rpc('increment', { x: 1 }),
+            last_clicked_at: new Date().toISOString()
+          })
+          .eq('short_code', shortCode);
+      } catch (updateError) {
+        console.error('Error updating click count:', updateError);
+        // 繼續執行重定向，即使更新點擊次數失敗
+      }
       
-      console.log(`[Server] Redirecting to custom URL: ${customData.original_url}`);
+      console.log('Redirecting to custom URL:', customData.original_url);
       
       // 確保是有效的絕對 URL
       let targetUrl = customData.original_url;
-      try {
-        // 檢查是否為有效 URL
-        new URL(targetUrl);
-        console.log('[SHORTCUTS] Redirecting to valid URL:', targetUrl);
-        // 使用客戶端重定向而非Next.js的redirect函數
-        return new Response(null, {
-          status: 302,
-          headers: {
-            'Location': targetUrl,
-          },
-        });
-      } catch (e) {
-        // 不是有效 URL，添加協議
-        console.error('[SHORTCUTS] Invalid URL format, trying to add protocol:', targetUrl);
+      if (!targetUrl.startsWith('http')) {
         targetUrl = 'https://' + targetUrl;
-        console.log('[SHORTCUTS] Redirecting to URL with added protocol:', targetUrl);
-        // 使用客戶端重定向而非Next.js的redirect函數
-        return new Response(null, {
-          status: 302,
-          headers: {
-            'Location': targetUrl,
-          },
-        });
       }
+      
+      // 使用基本的重定向響應
+      return new Response(null, {
+        status: 302,
+        headers: {
+          'Location': targetUrl,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
+      });
     }
     
     // 更新普通短網址的點擊計數器
-    await supabase
-      .from('urls')
-      .update({ click_count: supabase.rpc('increment', { x: 1 }) })
-      .eq('short_code', shortCode);
+    try {
+      await supabase
+        .from('urls')
+        .update({ 
+          click_count: supabase.rpc('increment', { x: 1 }),
+          last_clicked_at: new Date().toISOString()
+        })
+        .eq('short_code', shortCode);
+    } catch (updateError) {
+      console.error('Error updating click count:', updateError);
+      // 繼續執行重定向，即使更新點擊次數失敗
+    }
     
-    console.log(`[Server] Redirecting to URL: ${data.original_url}`);
+    console.log('Redirecting to URL:', data.original_url);
     
     // 確保是有效的絕對 URL
     let targetUrl = data.original_url;
-    try {
-      // 檢查是否為有效 URL
-      new URL(targetUrl);
-      console.log('[SHORTCUTS] Redirecting to valid URL:', targetUrl);
-      return new Response(null, {
-        status: 302,
-        headers: {
-          'Location': targetUrl,
-        },
-      });
-    } catch (e) {
-      // 不是有效 URL，添加協議
-      console.error('[SHORTCUTS] Invalid URL format, trying to add protocol:', targetUrl);
+    if (!targetUrl.startsWith('http')) {
       targetUrl = 'https://' + targetUrl;
-      console.log('[SHORTCUTS] Redirecting to URL with added protocol:', targetUrl);
-      return new Response(null, {
-        status: 302,
-        headers: {
-          'Location': targetUrl,
-        },
-      });
     }
     
-  } catch (error) {
-    console.error('[SHORTCUTS] Error processing redirect:', error);
-    // 發生錯誤時顯示原始404頁面
+    // 使用基本的重定向響應
     return new Response(null, {
-      status: 404
+      status: 302,
+      headers: {
+        'Location': targetUrl,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      },
+    });
+    
+  } catch (error) {
+    console.error('Error processing redirect:', error);
+    // 發生錯誤時顯示詳細錯誤頁面
+    return new Response(`<html><body><h1>Error</h1><p>Failed to process short URL: ${error.message}</p></body></html>`, {
+      status: 500,
+      headers: {
+        'Content-Type': 'text/html',
+      }
     });
   }
 }

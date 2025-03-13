@@ -26,11 +26,8 @@ export default async function ShortCodeHandler({ params }) {
     });
   }
   
-  // 特殊處理 not-found 路徑，避免循環重定向
-  if (shortCode === 'not-found') {
-    console.log(`[SHORTCUTS] Handling /not-found path, showing 404 page`);
-    notFound();
-  }
+  // 不再特殊處理 not-found 路徑
+  console.log(`[SHORTCUTS] Processing shortcode: ${shortCode}`);
   
   // 查詢數據庫獲取原始 URL
   try {
@@ -53,8 +50,10 @@ export default async function ShortCodeHandler({ params }) {
       
       if (customError || !customData) {
         console.error('[Server] Short code not found in any table:', shortCode);
-        // 顯示404頁面，不做重定向
-        notFound();
+        // 顯示原始404頁面
+        return new Response(null, {
+          status: 404
+        });
       }
       
       // 更新自定義短網址的點擊計數器
@@ -128,30 +127,9 @@ export default async function ShortCodeHandler({ params }) {
     
   } catch (error) {
     console.error('[SHORTCUTS] Error processing redirect:', error);
-    // 顯示404頁面，不做重定向
-    
-    // 創建一個簡單的HTML來顯示錯誤信息
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Short URL Error</title>
-          <meta charset="utf-8">
-        </head>
-        <body>
-          <h1>短網址處理時出錯</h1>
-          <p>無法找到對應的原始URL: ${shortCode}</p>
-          <p>錯誤: ${error.message}</p>
-          <p><a href="/">返回首頁</a></p>
-        </body>
-      </html>
-    `;
-    
-    return new Response(htmlContent, {
-      status: 404,
-      headers: {
-        'Content-Type': 'text/html',
-      },
+    // 發生錯誤時顯示原始404頁面
+    return new Response(null, {
+      status: 404
     });
   }
 }

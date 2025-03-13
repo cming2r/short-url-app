@@ -3,9 +3,6 @@ module.exports = {
   siteUrl: process.env.SITE_URL || 'https://vvrl.cc',
   generateRobotsTxt: true,
   robotsTxtOptions: {
-    additionalSitemaps: [
-      'https://vvrl.cc/server-sitemap.xml', // 動態生成的 sitemap
-    ],
     policies: [
       {
         userAgent: '*',

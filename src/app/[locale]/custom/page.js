@@ -1,7 +1,7 @@
 // 伺服器組件部分
 import { Suspense } from 'react';
 import { DEFAULT_LOCALE } from '@/lib/i18n/constants';
-import CustomUrlPageClient from '@/components/shared/CustomUrlClient';
+import CustomUrlPageClient from '@/lib/components/CustomUrlClient';
 
 // 加載中顯示
 function CustomPageLoading() {

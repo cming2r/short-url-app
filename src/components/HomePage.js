@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { supabase } from '@/lib/supabase';
+import { validateUrl, formatUrl } from '@/lib/utils/validators';
 
 // Client 端元件，僅使用英文
 export default function HomePage({ locale }) {
@@ -84,7 +85,7 @@ export default function HomePage({ locale }) {
     setShortUrl('');
     setCopied(false);
     
-    if (!url || !/^https?:\/\//.test(url)) {
+    if (!validateUrl(url)) {
       setError(t.errors?.invalidUrl || '請輸入有效的 URL（需包含 http:// 或 https://）');
       return;
     }

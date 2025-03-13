@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { nanoid } from 'nanoid';
 import { fetchTitle } from '@/lib/utils/fetchTitle';
+import { validateUrl, formatUrl, validateCustomCode } from '@/lib/utils/validators';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -36,16 +37,10 @@ export async function POST(request) {
     });
   }
 
-  // 驗證並格式化 URL
-  let formattedUrl = url.trim();
-  if (!/^https?:\/\//.test(formattedUrl)) {
-    // 如果缺少協議，假設為 https
-    formattedUrl = `https://${formattedUrl}`;
-  }
-
-  try {
-    new URL(formattedUrl); // 驗證 URL 格式
-  } catch (urlError) {
+  // 使用共享函數驗證並格式化 URL
+  let formattedUrl = formatUrl(url);
+  
+  if (!validateUrl(formattedUrl)) {
     return new Response(JSON.stringify({ error: 'Invalid URL format, must start with http:// or https://' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
@@ -54,13 +49,8 @@ export async function POST(request) {
 
   let shortCode = customCode || nanoid(6);
   if (customCode) {
-    // 更新為與前端一致的驗證規則：4-5個字符，至少一個字母和一個數字
-    const isValidLength = customCode.length >= 4 && customCode.length <= 5;
-    const hasLetter = /[a-zA-Z]/.test(customCode);
-    const hasNumber = /[0-9]/.test(customCode);
-    const isValidChars = /^[a-zA-Z0-9]+$/.test(customCode);
-    
-    if (!isValidLength || !hasLetter || !hasNumber || !isValidChars) {
+    // 使用共享函數驗證自訂短碼
+    if (!validateCustomCode(customCode)) {
       return new Response(JSON.stringify({ error: '自訂短碼必須為4-5位元，且至少包含一個字母及一個數字' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },

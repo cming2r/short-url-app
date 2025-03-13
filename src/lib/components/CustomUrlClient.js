@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { validateUrl, formatUrl, validateCustomCode } from '@/lib/utils/validators';
 
 export default function CustomUrlClient({ locale }) {
   const { changeLanguage, t } = useTranslation();
@@ -17,16 +18,19 @@ export default function CustomUrlClient({ locale }) {
   const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false); // 新增編輯模式狀態
 
-  // 完全禁用語言設置功能 - 讓頁面保持在當前 URL
+  // 語言設置處理
   useEffect(() => {
-    // 不設定任何語言，保持當前頁面狀態
-    console.log(`禁用自動語言設置，頁面將保持在: ${typeof window !== 'undefined' ? window.location.pathname : '未知'}`);
-    
-    // 防止語言設置影響頁面路徑
-    localStorage.removeItem('language');
-    
-    // 不呼叫 changeLanguage 函數
-  }, []);
+    // 根據傳入的語言模式決定行為
+    if (locale === 'disable') {
+      // 完全禁用語言設置，用於根路徑
+      console.log(`禁用自動語言設置，頁面將保持在: ${typeof window !== 'undefined' ? window.location.pathname : '未知'}`);
+      localStorage.removeItem('language');
+    } else {
+      // 設置特定語言，用於[locale]路徑
+      console.log(`設定語言為: ${locale}`);
+      changeLanguage(locale);
+    }
+  }, [locale, changeLanguage]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -100,21 +104,14 @@ export default function CustomUrlClient({ locale }) {
 
   const handleShorten = async () => {
     setError('');
-    if (!longUrl || !/^https?:\/\//.test(longUrl)) {
+    if (!validateUrl(longUrl)) {
       setError(t.errors?.invalidUrl || '請輸入有效的 URL（需包含 http:// 或 https://）');
       return;
     }
-    // 檢查自訂短碼是否符合新要求：4-5個字符，必須包含至少一個字母和一個數字
-    if (customCode) {
-      const isValidLength = customCode.length >= 4 && customCode.length <= 5;
-      const hasLetter = /[a-zA-Z]/.test(customCode);
-      const hasNumber = /[0-9]/.test(customCode);
-      const isValidChars = /^[a-zA-Z0-9]+$/.test(customCode);
-      
-      if (!isValidLength || !hasLetter || !hasNumber || !isValidChars) {
-        setError(t.errors?.invalidCustomCode || '自訂短碼必須為4-5位元，且至少包含一個字母及一個數字');
-        return;
-      }
+    // 使用共享函數檢查自訂短碼
+    if (customCode && !validateCustomCode(customCode)) {
+      setError(t.errors?.invalidCustomCode || '自訂短碼必須為4-5位元，且至少包含一個字母及一個數字');
+      return;
     }
 
     try {
@@ -182,23 +179,18 @@ export default function CustomUrlClient({ locale }) {
 
   const handleEditCustom = async () => {
     setError('');
-    if (!longUrl || !/^https?:\/\//.test(longUrl)) {
+    if (!validateUrl(longUrl)) {
       setError(t.errors?.invalidUrl || '請輸入有效的 URL（需包含 http:// 或 https://）');
       return;
     }
 
-    // 檢查自訂短碼是否符合新要求：4-5個字符，必須包含至少一個字母和一個數字
+    // 檢查自訂短碼
     if (!customCode) {
       setError(t.errors?.invalidCustomCode || '請輸入自訂短碼');
       return;
     }
     
-    const isValidLength = customCode.length >= 4 && customCode.length <= 5;
-    const hasLetter = /[a-zA-Z]/.test(customCode);
-    const hasNumber = /[0-9]/.test(customCode);
-    const isValidChars = /^[a-zA-Z0-9]+$/.test(customCode);
-    
-    if (!isValidLength || !hasLetter || !hasNumber || !isValidChars) {
+    if (!validateCustomCode(customCode)) {
       setError(t.errors?.invalidCustomCode || '自訂短碼必須為4-5位元，且至少包含一個字母及一個數字');
       return;
     }

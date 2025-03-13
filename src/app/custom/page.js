@@ -1,6 +1,6 @@
 // 英文版自訂短網址頁面
 import { Suspense } from 'react';
-import CustomUrlPageClient from '@/components/shared/CustomUrlClient';
+import CustomUrlPageClient from '@/lib/components/CustomUrlClient';
 
 // 加載中顯示
 function CustomPageLoading() {
@@ -40,7 +40,7 @@ export default async function CustomPage() {
       {/* 插入簡單的語言清除腳本 */}
       <script dangerouslySetInnerHTML={{ __html: clearLanguageScript }} />
       <Suspense fallback={<CustomPageLoading />}>
-        <CustomUrlPageClient locale="en" />
+        <CustomUrlPageClient locale="disable" />
       </Suspense>
     </>
   );

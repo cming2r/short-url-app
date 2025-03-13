@@ -1,6 +1,6 @@
 // 英文版歷史記錄頁面
 import { Suspense } from 'react';
-import HistoryPageClient from '@/components/shared/HistoryClient';
+import HistoryPageClient from '@/lib/components/HistoryClient';
 
 // 加載中顯示
 function HistoryPageLoading() {
@@ -40,7 +40,7 @@ export default async function HistoryPage() {
       {/* 插入簡單的語言清除腳本 */}
       <script dangerouslySetInnerHTML={{ __html: clearLanguageScript }} />
       <Suspense fallback={<HistoryPageLoading />}>
-        <HistoryPageClient locale="en" />
+        <HistoryPageClient locale="disable" />
       </Suspense>
     </>
   );
